@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "crash_orm",
+    "crash_orm_derive",
+]
+
+[workspace.dependencies]
+tokio-postgres = "0.7.8"
+syn = "2.0.28"
+quote = "1.0.32"
+tokio = "1.29.1"
