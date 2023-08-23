@@ -24,7 +24,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
     }
 
     let output = quote! {
-        impl crash_orm::Loadable for #ident {
+        impl crash_orm::Entity for #ident {
             type Output = #ident;
 
             fn load_from_row(row: crash_orm::tokio_postgres::Row) -> #ident {

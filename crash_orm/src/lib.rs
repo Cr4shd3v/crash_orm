@@ -5,5 +5,5 @@ pub extern crate tokio_postgres;
 mod connection;
 pub use connection::*;
 
-mod loadable;
-pub use loadable::*;
+mod entity;
+pub use entity::*;
