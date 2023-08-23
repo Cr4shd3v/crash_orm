@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crash_orm = { path = "../crash_orm" }
+crash_orm = { path = "../crash_orm", features = ["macros"] }
 tokio = { workspace = true, features = ["full"] }
