@@ -1,15 +1,10 @@
 [package]
-name = "crash_orm"
+name = "example_app"
 version = "0.1.0"
 edition = "2021"
-
-[features]
-default = []
-macros = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crash_orm_derive = { path = "../crash_orm_derive" }
-tokio-postgres = { workspace = true }
+crash_orm = { path = "../crash_orm" }
 tokio = { workspace = true, features = ["full"] }
