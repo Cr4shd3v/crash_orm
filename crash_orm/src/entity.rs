@@ -1,11 +1,16 @@
+use async_trait::async_trait;
 use tokio_postgres::Row;
+use crate::DatabaseConnection;
 
+#[async_trait]
 pub trait Entity {
     type Output;
 
     fn load_from_row(row: Row) -> Self::Output;
 
-    fn get_select_query(&self) -> String;
+    async fn get_by_id(connection: &DatabaseConnection, id: u32) -> Result<Self::Output, tokio_postgres::Error>;
 
-    fn get_insert_stmt(&self) -> String;
+    async fn insert(&self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
+
+    async fn insert_set_id(&mut self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
 }

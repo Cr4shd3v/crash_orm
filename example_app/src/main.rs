@@ -8,8 +8,9 @@ async fn main() {
     let row = conn.query_one("SELECT $1::TEXT;", &[&"hello world"]).await.unwrap();
     let value: &str = row.get(0);
     println!("{}", value);
-    let item = TestItem::new(String::from("test"));
-    println!("{:?}", item.get_insert_stmt());
+    let mut item = TestItem::new(String::from("test"));
+    item.insert_set_id(&conn).await.unwrap();
+    println!("{}", item.id);
 }
 
 #[entity]
