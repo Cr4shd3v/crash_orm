@@ -14,6 +14,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
     let mut fields = quote!();
     let mut field_names = quote!();
     let mut field_self_values = quote!();
+    let mut field_self_values_format = String::new();
 
     let mut index = 0usize;
     for field in struct_data.fields {
@@ -31,13 +32,14 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
             self.#ident,
         });
 
+        field_self_values_format.push_str("{},");
+
         index += 1;
     }
 
     let field_names = field_names.to_string();
     let field_names = field_names.strip_suffix(",").unwrap();
-    let field_self_values = field_self_values.to_string();
-    let field_self_values = field_self_values.strip_suffix(",").unwrap();
+    let field_self_values_format = field_self_values_format.strip_suffix(",").unwrap();
 
     let output = quote! {
         impl crash_orm::Entity for #ident {
@@ -54,7 +56,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
             }
 
             fn get_insert_stmt(&self) -> String {
-                format!("INSERT INTO {}({}) VALUES ({})", #ident_str, #field_names, #field_self_values)
+                format!("INSERT INTO {}({}) VALUES ({})", #ident_str, #field_names, format!(#field_self_values_format, #field_self_values))
             }
         }
     };
