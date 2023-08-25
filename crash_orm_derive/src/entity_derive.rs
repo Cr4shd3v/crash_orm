@@ -71,7 +71,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
 
             async fn get_all(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<Self::Output>> {
                 let rows = connection.query(&*format!("SELECT * FROM {}", #ident_str), &[]).await?;
-                Ok(rows.iter().map(|v| TestItem::load_from_row(v)).collect::<Vec<TestItem>>())
+                Ok(rows.iter().map(|v| Self::load_from_row(v)).collect::<Vec<Self>>())
             }
 
             async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<u32> {

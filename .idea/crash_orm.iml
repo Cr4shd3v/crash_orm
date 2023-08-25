@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crash_orm_derive/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/example_app/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crash_orm/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

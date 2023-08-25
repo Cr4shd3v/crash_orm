@@ -24,7 +24,7 @@ impl DatabaseConnection {
 
     #[cfg(test)]
     pub async fn test() -> Result<Self, Box<dyn Error>> {
-        Self::new("postgresql://crash_orm:postgres@localhost").await
+        Self::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await
     }
 }
 
