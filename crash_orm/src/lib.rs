@@ -11,3 +11,6 @@ pub use entity::*;
 
 mod error;
 pub use error::*;
+
+mod entity_vec;
+pub use entity_vec::*;

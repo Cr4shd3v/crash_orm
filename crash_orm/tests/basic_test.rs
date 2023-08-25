@@ -1,4 +1,4 @@
-use crash_orm::{DatabaseConnection, Entity};
+use crash_orm::{DatabaseConnection, Entity, EntityVec};
 use crash_orm_derive::Entity;
 
 #[derive(Entity, Debug)]
@@ -75,13 +75,7 @@ async fn test_persist() {
 #[tokio::test]
 async fn test_get_all() {
     let conn = setup_test_connection().await;
-    let item1 = TestItem2::test();
-    let item2 = TestItem2::test();
-    let item3 = TestItem2::test();
-
-    item1.insert_get_id(&conn).await.unwrap();
-    item2.insert_get_id(&conn).await.unwrap();
-    item3.insert_get_id(&conn).await.unwrap();
+    vec![TestItem2::test(), TestItem2::test(), TestItem2::test()].persist_all(&conn).await.unwrap();
 
     let results = TestItem2::get_all(&conn).await;
     assert!(results.is_ok());
@@ -89,7 +83,5 @@ async fn test_get_all() {
     assert_eq!(results.len(), 3);
 
     // cleanup
-    for result in &mut results {
-        result.remove(&conn).await.unwrap();
-    }
+    results.remove_all(&conn).await.unwrap();
 }
