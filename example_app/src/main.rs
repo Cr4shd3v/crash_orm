@@ -8,9 +8,11 @@ async fn main() {
     let row = conn.query_one("SELECT $1::TEXT;", &[&"hello world"]).await.unwrap();
     let value: &str = row.get(0);
     println!("{}", value);
-    let mut item = TestItem::new(String::from("test"));
-    item.insert_set_id(&conn).await.unwrap();
-    println!("{}", item.id);
+    // let mut item = TestItem::new(String::from("test"));
+    // item.insert_set_id(&conn).await.unwrap();
+    let mut item = TestItem::get_by_id(&conn, 8).await.unwrap();
+    item.remove(&conn).await.unwrap();
+    println!("{:?}", item.id);
 }
 
 #[entity]
@@ -22,7 +24,7 @@ impl TestItem {
     pub fn new(name: String) -> Self {
         Self {
             name,
-            id: 0,
+            id: None,
         }
     }
 }

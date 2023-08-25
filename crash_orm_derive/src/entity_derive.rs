@@ -12,8 +12,6 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
     let ident_str = ident.to_string();
 
     let mut select_fields = quote!();
-    let mut all_field_names = quote!();
-    let mut all_field_self_values = quote!();
     let mut all_field_self_values_format = String::new();
     let mut insert_field_names = quote!();
     let mut insert_field_self_values = quote!();
@@ -28,14 +26,6 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
             #ident: row.get(#all_index),
         });
 
-        all_field_names.extend(quote! {
-            #ident,
-        });
-
-        all_field_self_values.extend(quote! {
-            &self.#ident,
-        });
-
         if ident.to_string() != "id" {
             insert_field_names.extend(quote! {
                 #ident,
@@ -47,7 +37,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
 
             insert_index += 1;
 
-            insert_field_self_values_format.push_str(&*format!("${},", all_index));
+            insert_field_self_values_format.push_str(&*format!("${},", insert_index));
         }
 
         all_index += 1;
@@ -55,9 +45,6 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
         all_field_self_values_format.push_str(&*format!("${},", all_index));
     }
 
-    let all_field_names = all_field_names.to_string();
-    let all_field_names = all_field_names.strip_suffix(",").unwrap();
-    let all_field_self_values_format = all_field_self_values_format.strip_suffix(",").unwrap();
     let insert_field_names = insert_field_names.to_string();
     let insert_field_names = insert_field_names.strip_suffix(",").unwrap();
     let insert_field_self_values_format = insert_field_self_values_format.strip_suffix(",").unwrap();
@@ -88,8 +75,14 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
 
             async fn insert_set_id(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<u32, crash_orm::tokio_postgres::Error> {
                 let id = self.insert(connection).await?;
-                self.id = id;
+                self.id = Some(id);
                 Ok(id)
+            }
+
+            async fn remove(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+                connection.execute(&*format!("DELETE FROM {} WHERE id = $1", #ident_str), &[&self.id]).await?;
+                self.id = None;
+                Ok(())
             }
         }
     };

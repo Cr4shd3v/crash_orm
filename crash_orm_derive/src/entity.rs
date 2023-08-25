@@ -13,12 +13,9 @@ pub fn entity_impl(input: TokenStream) -> TokenStream {
     let ident = struct_item.ident;
     let fields = struct_item.fields;
 
-    let mut fields_output = quote!();
-    if fields.iter().filter(|f| f.ident.clone().unwrap().to_string().as_str() == "id").count() == 0 {
-        fields_output.extend(quote! {
-            pub id: u32,
-        });
-    }
+    let mut fields_output = quote! {
+        pub id: Option<u32>,
+    };
 
     for field in fields {
         fields_output.extend(field.to_token_stream());

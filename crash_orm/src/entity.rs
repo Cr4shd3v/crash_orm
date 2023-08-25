@@ -13,4 +13,6 @@ pub trait Entity {
     async fn insert(&self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
 
     async fn insert_set_id(&mut self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
+
+    async fn remove(&mut self, connection: &DatabaseConnection) -> Result<(), tokio_postgres::Error>;
 }
