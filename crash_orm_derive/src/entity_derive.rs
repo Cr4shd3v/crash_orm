@@ -65,7 +65,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
                 Ok(Self::load_from_row(row))
             }
 
-            async fn insert(&self, connection: &crash_orm::DatabaseConnection) -> Result<u32, crash_orm::tokio_postgres::Error> {
+            async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> Result<u32, crash_orm::tokio_postgres::Error> {
                 let row = connection.query(
                     &*format!("INSERT INTO {}({}) VALUES ({}) RETURNING id", #ident_str, #insert_field_names, #insert_field_self_values_format),
                     &[#insert_field_self_values]
@@ -73,16 +73,28 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
                 Ok(row.get(0).unwrap().get(0))
             }
 
-            async fn insert_set_id(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<u32, crash_orm::tokio_postgres::Error> {
-                let id = self.insert(connection).await?;
+            async fn insert_set_id(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+                let id = self.insert_get_id(connection).await?;
                 self.id = Some(id);
-                Ok(id)
+                Ok(())
             }
 
             async fn remove(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+                if self.id.is_none() {
+                    return Ok(());
+                }
+
                 connection.execute(&*format!("DELETE FROM {} WHERE id = $1", #ident_str), &[&self.id]).await?;
                 self.id = None;
                 Ok(())
+            }
+
+            async fn persist(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+                if self.id.is_none() {
+                    self.insert_set_id(connection).await
+                } else {
+                    panic!("Not supported yet");
+                }
             }
         }
     };

@@ -10,9 +10,11 @@ pub trait Entity {
 
     async fn get_by_id(connection: &DatabaseConnection, id: u32) -> Result<Self::Output, tokio_postgres::Error>;
 
-    async fn insert(&self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
+    async fn insert_get_id(&self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
 
-    async fn insert_set_id(&mut self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
+    async fn insert_set_id(&mut self, connection: &DatabaseConnection) -> Result<(), tokio_postgres::Error>;
 
     async fn remove(&mut self, connection: &DatabaseConnection) -> Result<(), tokio_postgres::Error>;
+
+    async fn persist(&mut self, connection: &DatabaseConnection) -> Result<(), tokio_postgres::Error>;
 }
