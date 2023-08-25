@@ -16,6 +16,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
     let mut insert_field_names = quote!();
     let mut insert_field_self_values = quote!();
     let mut insert_field_self_values_format = String::new();
+    let mut update_fields = String::new();
 
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
@@ -37,6 +38,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
 
             insert_index += 1;
 
+            update_fields.push_str(&*format!("{} = ${}", ident.to_string(), insert_index));
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
         }
 
@@ -44,6 +46,8 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
 
         all_field_self_values_format.push_str(&*format!("${},", all_index));
     }
+
+    insert_index += 1;
 
     let insert_field_names = insert_field_names.to_string();
     let insert_field_names = insert_field_names.strip_suffix(",").unwrap();
@@ -94,11 +98,24 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
                 Ok(())
             }
 
+            async fn update(&self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+                if self.id.is_none() {
+                    return Ok(());
+                }
+
+                connection.execute(
+                    &*format!("UPDATE {} SET {} WHERE id = ${}", #ident_str, #update_fields, #insert_index),
+                    &[#insert_field_self_values &self.id],
+                ).await?;
+
+                Ok(())
+            }
+
             async fn persist(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
                 if self.id.is_none() {
                     self.insert_set_id(connection).await
                 } else {
-                    panic!("Not supported yet");
+                    self.update(connection).await
                 }
             }
         }

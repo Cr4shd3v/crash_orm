@@ -7,8 +7,9 @@ async fn main() {
     // let mut item = TestItem::new(String::from("test"));
     // item.persist(&conn).await.unwrap();
     // item.remove(&conn).await.unwrap();
-    let results = TestItem::get_all(&conn).await.unwrap();
-    println!("{:?}", results);
+    let mut item = TestItem::get_by_id(&conn, 10).await.unwrap();
+    item.name = String::from("test123");
+    item.persist(&conn).await.unwrap();
 }
 
 #[derive(Entity, Debug)]

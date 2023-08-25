@@ -18,5 +18,7 @@ pub trait Entity {
 
     async fn remove(&mut self, connection: &DatabaseConnection) -> Result<(), tokio_postgres::Error>;
 
+    async fn update(&self, connection: &DatabaseConnection) -> Result<(), tokio_postgres::Error>;
+
     async fn persist(&mut self, connection: &DatabaseConnection) -> Result<(), tokio_postgres::Error>;
 }
