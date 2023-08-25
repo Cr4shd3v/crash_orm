@@ -64,17 +64,17 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
                 }
             }
 
-            async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> Result<Self::Output, crash_orm::tokio_postgres::Error> {
+            async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> crash_orm::Result<Self::Output> {
                 let row = connection.query_one(&*format!("SELECT * FROM {} WHERE id = $1", #ident_str), &[&id]).await?;
                 Ok(Self::load_from_row(&row))
             }
 
-            async fn get_all(connection: &crash_orm::DatabaseConnection) -> Result<Vec<Self::Output>, crash_orm::tokio_postgres::Error> {
+            async fn get_all(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<Self::Output>> {
                 let rows = connection.query(&*format!("SELECT * FROM {}", #ident_str), &[]).await?;
                 Ok(rows.iter().map(|v| TestItem::load_from_row(v)).collect::<Vec<TestItem>>())
             }
 
-            async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> Result<u32, crash_orm::tokio_postgres::Error> {
+            async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<u32> {
                 let row = connection.query(
                     &*format!("INSERT INTO {}({}) VALUES ({}) RETURNING id", #ident_str, #insert_field_names, #insert_field_self_values_format),
                     &[#insert_field_self_values]
@@ -82,13 +82,13 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
                 Ok(row.get(0).unwrap().get(0))
             }
 
-            async fn insert_set_id(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+            async fn insert_set_id(&mut self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 let id = self.insert_get_id(connection).await?;
                 self.id = Some(id);
                 Ok(())
             }
 
-            async fn remove(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+            async fn remove(&mut self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.id.is_none() {
                     return Ok(());
                 }
@@ -98,9 +98,9 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
                 Ok(())
             }
 
-            async fn update(&self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+            async fn update(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.id.is_none() {
-                    return Ok(());
+                    return Err(crash_orm::Error::from_str("You can't update an entity without an id."));
                 }
 
                 connection.execute(
@@ -111,7 +111,7 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
                 Ok(())
             }
 
-            async fn persist(&mut self, connection: &crash_orm::DatabaseConnection) -> Result<(), crash_orm::tokio_postgres::Error> {
+            async fn persist(&mut self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.id.is_none() {
                     self.insert_set_id(connection).await
                 } else {
