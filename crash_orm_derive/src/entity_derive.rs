@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, parse_macro_input};
 
-pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
+pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
     let Data::Struct(struct_data) = derive_input.data else {
         panic!("only structs are supported")

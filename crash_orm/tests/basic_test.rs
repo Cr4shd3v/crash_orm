@@ -1,5 +1,5 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec};
-use crash_orm_derive::Entity;
+use crash_orm::{DatabaseConnection, Entity, EntityVec, Schema};
+use crash_orm_derive::{Entity, Schema};
 
 #[derive(Entity, Debug)]
 pub struct TestItem1 {
@@ -8,21 +8,6 @@ pub struct TestItem1 {
 }
 
 impl TestItem1 {
-    fn test() -> Self {
-        Self {
-            id: None,
-            name: String::from("test123"),
-        }
-    }
-}
-
-#[derive(Entity, Debug)]
-pub struct TestItem2 {
-    pub id: Option<u32>,
-    pub name: String,
-}
-
-impl TestItem2 {
     fn test() -> Self {
         Self {
             id: None,
@@ -72,6 +57,21 @@ async fn test_persist() {
     item.remove(&conn).await.unwrap();
 }
 
+#[derive(Entity, Debug)]
+pub struct TestItem2 {
+    pub id: Option<u32>,
+    pub name: String,
+}
+
+impl TestItem2 {
+    fn test() -> Self {
+        Self {
+            id: None,
+            name: String::from("test123"),
+        }
+    }
+}
+
 #[tokio::test]
 async fn test_get_all() {
     let conn = setup_test_connection().await;
@@ -84,4 +84,17 @@ async fn test_get_all() {
 
     // cleanup
     results.remove_all(&conn).await.unwrap();
+}
+
+#[derive(Entity, Debug, Schema)]
+pub struct TestItem3 {
+    pub id: Option<u32>,
+    pub name: String,
+}
+
+#[tokio::test]
+async fn test_schema() {
+    let conn = setup_test_connection().await;
+
+    assert!(TestItem3::create_table(&conn).await.is_ok());
 }
