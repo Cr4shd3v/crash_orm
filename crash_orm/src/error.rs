@@ -1,5 +1,7 @@
 use std::fmt::{Debug, Display, Formatter};
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 #[derive(Debug)]
 pub enum Error {
     Postgres(tokio_postgres::Error),
@@ -22,8 +24,6 @@ impl Display for Error {
 }
 
 impl std::error::Error for Error {}
-
-pub type Result<T> = std::result::Result<T, Error>;
 
 impl From<tokio_postgres::Error> for Error {
     fn from(value: tokio_postgres::Error) -> Self {
