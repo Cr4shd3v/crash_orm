@@ -6,9 +6,11 @@ use crate::DatabaseConnection;
 pub trait Entity {
     type Output;
 
-    fn load_from_row(row: Row) -> Self::Output;
+    fn load_from_row(row: &Row) -> Self::Output;
 
     async fn get_by_id(connection: &DatabaseConnection, id: u32) -> Result<Self::Output, tokio_postgres::Error>;
+
+    async fn get_all(connection: &DatabaseConnection) -> Result<Vec<Self::Output>, tokio_postgres::Error>;
 
     async fn insert_get_id(&self, connection: &DatabaseConnection) -> Result<u32, tokio_postgres::Error>;
 

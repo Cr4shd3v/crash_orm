@@ -54,15 +54,20 @@ pub fn derive_loadable_impl(input: TokenStream) -> TokenStream {
         impl crash_orm::Entity for #ident {
             type Output = #ident;
 
-            fn load_from_row(row: crash_orm::tokio_postgres::Row) -> #ident {
+            fn load_from_row(row: &crash_orm::tokio_postgres::Row) -> Self::Output {
                 #ident {
                     #select_fields
                 }
             }
 
-            async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> Result<#ident, crash_orm::tokio_postgres::Error> {
+            async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> Result<Self::Output, crash_orm::tokio_postgres::Error> {
                 let row = connection.query_one(&*format!("SELECT * FROM {} WHERE id = $1", #ident_str), &[&id]).await?;
-                Ok(Self::load_from_row(row))
+                Ok(Self::load_from_row(&row))
+            }
+
+            async fn get_all(connection: &crash_orm::DatabaseConnection) -> Result<Vec<Self::Output>, crash_orm::tokio_postgres::Error> {
+                let rows = connection.query(&*format!("SELECT * FROM {}", #ident_str), &[]).await?;
+                Ok(rows.iter().map(|v| TestItem::load_from_row(v)).collect::<Vec<TestItem>>())
             }
 
             async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> Result<u32, crash_orm::tokio_postgres::Error> {
