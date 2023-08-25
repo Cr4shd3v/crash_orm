@@ -14,3 +14,6 @@ pub use error::*;
 
 mod entity_vec;
 pub use entity_vec::*;
+
+mod schema;
+pub use schema::*;
