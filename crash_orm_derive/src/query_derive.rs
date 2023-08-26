@@ -22,7 +22,7 @@ pub fn derive_query_impl(input: TokenStream) -> TokenStream {
         } else { field.ty };
 
         column_consts.extend(quote! {
-            pub const #field_ident_upper: crash_orm::QueryColumn::<#field_type, #original_ident> = crash_orm::QueryColumn::<#field_type, #original_ident>::new(#field_ident_str);
+            pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #original_ident> = crash_orm::EntityColumn::<#field_type, #original_ident>::new(#field_ident_str);
         });
     }
 

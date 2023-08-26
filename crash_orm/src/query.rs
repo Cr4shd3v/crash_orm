@@ -27,7 +27,7 @@ pub trait QueryEntity<T: Entity + Send + 'static>: Entity {
         Ok(row.get(0))
     }
 
-    async fn count_column<U: ToSql + Send>(connection: &DatabaseConnection, column: QueryColumn<U, T>, distinct: bool) -> crate::Result<i64> {
+    async fn count_column<U: ToSql + Send>(connection: &DatabaseConnection, column: EntityColumn<U, T>, distinct: bool) -> crate::Result<i64> {
         let row = connection.query_one(
             &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, column.name, Self::TABLE_NAME),
             &[],
@@ -36,7 +36,7 @@ pub trait QueryEntity<T: Entity + Send + 'static>: Entity {
         Ok(row.get(0))
     }
 
-    async fn count_column_query<U: ToSql + Send>(connection: &DatabaseConnection, column: QueryColumn<U, T>, distinct: bool, condition: QueryCondition<T>) -> crate::Result<i64> {
+    async fn count_column_query<U: ToSql + Send>(connection: &DatabaseConnection, column: EntityColumn<U, T>, distinct: bool, condition: QueryCondition<T>) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
         let row = connection.query_one(
@@ -110,19 +110,23 @@ impl<T: Entity + Send> QueryCondition<T> {
     }
 }
 
-pub struct QueryColumn<T: ToSql, U: Entity> {
+pub struct EntityColumn<T: ToSql, U: Entity> {
     name: &'static str,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
 }
 
-impl<T: ToSql, U: Entity + Send> QueryColumn<T, U> {
-    pub const fn new(name: &'static str) -> QueryColumn<T, U> {
+impl<T: ToSql, U: Entity + Send> EntityColumn<T, U> {
+    pub const fn new(name: &'static str) -> EntityColumn<T, U> {
         Self {
             name,
             phantom_1: PhantomData,
             phantom_2: PhantomData,
         }
+    }
+
+    pub fn get_name(&self) -> &str {
+        self.name
     }
 }
 
@@ -132,7 +136,7 @@ pub trait NullQueryColumn<T: ToSql, U: Entity + Send> {
     fn is_not_null(&self) -> QueryCondition<U>;
 }
 
-impl<T: ToSql, U: Entity + Send> NullQueryColumn<T, U> for QueryColumn<Option<T>, U>  {
+impl<T: ToSql, U: Entity + Send> NullQueryColumn<T, U> for EntityColumn<Option<T>, U>  {
     fn is_null(&self) -> QueryCondition<U> {
         QueryCondition::IsNull(self.name.to_string())
     }
@@ -148,9 +152,9 @@ pub trait EqualQueryColumn<T: ToSql, U: Entity + Send> {
     fn not_equals(&self, other: T) -> QueryCondition<U>;
 }
 
-macro_rules! impl_equal_query_column {
+macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
-        impl<T: Entity + Send> EqualQueryColumn<$column_type, T> for QueryColumn<$column_type, T> {
+        impl<T: Entity + Send> EqualQueryColumn<$column_type, T> for EntityColumn<$column_type, T> {
             fn equals(&self, other: $column_type) -> QueryCondition<T> {
                 QueryCondition::Equals(self.name.to_string(), Box::new(other))
             }
@@ -160,7 +164,7 @@ macro_rules! impl_equal_query_column {
             }
         }
 
-        impl<T: Entity + Send> EqualQueryColumn<$column_type, T> for QueryColumn<Option<$column_type>, T> {
+        impl<T: Entity + Send> EqualQueryColumn<$column_type, T> for EntityColumn<Option<$column_type>, T> {
             fn equals(&self, other: $column_type) -> QueryCondition<T> {
                 QueryCondition::Equals(self.name.to_string(), Box::new(other))
             }
@@ -172,12 +176,12 @@ macro_rules! impl_equal_query_column {
     };
 }
 
-impl_equal_query_column!(bool);
-impl_equal_query_column!(i8);
-impl_equal_query_column!(i16);
-impl_equal_query_column!(i32);
-impl_equal_query_column!(i64);
-impl_equal_query_column!(u32);
-impl_equal_query_column!(f32);
-impl_equal_query_column!(f64);
-impl_equal_query_column!(String);
+impl_equal_entity_column!(bool);
+impl_equal_entity_column!(i8);
+impl_equal_entity_column!(i16);
+impl_equal_entity_column!(i32);
+impl_equal_entity_column!(i64);
+impl_equal_entity_column!(u32);
+impl_equal_entity_column!(f32);
+impl_equal_entity_column!(f64);
+impl_equal_entity_column!(String);
