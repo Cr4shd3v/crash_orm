@@ -4,6 +4,8 @@ use crate::DatabaseConnection;
 
 #[async_trait]
 pub trait Entity {
+    const TABLE_NAME: &'static str;
+
     type Output;
 
     fn load_from_row(row: &Row) -> Self::Output;

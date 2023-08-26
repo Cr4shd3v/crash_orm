@@ -62,6 +62,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let output = quote! {
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Entity for #ident {
+            const TABLE_NAME: &'static str = #ident_str;
+
             type Output = #ident;
 
             fn load_from_row(row: &crash_orm::tokio_postgres::Row) -> Self::Output {
