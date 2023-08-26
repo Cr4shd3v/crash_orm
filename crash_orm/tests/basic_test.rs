@@ -1,5 +1,5 @@
 use crash_orm::{DatabaseConnection, Entity, EntityVec, Schema};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm_derive::{Entity, Query, Schema};
 
 #[derive(Entity, Debug)]
 pub struct TestItem1 {
@@ -123,4 +123,24 @@ async fn test_schema() {
     let exists = TestItem3::table_exists(&conn).await;
     assert!(exists.is_ok());
     assert!(!exists.unwrap());
+}
+
+#[derive(Entity, Debug, Schema, Query)]
+pub struct TestItem4 {
+    pub id: Option<u32>,
+    pub name: String,
+}
+
+impl TestItem4 {
+    fn test() -> Self {
+        Self {
+            id: None,
+            name: String::from("test123"),
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_query() {
+    // let conn = setup_test_connection().await;
 }

@@ -25,7 +25,14 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         };
 
         let column_type = match &*path {
+            "bool" => "bool",
+            "i8" => "char",
+            "i16" => "int2",
+            "i32" => "int4",
+            "i64" => "int8",
             "u32" => "oid",
+            "f32" => "float4",
+            "f64" => "float8",
             "String" => "text",
             _ => panic!("unsupported type {}", path),
         };
