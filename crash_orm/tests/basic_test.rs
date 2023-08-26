@@ -92,9 +92,28 @@ pub struct TestItem3 {
     pub name: String,
 }
 
+impl TestItem3 {
+    fn test() -> Self {
+        Self {
+            id: None,
+            name: String::from("test123"),
+        }
+    }
+}
+
 #[tokio::test]
 async fn test_schema() {
     let conn = setup_test_connection().await;
 
     assert!(TestItem3::create_table(&conn).await.is_ok());
+    assert!(TestItem3::test().persist(&conn).await.is_ok());
+    let all = TestItem3::get_all(&conn).await;
+    assert!(all.is_ok());
+    assert_eq!(all.unwrap().len(), 1);
+    assert!(TestItem3::truncate_table(&conn).await.is_ok());
+    let all = TestItem3::get_all(&conn).await;
+    assert!(all.is_ok());
+    assert_eq!(all.unwrap().len(), 0);
+    assert!(TestItem3::drop_table(&conn).await.is_ok());
+    assert!(TestItem3::test().persist(&conn).await.is_err());
 }
