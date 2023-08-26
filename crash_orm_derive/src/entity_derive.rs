@@ -53,6 +53,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let insert_field_names = insert_field_names.strip_suffix(",").unwrap();
     let insert_field_self_values_format = insert_field_self_values_format.strip_suffix(",").unwrap();
 
+    let select_by_id_string = format!("SELECT * FROM {} WHERE id = $1", ident_str);
+    let select_all_string = format!("SELECT * FROM {}", ident_str);
+    let insert_string = format!("INSERT INTO {}({}) VALUES ({}) RETURNING id", ident_str, insert_field_names, insert_field_self_values_format);
+    let delete_string = format!("DELETE FROM {} WHERE id = $1", ident_str);
+    let update_string = format!("UPDATE {} SET {} WHERE id = ${}", ident_str, update_fields, insert_index);
+
     let output = quote! {
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Entity for #ident {
@@ -65,20 +71,17 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             }
 
             async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> crash_orm::Result<Self::Output> {
-                let row = connection.query_one(&*format!("SELECT * FROM {} WHERE id = $1", #ident_str), &[&id]).await?;
+                let row = connection.query_one(#select_by_id_string, &[&id]).await?;
                 Ok(Self::load_from_row(&row))
             }
 
             async fn get_all(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<Self::Output>> {
-                let rows = connection.query(&*format!("SELECT * FROM {}", #ident_str), &[]).await?;
+                let rows = connection.query(#select_all_string, &[]).await?;
                 Ok(rows.iter().map(|v| Self::load_from_row(v)).collect::<Vec<Self>>())
             }
 
             async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<u32> {
-                let row = connection.query(
-                    &*format!("INSERT INTO {}({}) VALUES ({}) RETURNING id", #ident_str, #insert_field_names, #insert_field_self_values_format),
-                    &[#insert_field_self_values]
-                ).await?;
+                let row = connection.query(#insert_string,&[#insert_field_self_values]).await?;
                 Ok(row.get(0).unwrap().get(0))
             }
 
@@ -93,7 +96,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     return Ok(());
                 }
 
-                connection.execute(&*format!("DELETE FROM {} WHERE id = $1", #ident_str), &[&self.id]).await?;
+                connection.execute(#delete_string, &[&self.id]).await?;
                 self.id = None;
                 Ok(())
             }
@@ -103,10 +106,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     return Err(crash_orm::Error::from_str("You can't update an entity without an id."));
                 }
 
-                connection.execute(
-                    &*format!("UPDATE {} SET {} WHERE id = ${}", #ident_str, #update_fields, #insert_index),
-                    &[#insert_field_self_values &self.id],
-                ).await?;
+                connection.execute(#update_string,&[#insert_field_self_values &self.id],).await?;
 
                 Ok(())
             }
