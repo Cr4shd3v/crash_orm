@@ -138,6 +138,13 @@ impl TestItem4 {
             name: String::from("test123"),
         }
     }
+
+    fn test2() -> Self {
+        Self {
+            id: None,
+            name: String::from("test1234"),
+        }
+    }
 }
 
 #[tokio::test]
@@ -149,8 +156,12 @@ async fn test_query() {
     }
 
     assert!(TestItem4::test().persist(&conn).await.is_ok());
-    let results = TestItem4::query(TestItem4Column::NAME.equals(String::from("test123"))).await;
+    assert!(TestItem4::test2().persist(&conn).await.is_ok());
+    let results = TestItem4::query(&conn, TestItem4Column::NAME.equals(String::from("test123"))).await;
+    println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
+
+    assert!(TestItem4::truncate_table(&conn).await.is_ok());
 }
