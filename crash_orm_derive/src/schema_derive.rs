@@ -74,7 +74,6 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
             }
 
             async fn table_exists(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<bool> {
-                println!(#table_exists_string);
                 let row = connection.query_one(#table_exists_string, &[]).await?;
                 let exists: bool = row.get(0);
                 Ok(exists)
