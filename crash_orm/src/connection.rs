@@ -1,5 +1,6 @@
 use std::ops::Deref;
 use tokio_postgres::Client;
+use crate::Entity;
 
 pub struct DatabaseConnection {
     client: Client,
@@ -24,6 +25,14 @@ impl DatabaseConnection {
     #[cfg(test)]
     pub async fn test() -> crate::Result<Self> {
         Self::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await
+    }
+
+    pub async fn persist<T: Entity>(&self, entity: &mut T) -> crate::Result<()> {
+        entity.persist(self).await
+    }
+
+    pub async fn remove<T: Entity>(&self, entity: &mut T) -> crate::Result<()> {
+        entity.remove(self).await
     }
 }
 
