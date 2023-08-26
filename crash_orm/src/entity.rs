@@ -14,6 +14,8 @@ pub trait Entity {
 
     async fn get_all(connection: &DatabaseConnection) -> crate::Result<Vec<Self::Output>>;
 
+    async fn count(connection: &DatabaseConnection) -> crate::Result<i64>;
+
     async fn insert_get_id(&self, connection: &DatabaseConnection) -> crate::Result<u32>;
 
     async fn insert_set_id(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;

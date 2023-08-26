@@ -55,6 +55,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let select_by_id_string = format!("SELECT * FROM {} WHERE id = $1", ident_str);
     let select_all_string = format!("SELECT * FROM {}", ident_str);
+    let count_string = format!("SELECT COUNT(*) FROM {}", ident_str);
     let insert_string = format!("INSERT INTO {}({}) VALUES ({}) RETURNING id", ident_str, insert_field_names, insert_field_self_values_format);
     let delete_string = format!("DELETE FROM {} WHERE id = $1", ident_str);
     let update_string = format!("UPDATE {} SET {} WHERE id = ${}", ident_str, update_fields, insert_index);
@@ -82,9 +83,14 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 Ok(rows.iter().map(|v| Self::load_from_row(v)).collect::<Vec<Self>>())
             }
 
+            async fn count(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<i64> {
+                let row = connection.query_one(#count_string, &[]).await?;
+                Ok(row.get(0))
+            }
+
             async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<u32> {
-                let row = connection.query(#insert_string,&[#insert_field_self_values]).await?;
-                Ok(row.get(0).unwrap().get(0))
+                let rows = connection.query(#insert_string,&[#insert_field_self_values]).await?;
+                Ok(rows.get(0).unwrap().get(0))
             }
 
             async fn insert_set_id(&mut self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
