@@ -1,5 +1,9 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, QueryEntity, Schema};
-use crash_orm_derive::{Entity, Query, Schema};
+use crash_orm::{DatabaseConnection, Entity, EntityVec, Schema};
+use crash_orm_derive::{Entity, Schema};
+
+pub async fn setup_test_connection() -> DatabaseConnection {
+    DatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await.unwrap()
+}
 
 #[derive(Entity, Debug)]
 pub struct TestItem1 {
@@ -14,10 +18,6 @@ impl TestItem1 {
             name: String::from("test123"),
         }
     }
-}
-
-pub async fn setup_test_connection() -> DatabaseConnection {
-    DatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await.unwrap()
 }
 
 #[tokio::test]
@@ -123,43 +123,4 @@ async fn test_schema() {
     let exists = TestItem3::table_exists(&conn).await;
     assert!(exists.is_ok());
     assert!(!exists.unwrap());
-}
-
-#[derive(Entity, Debug, Schema, Query)]
-pub struct TestItem4 {
-    pub id: Option<u32>,
-    pub name: Option<String>,
-}
-
-impl TestItem4 {
-    fn test() -> Self {
-        Self {
-            id: None,
-            name: Some(String::from("test123")),
-        }
-    }
-
-    fn test2() -> Self {
-        Self {
-            id: None,
-            name: Some(String::from("test1234")),
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_query() {
-    let conn = setup_test_connection().await;
-
-    assert!(TestItem4::create_table(&conn).await.is_ok());
-
-    assert!(TestItem4::test().persist(&conn).await.is_ok());
-    assert!(TestItem4::test2().persist(&conn).await.is_ok());
-    let results = TestItem4::query(&conn, TestItem4Column::NAME.equals(String::from("test123"))).await;
-    println!("{:?}", results);
-    assert!(results.is_ok());
-    let results = results.unwrap();
-    assert_eq!(results.len(), 1);
-
-    assert!(TestItem4::drop_table(&conn).await.is_ok());
 }

@@ -48,7 +48,7 @@ impl<T: Entity + Send> QueryCondition<T> {
 
                 first_values.extend(second_values);
 
-                (format!("{} AND {}", first_query, second_query), first_values, index)
+                (format!("({}) AND ({})", first_query, second_query), first_values, index)
             }
             QueryCondition::Or(first, second) => {
                 let (first_query, mut first_values, index) = first.resolve(index);
@@ -56,7 +56,7 @@ impl<T: Entity + Send> QueryCondition<T> {
 
                 first_values.extend(second_values);
 
-                (format!("{} OR {}", first_query, second_query), first_values, index)
+                (format!("({}) OR ({})", first_query, second_query), first_values, index)
             }
             QueryCondition::__(_) => {
                 panic!("Invalid Condition (PhantomData)");
