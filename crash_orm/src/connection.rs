@@ -1,13 +1,14 @@
 use std::error::Error;
 use std::ops::Deref;
 use tokio_postgres::Client;
+use crate::Entity;
 
 pub struct DatabaseConnection {
     client: Client,
 }
 
 impl DatabaseConnection {
-    pub async fn new(config: &str) -> Result<Self, Box<dyn Error>> {
+    pub async fn new(config: &str) -> crate::Result<Self> {
         let (client, connection) =
             tokio_postgres::connect(config, tokio_postgres::NoTls).await?;
 
@@ -23,7 +24,7 @@ impl DatabaseConnection {
     }
 
     #[cfg(test)]
-    pub async fn test() -> Result<Self, Box<dyn Error>> {
+    pub async fn test() -> crate::Result<Self> {
         Self::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await
     }
 }
