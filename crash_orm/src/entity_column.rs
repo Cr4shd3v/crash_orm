@@ -9,6 +9,9 @@ pub use sum_column::*;
 mod min_column;
 pub use min_column::*;
 
+mod max_column;
+pub use max_column::*;
+
 pub struct EntityColumn<T: ToSql + FromSql<'static>, U: Entity<U> + Send + 'static> {
     pub(crate) name: &'static str,
     phantom_1: PhantomData<T>,
