@@ -9,7 +9,7 @@ pub trait EntityVec {
 }
 
 #[async_trait]
-impl<T> EntityVec for Vec<T> where T: Entity + Send {
+impl<T> EntityVec for Vec<T> where T: Entity<T> + Send + 'static {
     async fn persist_all(&mut self, connection: &DatabaseConnection) -> crate::Result<()> {
         for entity in self {
             entity.persist(connection).await?;

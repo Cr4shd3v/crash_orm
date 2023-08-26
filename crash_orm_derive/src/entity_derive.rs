@@ -62,23 +62,21 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #[crash_orm::async_trait::async_trait]
-        impl crash_orm::Entity for #ident {
+        impl crash_orm::Entity<#ident> for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
-            type Output = #ident;
-
-            fn load_from_row(row: &crash_orm::tokio_postgres::Row) -> Self::Output {
+            fn load_from_row(row: &crash_orm::tokio_postgres::Row) -> #ident {
                 #ident {
                     #select_fields
                 }
             }
 
-            async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> crash_orm::Result<Self::Output> {
+            async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> crash_orm::Result<#ident> {
                 let row = connection.query_one(#select_by_id_string, &[&id]).await?;
                 Ok(Self::load_from_row(&row))
             }
 
-            async fn get_all(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<Self::Output>> {
+            async fn get_all(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
                 let rows = connection.query(#select_all_string, &[]).await?;
                 Ok(rows.iter().map(|v| Self::load_from_row(v)).collect::<Vec<Self>>())
             }

@@ -27,11 +27,11 @@ impl DatabaseConnection {
         Self::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await
     }
 
-    pub async fn persist<T: Entity>(&self, entity: &mut T) -> crate::Result<()> {
+    pub async fn persist<T: Entity<T> + Send + 'static>(&self, entity: &mut T) -> crate::Result<()> {
         entity.persist(self).await
     }
 
-    pub async fn remove<T: Entity>(&self, entity: &mut T) -> crate::Result<()> {
+    pub async fn remove<T: Entity<T> + Send + 'static>(&self, entity: &mut T) -> crate::Result<()> {
         entity.remove(self).await
     }
 }

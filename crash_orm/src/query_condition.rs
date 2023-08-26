@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 use crate::Entity;
 
-pub enum QueryCondition<T: Entity + Send> {
+pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Equals(String, Box<dyn ToSql + Sync + Send>),
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
     And(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
@@ -12,7 +12,7 @@ pub enum QueryCondition<T: Entity + Send> {
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
-impl<T: Entity + Send> QueryCondition<T> {
+impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
     pub(crate) fn resolve(self, index: usize) -> (String, Vec<Box<dyn ToSql + Send + Sync>>, usize) {
         match self {
             QueryCondition::Equals(name, value) => {
