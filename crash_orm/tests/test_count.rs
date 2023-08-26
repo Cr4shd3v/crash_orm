@@ -53,27 +53,24 @@ async fn test_count() {
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), 2);
 
-    let result = TestItem6::count_column_query(
+    let result = TestItem6Column::NAME1.count_query(
         &conn,
-        TestItem6Column::NAME1,
         true,
         TestItem6Column::NAME1.is_not_null()
     ).await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), 1);
 
-    let result = TestItem6::count_column_query(
+    let result = TestItem6Column::NAME1.count_query(
         &conn,
-        TestItem6Column::NAME1,
         false,
         TestItem6Column::NAME1.is_not_null()
     ).await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), 2);
 
-    let result = TestItem6::count_column(
+    let result = TestItem6Column::NUMBER.count(
         &conn,
-        TestItem6Column::NUMBER,
         false,
     ).await;
     assert!(result.is_ok());
