@@ -18,9 +18,6 @@ pub use entity_vec::*;
 mod schema;
 pub use schema::*;
 
-mod query_entity;
-pub use query_entity::*;
-
 mod entity_column;
 pub use entity_column::*;
 

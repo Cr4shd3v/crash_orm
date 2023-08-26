@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput, parse_macro_input};
+use syn::{Data, DeriveInput, Ident, parse_macro_input};
+use crate::util::extract_type_from_option;
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -10,6 +11,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let ident = derive_input.ident;
     let ident_str = ident.to_string().to_lowercase();
+    let vis = derive_input.vis;
 
     let mut select_fields = quote!();
     let mut all_field_self_values_format = String::new();
@@ -17,28 +19,38 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut insert_field_self_values = quote!();
     let mut insert_field_self_values_format = String::new();
     let mut update_fields = String::new();
+    let mut column_consts = quote!();
 
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
     for field in struct_data.fields {
-        let ident = field.ident.unwrap();
+        let field_ident = field.ident.unwrap();
+        let field_ident_str = field_ident.to_string();
+        let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
+        let field_type = if &*field_ident_str == "id" {
+            extract_type_from_option(&field.ty).unwrap_or(field.ty)
+        } else { field.ty };
 
-        select_fields.extend(quote! {
-            #ident: row.get(#all_index),
+        column_consts.extend(quote! {
+            pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
         });
 
-        if ident.to_string() != "id" {
+        select_fields.extend(quote! {
+            #field_ident: row.get(#all_index),
+        });
+
+        if field_ident.to_string() != "id" {
             insert_field_names.extend(quote! {
-                #ident,
+                #field_ident,
             });
 
             insert_field_self_values.extend(quote! {
-                &self.#ident,
+                &self.#field_ident,
             });
 
             insert_index += 1;
 
-            update_fields.push_str(&*format!("{} = ${}", ident.to_string(), insert_index));
+            update_fields.push_str(&*format!("{} = ${}", field_ident.to_string(), insert_index));
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
         }
 
@@ -59,8 +71,15 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let insert_string = format!("INSERT INTO {}({}) VALUES ({}) RETURNING id", ident_str, insert_field_names, insert_field_self_values_format);
     let delete_string = format!("DELETE FROM {} WHERE id = $1", ident_str);
     let update_string = format!("UPDATE {} SET {} WHERE id = ${}", ident_str, update_fields, insert_index);
+    let ident_column = Ident::new(&*format!("{}Column", ident.to_string()), ident.span());
 
     let output = quote! {
+        #vis struct #ident_column;
+
+        impl #ident_column {
+            #column_consts
+        }
+
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Entity<#ident> for #ident {
             const TABLE_NAME: &'static str = #ident_str;

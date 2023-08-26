@@ -1,11 +1,11 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec, NullQueryColumn, QueryEntity, Schema};
-use crash_orm_derive::{Entity, Query, Schema};
+use crash_orm::{DatabaseConnection, Entity, EntityVec, NullQueryColumn, Schema};
+use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
     DatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await.unwrap()
 }
 
-#[derive(Entity, Debug, Schema, Query)]
+#[derive(Entity, Debug, Schema)]
 pub struct TestItem6 {
     pub id: Option<u32>,
     pub name1: Option<String>,

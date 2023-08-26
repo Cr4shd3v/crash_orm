@@ -1,11 +1,11 @@
-use crash_orm::{DatabaseConnection, Entity, EqualQueryColumn, NullQueryColumn, QueryEntity, Schema};
-use crash_orm_derive::{Entity, Query, Schema};
+use crash_orm::{DatabaseConnection, Entity, EqualQueryColumn, NullQueryColumn, Schema};
+use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
     DatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await.unwrap()
 }
 
-#[derive(Entity, Debug, Schema, Query)]
+#[derive(Entity, Debug, Schema)]
 pub struct TestItem4 {
     pub id: Option<u32>,
     pub name: Option<String>,
@@ -48,7 +48,7 @@ async fn test_query_simple() {
     assert!(TestItem4::drop_table(&conn).await.is_ok());
 }
 
-#[derive(Entity, Debug, Schema, Query)]
+#[derive(Entity, Debug, Schema)]
 pub struct TestItem5 {
     pub id: Option<u32>,
     pub name1: Option<String>,
