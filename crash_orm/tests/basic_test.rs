@@ -105,6 +105,7 @@ impl TestItem3 {
 async fn test_schema() {
     let conn = setup_test_connection().await;
 
+    assert_eq!(TestItem3::TABLE_NAME, "testitem3");
     assert!(TestItem3::create_table(&conn).await.is_ok());
     assert!(TestItem3::test().persist(&conn).await.is_ok());
     let all = TestItem3::get_all(&conn).await;

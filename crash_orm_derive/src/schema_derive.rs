@@ -53,6 +53,8 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let output = quote! {
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Schema for #ident {
+            const TABLE_NAME: &'static str = #ident_str;
+
             async fn create_table(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 connection.execute(#sequence_create, &[]).await?;
                 connection.execute(#create_string, &[]).await?;
