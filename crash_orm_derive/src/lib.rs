@@ -8,6 +8,7 @@ use crate::schema_derive::derive_schema_impl;
 mod entity_derive;
 mod schema_derive;
 mod query_derive;
+mod util;
 
 #[proc_macro_derive(Entity)]
 pub fn derive_entity(input: TokenStream) -> TokenStream {
