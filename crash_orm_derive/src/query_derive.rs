@@ -17,7 +17,9 @@ pub fn derive_query_impl(input: TokenStream) -> TokenStream {
         let field_ident = field.ident.unwrap();
         let field_ident_str = field_ident.to_string();
         let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
-        let field_type = extract_type_from_option(&field.ty).unwrap_or(field.ty);
+        let field_type = if &*field_ident_str == "id" {
+            extract_type_from_option(&field.ty).unwrap_or(field.ty)
+        } else { field.ty };
 
         column_consts.extend(quote! {
             pub const #field_ident_upper: crash_orm::QueryColumn::<#field_type, #original_ident> = crash_orm::QueryColumn::<#field_type, #original_ident>::new(#field_ident_str);

@@ -28,6 +28,8 @@ pub enum QueryCondition<T: Entity + Send> {
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
     And(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
     Or(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
+    IsNull(String),
+    IsNotNull(String),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -59,6 +61,12 @@ impl<T: Entity + Send> QueryCondition<T> {
             QueryCondition::__(_) => {
                 panic!("Invalid Condition (PhantomData)");
             }
+            QueryCondition::IsNull(name) => {
+                (format!("{} IS NULL", name), vec![], index)
+            }
+            QueryCondition::IsNotNull(name) => {
+                (format!("{} IS NOT NULL", name), vec![], index)
+            }
         }
     }
 
@@ -77,13 +85,29 @@ pub struct QueryColumn<T: ToSql, U: Entity> {
     phantom_2: PhantomData<U>,
 }
 
-impl<T: ToSql, U: Entity> QueryColumn<T, U> {
+impl<T: ToSql, U: Entity + Send> QueryColumn<T, U> {
     pub const fn new(name: &'static str) -> QueryColumn<T, U> {
         Self {
             name,
             phantom_1: PhantomData,
             phantom_2: PhantomData,
         }
+    }
+}
+
+pub trait NullQueryColumn<T: ToSql, U: Entity + Send> {
+    fn is_null(&self) -> QueryCondition<U>;
+
+    fn is_not_null(&self) -> QueryCondition<U>;
+}
+
+impl<T: ToSql, U: Entity + Send> NullQueryColumn<T, U> for QueryColumn<Option<T>, U>  {
+    fn is_null(&self) -> QueryCondition<U> {
+        QueryCondition::IsNull(self.name.to_string())
+    }
+
+    fn is_not_null(&self) -> QueryCondition<U> {
+        QueryCondition::IsNull(self.name.to_string())
     }
 }
 
@@ -96,6 +120,16 @@ pub trait EqualQueryColumn<T: ToSql, U: Entity + Send> {
 macro_rules! impl_equal_query_column {
     ($column_type:ty) => {
         impl<T: Entity + Send> EqualQueryColumn<$column_type, T> for QueryColumn<$column_type, T> {
+            fn equals(&self, other: $column_type) -> QueryCondition<T> {
+                QueryCondition::Equals(self.name.to_string(), Box::new(other))
+            }
+
+            fn not_equals(&self, other: $column_type) -> QueryCondition<T> {
+                QueryCondition::NotEquals(self.name.to_string(), Box::new(other))
+            }
+        }
+
+        impl<T: Entity + Send> EqualQueryColumn<$column_type, T> for QueryColumn<Option<$column_type>, T> {
             fn equals(&self, other: $column_type) -> QueryCondition<T> {
                 QueryCondition::Equals(self.name.to_string(), Box::new(other))
             }

@@ -128,21 +128,21 @@ async fn test_schema() {
 #[derive(Entity, Debug, Schema, Query)]
 pub struct TestItem4 {
     pub id: Option<u32>,
-    pub name: String,
+    pub name: Option<String>,
 }
 
 impl TestItem4 {
     fn test() -> Self {
         Self {
             id: None,
-            name: String::from("test123"),
+            name: Some(String::from("test123")),
         }
     }
 
     fn test2() -> Self {
         Self {
             id: None,
-            name: String::from("test1234"),
+            name: Some(String::from("test1234")),
         }
     }
 }
@@ -151,9 +151,7 @@ impl TestItem4 {
 async fn test_query() {
     let conn = setup_test_connection().await;
 
-    if !TestItem4::table_exists(&conn).await.unwrap() {
-        TestItem4::create_table(&conn).await.unwrap();
-    }
+    assert!(TestItem4::create_table(&conn).await.is_ok());
 
     assert!(TestItem4::test().persist(&conn).await.is_ok());
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
@@ -163,5 +161,5 @@ async fn test_query() {
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
 
-    assert!(TestItem4::truncate_table(&conn).await.is_ok());
+    assert!(TestItem4::drop_table(&conn).await.is_ok());
 }

@@ -18,7 +18,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         let path = path.into_token_stream().to_string().replace(" ", "");
         let field_name = field.ident.unwrap().to_string();
 
-        let (path, _nullable) = if path.starts_with("Option<") {
+        let (path, nullable) = if path.starts_with("Option<") {
             (path.strip_prefix("Option<").unwrap().strip_suffix(">").unwrap().to_string(), &*field_name != "id")
         } else {
             (path, false)
@@ -37,7 +37,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
             _ => panic!("unsupported type {}", path),
         };
 
-        create_fields_string.push_str(&*format!("{} {} NOT NULL", field_name, column_type));
+        create_fields_string.push_str(&*format!("{} {} {}", field_name, column_type, if nullable { "" } else { "NOT NULL" }));
 
         if &*field_name == "id" {
             create_fields_string.push_str(&*format!(" DEFAULT nextval('{}_id_seq'::regclass)", ident_str));
