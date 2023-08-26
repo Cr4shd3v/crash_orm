@@ -8,4 +8,6 @@ pub trait Schema {
     async fn drop_table(connection: &DatabaseConnection) -> crate::Result<()>;
 
     async fn truncate_table(connection: &DatabaseConnection) -> crate::Result<()>;
+
+    async fn table_exists(connection: &DatabaseConnection) -> crate::Result<bool>;
 }

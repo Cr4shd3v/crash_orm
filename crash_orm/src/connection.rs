@@ -1,7 +1,5 @@
-use std::error::Error;
 use std::ops::Deref;
 use tokio_postgres::Client;
-use crate::Entity;
 
 pub struct DatabaseConnection {
     client: Client,

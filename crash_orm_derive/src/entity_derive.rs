@@ -9,7 +9,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     };
 
     let ident = derive_input.ident;
-    let ident_str = ident.to_string();
+    let ident_str = ident.to_string().to_lowercase();
 
     let mut select_fields = quote!();
     let mut all_field_self_values_format = String::new();

@@ -11,7 +11,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let mut create_fields_string = String::new();
 
     let ident = derive_input.ident;
-    let ident_str = ident.to_string();
+    let ident_str = ident.to_string().to_lowercase();
 
     for field in struct_data.fields {
         let syn::Type::Path(path) = field.ty else { panic!("unsupported") };
@@ -48,6 +48,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
 
     let drop_string = format!("DROP TABLE IF EXISTS {} CASCADE", ident_str);
     let truncate_string = format!("TRUNCATE {} RESTART IDENTITY", ident_str);
+    let table_exists_string = format!("SELECT EXISTS(SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '{}')", ident_str);
 
     let output = quote! {
         #[crash_orm::async_trait::async_trait]
@@ -70,6 +71,13 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
                 connection.execute(#truncate_string, &[]).await?;
 
                 Ok(())
+            }
+
+            async fn table_exists(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<bool> {
+                println!(#table_exists_string);
+                let row = connection.query_one(#table_exists_string, &[]).await?;
+                let exists: bool = row.get(0);
+                Ok(exists)
             }
         }
     };

@@ -114,6 +114,12 @@ async fn test_schema() {
     let all = TestItem3::get_all(&conn).await;
     assert!(all.is_ok());
     assert_eq!(all.unwrap().len(), 0);
+    let exists = TestItem3::table_exists(&conn).await;
+    assert!(exists.is_ok());
+    assert!(exists.unwrap());
     assert!(TestItem3::drop_table(&conn).await.is_ok());
     assert!(TestItem3::test().persist(&conn).await.is_err());
+    let exists = TestItem3::table_exists(&conn).await;
+    assert!(exists.is_ok());
+    assert!(!exists.unwrap());
 }
