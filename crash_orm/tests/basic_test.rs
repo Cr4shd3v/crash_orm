@@ -1,4 +1,4 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec, Schema};
+use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, QueryEntity, Schema};
 use crash_orm_derive::{Entity, Query, Schema};
 
 #[derive(Entity, Debug)]
@@ -142,5 +142,15 @@ impl TestItem4 {
 
 #[tokio::test]
 async fn test_query() {
-    // let conn = setup_test_connection().await;
+    let conn = setup_test_connection().await;
+
+    if !TestItem4::table_exists(&conn).await.unwrap() {
+        TestItem4::create_table(&conn).await.unwrap();
+    }
+
+    assert!(TestItem4::test().persist(&conn).await.is_ok());
+    let results = TestItem4::query(TestItem4Column::NAME.equals(String::from("test123"))).await;
+    assert!(results.is_ok());
+    let results = results.unwrap();
+    assert_eq!(results.len(), 1);
 }

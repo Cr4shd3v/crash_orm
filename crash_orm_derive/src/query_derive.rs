@@ -32,6 +32,9 @@ pub fn derive_query_impl(input: TokenStream) -> TokenStream {
         impl #ident {
             #column_consts
         }
+
+        #[crash_orm::async_trait::async_trait]
+        impl crash_orm::QueryEntity<#original_ident> for #original_ident {}
     };
 
     output.into()
