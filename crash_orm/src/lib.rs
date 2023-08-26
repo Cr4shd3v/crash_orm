@@ -27,5 +27,4 @@ pub use query_condition::*;
 mod query_column;
 pub use query_column::*;
 
-mod sum_column;
-pub use sum_column::*;
+pub use entity_column::sum_column::*;
