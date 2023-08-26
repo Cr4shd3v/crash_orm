@@ -26,6 +26,26 @@ pub trait QueryEntity<T: Entity + Send + 'static>: Entity {
 
         Ok(row.get(0))
     }
+
+    async fn count_column<U: ToSql + Send>(connection: &DatabaseConnection, column: QueryColumn<U, T>, distinct: bool) -> crate::Result<i64> {
+        let row = connection.query_one(
+            &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, column.name, Self::TABLE_NAME),
+            &[],
+        ).await?;
+
+        Ok(row.get(0))
+    }
+
+    async fn count_column_query<U: ToSql + Send>(connection: &DatabaseConnection, column: QueryColumn<U, T>, distinct: bool, condition: QueryCondition<T>) -> crate::Result<i64> {
+        let (query, values, _) = condition.resolve(1);
+
+        let row = connection.query_one(
+            &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, column.name, Self::TABLE_NAME, query),
+            slice_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
+        ).await?;
+
+        Ok(row.get(0))
+    }
 }
 
 fn slice_iter<'a>(
@@ -118,7 +138,7 @@ impl<T: ToSql, U: Entity + Send> NullQueryColumn<T, U> for QueryColumn<Option<T>
     }
 
     fn is_not_null(&self) -> QueryCondition<U> {
-        QueryCondition::IsNull(self.name.to_string())
+        QueryCondition::IsNotNull(self.name.to_string())
     }
 }
 
