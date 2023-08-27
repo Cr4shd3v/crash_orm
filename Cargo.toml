@@ -3,6 +3,7 @@ members = [
     "crash_orm",
     "crash_orm_derive",
 ]
+resolver = "2"
 
 [workspace.dependencies]
 tokio-postgres = "0.7.8"

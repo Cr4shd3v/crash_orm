@@ -5,7 +5,7 @@ pub async fn setup_test_connection() -> DatabaseConnection {
     DatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await.unwrap()
 }
 
-#[derive(Entity, Debug)]
+#[derive(Entity, Debug, Schema)]
 pub struct TestItem1 {
     pub id: Option<u32>,
     pub name: String,
@@ -23,6 +23,10 @@ impl TestItem1 {
 #[tokio::test]
 async fn test_basic() {
     let conn = setup_test_connection().await;
+
+    if !TestItem1::table_exists(&conn).await.unwrap() {
+        TestItem1::create_table(&conn).await.unwrap();
+    }
 
     let mut item = TestItem1::test();
 
@@ -42,6 +46,10 @@ async fn test_basic() {
 async fn test_persist() {
     let conn = setup_test_connection().await;
 
+    if !TestItem1::table_exists(&conn).await.unwrap() {
+        TestItem1::create_table(&conn).await.unwrap();
+    }
+
     let mut item = TestItem1::test();
     item.persist(&conn).await.unwrap();
     assert!(item.id.is_some());
@@ -57,7 +65,7 @@ async fn test_persist() {
     assert!(conn.remove(&mut item).await.is_ok());
 }
 
-#[derive(Entity, Debug)]
+#[derive(Entity, Debug, Schema)]
 pub struct TestItem2 {
     pub id: Option<u32>,
     pub name: String,
@@ -75,6 +83,11 @@ impl TestItem2 {
 #[tokio::test]
 async fn test_get_all() {
     let conn = setup_test_connection().await;
+
+    if !TestItem2::table_exists(&conn).await.unwrap() {
+        TestItem2::create_table(&conn).await.unwrap();
+    }
+
     vec![TestItem2::test(), TestItem2::test(), TestItem2::test()].persist_all(&conn).await.unwrap();
 
     let results = TestItem2::get_all(&conn).await;
