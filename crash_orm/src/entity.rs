@@ -28,8 +28,6 @@ pub trait Entity<T: Entity<T> + Send + 'static> {
     async fn query(connection: &DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<Vec<T>> {
         let (query, values, _) = condition.resolve(1);
 
-        println!("SELECT * FROM {} WHERE {}", Self::TABLE_NAME, query);
-
         let rows = connection.query(
             &*format!("SELECT * FROM {} WHERE {}", Self::TABLE_NAME, query),
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),

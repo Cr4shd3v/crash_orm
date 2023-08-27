@@ -15,28 +15,43 @@ pub use max_column::*;
 mod avg_column;
 pub use avg_column::*;
 
-pub struct EntityColumn<T: ToSql, U: Entity<U> + Send + 'static> {
-    pub(crate) name: &'static str,
+pub struct EntityColumn<'a, T: ToSql, U: Entity<U> + Send + 'static> {
+    name_str: Option<&'a str>,
+    name_string: Option<String>,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
 }
 
-impl<T: ToSql, U: Entity<U> + Send + 'static> EntityColumn<T, U> {
-    pub const fn new(name: &'static str) -> EntityColumn<T, U> {
+impl<'a, T: ToSql, U: Entity<U> + Send + 'static> EntityColumn<'a, T, U> {
+    pub const fn new(name: &'a str) -> EntityColumn<T, U> {
         Self {
-            name,
+            name_str: Some(name),
+            name_string: None,
             phantom_1: PhantomData,
             phantom_2: PhantomData,
         }
     }
 
-    pub fn get_name(&self) -> &str {
-        self.name
+    pub fn from_string(name: String) -> EntityColumn<'a, T, U> {
+        Self {
+            name_str: None,
+            name_string: Some(name),
+            phantom_1: PhantomData,
+            phantom_2: PhantomData,
+        }
+    }
+
+    pub fn get_name(&self) -> String {
+        if self.name_string.is_some() {
+            self.name_string.clone().unwrap()
+        } else {
+            self.name_str.clone().unwrap().to_string()
+        }
     }
 
     pub async fn count(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<i64> {
         let row = connection.query_one(
-            &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.name, U::TABLE_NAME),
+            &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), U::TABLE_NAME),
             &[],
         ).await?;
 
@@ -47,7 +62,7 @@ impl<T: ToSql, U: Entity<U> + Send + 'static> EntityColumn<T, U> {
         let (query, values, _) = condition.resolve(1);
 
         let row = connection.query_one(
-            &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.name, U::TABLE_NAME, query),
+            &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), U::TABLE_NAME, query),
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
         ).await?;
 

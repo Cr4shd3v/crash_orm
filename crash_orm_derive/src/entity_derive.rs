@@ -32,7 +32,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         } else { field.ty };
 
         column_consts.extend(quote! {
-            pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
+            pub const #field_ident_upper: crash_orm::EntityColumn::<'_, #field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
         });
 
         select_fields.extend(quote! {

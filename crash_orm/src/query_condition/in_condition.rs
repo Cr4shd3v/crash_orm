@@ -10,33 +10,33 @@ pub trait InQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 
 macro_rules! impl_in_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U> + Send + 'static> InQueryColumn<$column_type, U> for EntityColumn<$column_type, U> {
+        impl<U: Entity<U> + Send + 'static> InQueryColumn<$column_type, U> for EntityColumn<'_, $column_type, U> {
             fn r#in(&self, other: Vec<$column_type>) -> QueryCondition<U> {
                 QueryCondition::In(
-                    self.name.to_string(),
+                    self.get_name(),
                     other.iter().map(|i| -> Box<dyn ToSql + Sync + Send>{Box::new((*i).clone())}).collect()
                 )
             }
 
             fn not_in(&self, other: Vec<$column_type>) -> QueryCondition<U> {
                 QueryCondition::NotIn(
-                    self.name.to_string(),
+                    self.get_name(),
                     other.iter().map(|i| -> Box<dyn ToSql + Sync + Send>{Box::new((*i).clone())}).collect()
                 )
             }
         }
 
-        impl<U: Entity<U> + Send + 'static> InQueryColumn<$column_type, U> for EntityColumn<Option<$column_type>, U> {
+        impl<U: Entity<U> + Send + 'static> InQueryColumn<$column_type, U> for EntityColumn<'_, Option<$column_type>, U> {
             fn r#in(&self, other: Vec<$column_type>) -> QueryCondition<U> {
                 QueryCondition::In(
-                    self.name.to_string(),
+                    self.get_name(),
                     other.iter().map(|i| -> Box<dyn ToSql + Sync + Send>{Box::new((*i).clone())}).collect()
                 )
             }
 
             fn not_in(&self, other: Vec<$column_type>) -> QueryCondition<U> {
                 QueryCondition::NotIn(
-                    self.name.to_string(),
+                    self.get_name(),
                     other.iter().map(|i| -> Box<dyn ToSql + Sync + Send>{Box::new((*i).clone())}).collect()
                 )
             }

@@ -24,3 +24,6 @@ pub use entity_column::*;
 
 mod query_condition;
 pub use query_condition::*;
+
+mod virtual_column;
+pub use virtual_column::*;

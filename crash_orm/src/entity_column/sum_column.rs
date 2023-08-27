@@ -14,10 +14,10 @@ pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U> + Send + 'static> {
 macro_rules! impl_sum_column {
     ($in_type:ty, $out_type:ty) => {
         #[async_trait]
-        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<$in_type, T> {
+        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<'_, $in_type, T> {
             async fn sum(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
-                    &*format!("SELECT SUM({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.name, T::TABLE_NAME),
+                    &*format!("SELECT SUM({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),
                     &[],
                 ).await?;
 
@@ -28,7 +28,7 @@ macro_rules! impl_sum_column {
                 let (query, values, _) = condition.resolve(1);
 
                 let row = connection.query_one(
-                    &*format!("SELECT SUM({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.name, T::TABLE_NAME, query),
+                    &*format!("SELECT SUM({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME, query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
@@ -37,10 +37,10 @@ macro_rules! impl_sum_column {
         }
 
         #[async_trait]
-        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<Option<$in_type>, T> {
+        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<'_, Option<$in_type>, T> {
             async fn sum(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
-                    &*format!("SELECT SUM({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.name, T::TABLE_NAME),
+                    &*format!("SELECT SUM({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),
                     &[],
                 ).await?;
 
@@ -51,7 +51,7 @@ macro_rules! impl_sum_column {
                 let (query, values, _) = condition.resolve(1);
 
                 let row = connection.query_one(
-                    &*format!("SELECT SUM({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.name, T::TABLE_NAME, query),
+                    &*format!("SELECT SUM({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME, query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 

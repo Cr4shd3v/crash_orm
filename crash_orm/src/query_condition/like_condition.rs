@@ -9,13 +9,13 @@ pub trait LikeQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 
 macro_rules! impl_like_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U> + Send + 'static> LikeQueryColumn<String, U> for EntityColumn<$column_type, U> {
+        impl<U: Entity<U> + Send + 'static> LikeQueryColumn<String, U> for EntityColumn<'_, $column_type, U> {
             fn like(&self, like: String) -> QueryCondition<U> {
-                QueryCondition::Like(self.name.to_string(), like)
+                QueryCondition::Like(self.get_name(), like)
             }
 
             fn not_like(&self, like: String) -> QueryCondition<U> {
-                QueryCondition::NotLike(self.name.to_string(), like)
+                QueryCondition::NotLike(self.get_name(), like)
             }
         }
     };
