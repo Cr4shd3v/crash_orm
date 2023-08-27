@@ -31,7 +31,7 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
                 (format!("{} = ${}", name, index), vec![value], index + 1)
             },
             QueryCondition::NotEquals(name, value) => {
-                (format!("{} != ${}", name, index), vec![value], index + 1)
+                (format!("{} <> ${}", name, index), vec![value], index + 1)
             },
             QueryCondition::And(first, second) => {
                 let (first_query, mut first_values, index) = first.resolve(index);
