@@ -12,6 +12,9 @@ pub use min_column::*;
 mod max_column;
 pub use max_column::*;
 
+mod avg_column;
+pub use avg_column::*;
+
 pub struct EntityColumn<T: ToSql, U: Entity<U> + Send + 'static> {
     pub(crate) name: &'static str,
     phantom_1: PhantomData<T>,
