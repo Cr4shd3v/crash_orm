@@ -11,6 +11,9 @@ pub use equal_condition::*;
 mod like_condition;
 pub use like_condition::*;
 
+mod compare_condition;
+pub use compare_condition::*;
+
 pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Equals(String, Box<dyn ToSql + Sync + Send>),
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
@@ -21,6 +24,10 @@ pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Not(Box<QueryCondition<T>>),
     Like(String, String),
     NotLike(String, String),
+    GreaterThan(String, Box<dyn ToSql + Sync + Send>),
+    GreaterEqual(String, Box<dyn ToSql + Sync + Send>),
+    LessThan(String, Box<dyn ToSql + Sync + Send>),
+    LessEqual(String, Box<dyn ToSql + Sync + Send>),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -68,6 +75,18 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
             }
             QueryCondition::NotLike(name, like) => {
                 (format!("{} NOT LIKE ${}", name, index), vec![Box::new(like)], index + 1)
+            }
+            QueryCondition::GreaterThan(name, value) => {
+                (format!("{} > ${}", name, index), vec![value], index + 1)
+            }
+            QueryCondition::GreaterEqual(name, value) => {
+                (format!("{} >= ${}", name, index), vec![value], index + 1)
+            }
+            QueryCondition::LessThan(name, value) => {
+                (format!("{} < ${}", name, index), vec![value], index + 1)
+            }
+            QueryCondition::LessEqual(name, value) => {
+                (format!("{} <= ${}", name, index), vec![value], index + 1)
             }
         }
     }
