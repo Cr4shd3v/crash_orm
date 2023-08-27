@@ -14,6 +14,9 @@ pub use like_condition::*;
 mod compare_condition;
 pub use compare_condition::*;
 
+mod bool_condition;
+pub use bool_condition::*;
+
 pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Equals(String, Box<dyn ToSql + Sync + Send>),
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
@@ -30,6 +33,8 @@ pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     LessEqual(String, Box<dyn ToSql + Sync + Send>),
     Between(String, Box<dyn ToSql + Sync + Send>, Box<dyn ToSql + Sync + Send>),
     NotBetween(String, Box<dyn ToSql + Sync + Send>, Box<dyn ToSql + Sync + Send>),
+    IsTrue(String),
+    IsFalse(String),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -95,6 +100,12 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
             }
             QueryCondition::NotBetween(name, from, to) => {
                 (format!("{} NOT BETWEEN ${} AND ${}", name, index, index + 1), vec![from, to], index + 2)
+            }
+            QueryCondition::IsTrue(name) => {
+                (format!("{} IS TRUE", name), vec![], index)
+            }
+            QueryCondition::IsFalse(name) => {
+                (format!("{} IS FALSE", name), vec![], index)
             }
         }
     }
