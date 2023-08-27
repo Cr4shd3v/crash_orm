@@ -12,7 +12,7 @@ pub struct VirtualColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 }
 
 impl<T: ToSql, U: Entity<U> + Send + 'static> VirtualColumn<T, U> {
-    pub fn new(name: String) -> VirtualColumn<T, U> {
+    pub(crate) fn new(name: String) -> VirtualColumn<T, U> {
         VirtualColumn {
             name,
             phantom_1: PhantomData,
