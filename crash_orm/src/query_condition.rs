@@ -8,6 +8,9 @@ pub use null_condition::*;
 mod equal_condition;
 pub use equal_condition::*;
 
+mod like_condition;
+pub use like_condition::*;
+
 pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Equals(String, Box<dyn ToSql + Sync + Send>),
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
@@ -16,6 +19,8 @@ pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     IsNull(String),
     IsNotNull(String),
     Not(Box<QueryCondition<T>>),
+    Like(String, String),
+    NotLike(String, String),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -57,6 +62,12 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
                 let (query, values, index) = other.resolve(index);
 
                 (format!("NOT ({})", query), values, index)
+            }
+            QueryCondition::Like(name, like) => {
+                (format!("{} LIKE ${}", name, index), vec![Box::new(like)], index + 1)
+            }
+            QueryCondition::NotLike(name, like) => {
+                (format!("{} NOT LIKE ${}", name, index), vec![Box::new(like)], index + 1)
             }
         }
     }
