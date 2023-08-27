@@ -15,6 +15,7 @@ pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Or(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
     IsNull(String),
     IsNotNull(String),
+    Not(Box<QueryCondition<T>>),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -52,6 +53,11 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
             QueryCondition::IsNotNull(name) => {
                 (format!("{} IS NOT NULL", name), vec![], index)
             }
+            QueryCondition::Not(other) => {
+                let (query, values, index) = other.resolve(index);
+
+                (format!("NOT ({})", query), values, index)
+            }
         }
     }
 
@@ -61,5 +67,9 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
 
     pub fn or(self, other: QueryCondition<T>) -> QueryCondition<T> {
         QueryCondition::Or(Box::new(self), Box::new(other))
+    }
+
+    pub fn not(self) -> QueryCondition<T> {
+        QueryCondition::Not(Box::new(self))
     }
 }

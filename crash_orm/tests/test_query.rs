@@ -110,5 +110,15 @@ async fn test_query_complex() {
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
+    let results = TestItem5::query(
+        &conn,
+        TestItem5Column::NAME2.is_null().not(),
+    ).await;
+    println!("4: {:?}", results);
+    assert!(results.is_ok());
+    let results = results.unwrap();
+    assert_eq!(results.len(), 1);
+    assert!(results[0].number.is_none());
+
     assert!(TestItem5::drop_table(&conn).await.is_ok());
 }
