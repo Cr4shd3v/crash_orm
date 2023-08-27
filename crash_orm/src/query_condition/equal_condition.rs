@@ -1,6 +1,6 @@
 use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
-use crate::{Entity, QueryCondition, EntityColumn};
+use crate::{Entity, QueryCondition, Column};
 
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
     fn equals(&self, other: T) -> QueryCondition<U>;
@@ -10,17 +10,7 @@ pub trait EqualQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 
 macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
-        impl<T: Entity<T> + Send + 'static> EqualQueryColumn<$column_type, T> for EntityColumn<'_, $column_type, T> {
-            fn equals(&self, other: $column_type) -> QueryCondition<T> {
-                QueryCondition::Equals(self.get_name(), Box::new(other))
-            }
-
-            fn not_equals(&self, other: $column_type) -> QueryCondition<T> {
-                QueryCondition::NotEquals(self.get_name(), Box::new(other))
-            }
-        }
-
-        impl<T: Entity<T> + Send + 'static> EqualQueryColumn<$column_type, T> for EntityColumn<'_, Option<$column_type>, T> {
+        impl<T: Entity<T> + Send + 'static, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
             fn equals(&self, other: $column_type) -> QueryCondition<T> {
                 QueryCondition::Equals(self.get_name(), Box::new(other))
             }

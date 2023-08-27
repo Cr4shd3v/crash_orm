@@ -13,7 +13,7 @@ pub trait AvgColumn<T: ToSql, R: ToSql, U: Entity<U> + Send + 'static> {
 macro_rules! impl_avg_column {
     ($in_type:ty, $out_type:ty) => {
         #[async_trait]
-        impl<T: Entity<T> + Send + Sync + 'static> AvgColumn<$in_type, $out_type, T> for EntityColumn<'_, $in_type, T> {
+        impl<T: Entity<T> + Send + Sync + 'static> AvgColumn<$in_type, $out_type, T> for EntityColumn<$in_type, T> {
             async fn avg(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
                     &*format!("SELECT AVG({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),
@@ -36,7 +36,7 @@ macro_rules! impl_avg_column {
         }
 
         #[async_trait]
-        impl<T: Entity<T> + Send + Sync + 'static> AvgColumn<$in_type, $out_type, T> for EntityColumn<'_, Option<$in_type>, T> {
+        impl<T: Entity<T> + Send + Sync + 'static> AvgColumn<$in_type, $out_type, T> for EntityColumn<Option<$in_type>, T> {
             async fn avg(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
                     &*format!("SELECT AVG({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),

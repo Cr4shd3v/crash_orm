@@ -14,7 +14,7 @@ pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U> + Send + 'static> {
 macro_rules! impl_sum_column {
     ($in_type:ty, $out_type:ty) => {
         #[async_trait]
-        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<'_, $in_type, T> {
+        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<$in_type, T> {
             async fn sum(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
                     &*format!("SELECT SUM({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),
@@ -37,7 +37,7 @@ macro_rules! impl_sum_column {
         }
 
         #[async_trait]
-        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<'_, Option<$in_type>, T> {
+        impl<T: Entity<T> + Send + Sync + 'static> SumColumn<$in_type, $out_type, T> for EntityColumn<Option<$in_type>, T> {
             async fn sum(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
                     &*format!("SELECT SUM({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),

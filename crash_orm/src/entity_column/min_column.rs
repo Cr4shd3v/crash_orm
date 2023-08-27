@@ -14,7 +14,7 @@ pub trait MinColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 macro_rules! impl_min_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U> + Send + Sync + 'static> MinColumn<$column_type, U> for EntityColumn<'_, $column_type, U> {
+        impl<U: Entity<U> + Send + Sync + 'static> MinColumn<$column_type, U> for EntityColumn<$column_type, U> {
             async fn min(&self, connection: &DatabaseConnection) -> crate::Result<$column_type> {
                 let row = connection.query_one(
                     &*format!("SELECT MIN({}) FROM {}", self.get_name(), U::TABLE_NAME),
@@ -37,7 +37,7 @@ macro_rules! impl_min_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U> + Send + Sync + 'static> MinColumn<Option<$column_type>, U> for EntityColumn<'_, Option<$column_type>, U> {
+        impl<U: Entity<U> + Send + Sync + 'static> MinColumn<Option<$column_type>, U> for EntityColumn<Option<$column_type>, U> {
             async fn min(&self, connection: &DatabaseConnection) -> crate::Result<Option<$column_type>> {
                 let row = connection.query_one(
                     &*format!("SELECT MIN({}) FROM {}", self.get_name(), U::TABLE_NAME),

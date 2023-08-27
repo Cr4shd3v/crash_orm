@@ -1,17 +1,11 @@
-use crate::{Entity, EntityColumn};
+use crate::{Column, Entity, VirtualColumn};
 
 pub trait LengthVirtualColumn<U: Entity<U> + Send + 'static> {
-    fn length(&self) -> EntityColumn<i32, U>;
+    fn length(&self) -> VirtualColumn<i32, U>;
 }
 
-impl<U: Entity<U> + Send + 'static> LengthVirtualColumn<U> for EntityColumn<'_, String, U> {
-    fn length(&self) -> EntityColumn<i32, U> {
-        EntityColumn::from_string(format!("LENGTH({})", self.get_name()))
-    }
-}
-
-impl<U: Entity<U> + Send + 'static> LengthVirtualColumn<U> for EntityColumn<'_, Option<String>, U> {
-    fn length(&self) -> EntityColumn<i32, U> {
-        EntityColumn::from_string(format!("LENGTH({})", self.get_name()))
+impl<U: Entity<U> + Send + 'static, R: Column<String, U>> LengthVirtualColumn<U> for R {
+    fn length(&self) -> VirtualColumn<i32, U> {
+        VirtualColumn::new(format!("LENGTH({})", self.get_name()))
     }
 }
