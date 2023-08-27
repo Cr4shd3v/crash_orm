@@ -28,6 +28,8 @@ pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     GreaterEqual(String, Box<dyn ToSql + Sync + Send>),
     LessThan(String, Box<dyn ToSql + Sync + Send>),
     LessEqual(String, Box<dyn ToSql + Sync + Send>),
+    Between(String, Box<dyn ToSql + Sync + Send>, Box<dyn ToSql + Sync + Send>),
+    NotBetween(String, Box<dyn ToSql + Sync + Send>, Box<dyn ToSql + Sync + Send>),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -87,6 +89,12 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
             }
             QueryCondition::LessEqual(name, value) => {
                 (format!("{} <= ${}", name, index), vec![value], index + 1)
+            }
+            QueryCondition::Between(name, from, to) => {
+                (format!("{} BETWEEN ${} AND ${}", name, index, index + 1), vec![from, to], index + 2)
+            }
+            QueryCondition::NotBetween(name, from, to) => {
+                (format!("{} NOT BETWEEN ${} AND ${}", name, index, index + 1), vec![from, to], index + 2)
             }
         }
     }

@@ -61,5 +61,13 @@ async fn test_compare() {
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
+    let results = TestItem12::query(&conn, TestItem12Column::NUMBER.between(0, 440)).await;
+    assert!(results.is_ok());
+    assert_eq!(results.unwrap().len(), 1);
+
+    let results = TestItem12::query(&conn, TestItem12Column::NUMBER.not_between(0, 440)).await;
+    assert!(results.is_ok());
+    assert_eq!(results.unwrap().len(), 1);
+
     assert!(TestItem12::drop_table(&conn).await.is_ok());
 }
