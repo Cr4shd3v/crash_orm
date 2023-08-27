@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, QueryCondition};
 use crate::{slice_query_value_iter, EntityColumn};
@@ -63,5 +64,7 @@ macro_rules! impl_sum_column {
 impl_sum_column!(i8, i64);
 impl_sum_column!(i16, i64);
 impl_sum_column!(i32, i64);
+impl_sum_column!(i64, Decimal);
+impl_sum_column!(Decimal, Decimal);
 impl_sum_column!(f32, f64);
 impl_sum_column!(f64, f64);

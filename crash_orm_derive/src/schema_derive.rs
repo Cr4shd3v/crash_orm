@@ -34,6 +34,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
             "f32" => "float4",
             "f64" => "float8",
             "String" => "text",
+            "Decimal" => "numeric",
             _ => panic!("unsupported type {}", path),
         };
 

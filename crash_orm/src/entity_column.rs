@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use tokio_postgres::types::{FromSql, ToSql};
+use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, QueryCondition};
 use crate::entity::slice_query_value_iter;
 
@@ -12,13 +12,13 @@ pub use min_column::*;
 mod max_column;
 pub use max_column::*;
 
-pub struct EntityColumn<T: ToSql + FromSql<'static>, U: Entity<U> + Send + 'static> {
+pub struct EntityColumn<T: ToSql, U: Entity<U> + Send + 'static> {
     pub(crate) name: &'static str,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
 }
 
-impl<T: ToSql + FromSql<'static>, U: Entity<U> + Send + 'static> EntityColumn<T, U> {
+impl<T: ToSql, U: Entity<U> + Send + 'static> EntityColumn<T, U> {
     pub const fn new(name: &'static str) -> EntityColumn<T, U> {
         Self {
             name,

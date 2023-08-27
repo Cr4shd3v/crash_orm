@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
 use crate::entity::slice_query_value_iter;
@@ -64,6 +65,7 @@ impl_min_column!(i8);
 impl_min_column!(i16);
 impl_min_column!(i32);
 impl_min_column!(i64);
+impl_min_column!(Decimal);
 impl_min_column!(u32);
 impl_min_column!(f32);
 impl_min_column!(f64);

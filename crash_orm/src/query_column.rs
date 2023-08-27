@@ -1,4 +1,5 @@
-use tokio_postgres::types::{FromSql, ToSql};
+use rust_decimal::Decimal;
+use tokio_postgres::types::ToSql;
 use crate::{Entity, EntityColumn, QueryCondition};
 
 pub trait NullQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
@@ -7,7 +8,7 @@ pub trait NullQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
     fn is_not_null(&self) -> QueryCondition<U>;
 }
 
-impl<T: ToSql + FromSql<'static>, U: Entity<U> + Send + 'static> NullQueryColumn<T, U> for EntityColumn<Option<T>, U>  {
+impl<T: ToSql, U: Entity<U> + Send + 'static> NullQueryColumn<T, U> for EntityColumn<Option<T>, U>  {
     fn is_null(&self) -> QueryCondition<U> {
         QueryCondition::IsNull(self.name.to_string())
     }
@@ -17,7 +18,7 @@ impl<T: ToSql + FromSql<'static>, U: Entity<U> + Send + 'static> NullQueryColumn
     }
 }
 
-pub trait EqualQueryColumn<T: ToSql + FromSql<'static>, U: Entity<U> + Send + 'static> {
+pub trait EqualQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
     fn equals(&self, other: T) -> QueryCondition<U>;
 
     fn not_equals(&self, other: T) -> QueryCondition<U>;
@@ -52,6 +53,7 @@ impl_equal_entity_column!(i8);
 impl_equal_entity_column!(i16);
 impl_equal_entity_column!(i32);
 impl_equal_entity_column!(i64);
+impl_equal_entity_column!(Decimal);
 impl_equal_entity_column!(u32);
 impl_equal_entity_column!(f32);
 impl_equal_entity_column!(f64);

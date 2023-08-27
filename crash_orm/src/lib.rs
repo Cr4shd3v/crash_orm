@@ -2,6 +2,7 @@
 pub extern crate crash_orm_derive;
 pub extern crate tokio_postgres;
 pub extern crate async_trait;
+pub extern crate rust_decimal;
 
 mod connection;
 pub use connection::*;
