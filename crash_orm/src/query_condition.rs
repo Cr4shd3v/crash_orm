@@ -2,6 +2,12 @@ use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 use crate::Entity;
 
+mod null_condition;
+pub use null_condition::*;
+
+mod equal_condition;
+pub use equal_condition::*;
+
 pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Equals(String, Box<dyn ToSql + Sync + Send>),
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
