@@ -17,6 +17,9 @@ pub use compare_condition::*;
 mod bool_condition;
 pub use bool_condition::*;
 
+mod in_condition;
+pub use in_condition::*;
+
 pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     Equals(String, Box<dyn ToSql + Sync + Send>),
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
@@ -35,6 +38,8 @@ pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     NotBetween(String, Box<dyn ToSql + Sync + Send>, Box<dyn ToSql + Sync + Send>),
     IsTrue(String),
     IsFalse(String),
+    In(String, Vec<Box<dyn ToSql + Sync + Send>>),
+    NotIn(String, Vec<Box<dyn ToSql + Sync + Send>>),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -106,6 +111,24 @@ impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
             }
             QueryCondition::IsFalse(name) => {
                 (format!("{} IS FALSE", name), vec![], index)
+            }
+            QueryCondition::In(name, values) => {
+                let mut format_string = String::new();
+                let length = values.len();
+                for i in 0..length {
+                    format_string.push_str(&*format!("${},", index + i))
+                }
+
+                (format!("{} IN ({})", name, format_string.strip_suffix(",").unwrap()), values, index + length)
+            }
+            QueryCondition::NotIn(name, values) => {
+                let mut format_string = String::new();
+                let length = values.len();
+                for i in 0..length {
+                    format_string.push_str(&*format!("${},", index + i))
+                }
+
+                (format!("{} NOT IN ({})", name, format_string.strip_suffix(",").unwrap()), values, index + length)
             }
         }
     }
