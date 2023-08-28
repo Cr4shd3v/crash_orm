@@ -2,7 +2,7 @@ use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, Column, QueryCondition};
 
-pub trait CompareQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
+pub trait CompareQueryColumn<T: ToSql, U: Entity<U>> {
     fn greater_than(&self, other: T) -> QueryCondition<U>;
     fn greater_equal(&self, other: T) -> QueryCondition<U>;
     fn less_than(&self, other: T) -> QueryCondition<U>;
@@ -13,7 +13,7 @@ pub trait CompareQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 
 macro_rules! impl_compare_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U> + Send + 'static, R: Column<$column_type, U>> CompareQueryColumn<$column_type, U> for R {
+        impl<U: Entity<U>, R: Column<$column_type, U>> CompareQueryColumn<$column_type, U> for R {
             fn greater_than(&self, other: $column_type) -> QueryCondition<U> {
                 QueryCondition::GreaterThan(self.get_name(), Box::new(other))
             }

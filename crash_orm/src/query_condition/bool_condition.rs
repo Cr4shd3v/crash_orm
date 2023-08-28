@@ -1,7 +1,7 @@
 use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, QueryCondition};
 
-pub trait BoolQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
+pub trait BoolQueryColumn<T: ToSql, U: Entity<U>> {
     fn is_true(&self) -> QueryCondition<U>;
     fn is_false(&self) -> QueryCondition<U>;
 }

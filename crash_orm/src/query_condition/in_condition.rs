@@ -2,7 +2,7 @@ use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, Column, QueryCondition};
 
-pub trait InQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
+pub trait InQueryColumn<T: ToSql, U: Entity<U>> {
     fn r#in(&self, other: Vec<T>) -> QueryCondition<U>;
 
     fn not_in(&self, other: Vec<T>) -> QueryCondition<U>;
@@ -10,7 +10,7 @@ pub trait InQueryColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 
 macro_rules! impl_in_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U> + Send + 'static, R: Column<$column_type, U>> InQueryColumn<$column_type, U> for R {
+        impl<U: Entity<U>, R: Column<$column_type, U>> InQueryColumn<$column_type, U> for R {
             fn r#in(&self, other: Vec<$column_type>) -> QueryCondition<U> {
                 QueryCondition::In(
                     self.get_name(),

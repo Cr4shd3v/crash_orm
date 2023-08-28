@@ -4,7 +4,7 @@ use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, QueryCondition, UntypedColumn};
 
 #[async_trait]
-pub trait Entity<T: Entity<T> + Send + 'static> {
+pub trait Entity<T: Entity<T>>: Send + 'static {
     const TABLE_NAME: &'static str;
 
     fn load_from_row(row: &Row) -> T;
@@ -47,8 +47,15 @@ pub trait Entity<T: Entity<T> + Send + 'static> {
         Ok(row.get(0))
     }
 
-    async fn select(columns: &[&(dyn UntypedColumn<T>)]) -> crate::Result<Vec<Row>> {
-        Ok(vec![])
+    async fn select(connection: &DatabaseConnection, columns: &[&(dyn UntypedColumn<T>)]) -> crate::Result<Vec<Row>> {
+        let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<String>>().join(",");
+
+        let rows = connection.query(
+            &*format!("SELECT {} FROM {}", columns, Self::TABLE_NAME),
+            &[],
+        ).await?;
+
+        Ok(rows)
     }
 }
 

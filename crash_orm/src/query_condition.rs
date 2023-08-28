@@ -20,7 +20,7 @@ pub use bool_condition::*;
 mod in_condition;
 pub use in_condition::*;
 
-pub enum QueryCondition<T: Entity<T> + Send + 'static> {
+pub enum QueryCondition<T: Entity<T>> {
     Equals(String, Box<dyn ToSql + Sync + Send>),
     NotEquals(String, Box<dyn ToSql + Sync + Send>),
     And(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
@@ -43,7 +43,7 @@ pub enum QueryCondition<T: Entity<T> + Send + 'static> {
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
-impl<T: Entity<T> + Send + 'static> QueryCondition<T> {
+impl<T: Entity<T>> QueryCondition<T> {
     pub(crate) fn resolve(self, index: usize) -> (String, Vec<Box<dyn ToSql + Send + Sync>>, usize) {
         match self {
             QueryCondition::Equals(name, value) => {

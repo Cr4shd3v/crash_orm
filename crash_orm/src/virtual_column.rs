@@ -17,13 +17,13 @@ use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 use crate::Entity;
 
-pub struct VirtualColumn<T: ToSql, U: Entity<U> + Send + 'static> {
+pub struct VirtualColumn<T: ToSql, U: Entity<U>> {
     name: String,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
 }
 
-impl<T: ToSql, U: Entity<U> + Send + 'static> VirtualColumn<T, U> {
+impl<T: ToSql, U: Entity<U>> VirtualColumn<T, U> {
     pub(crate) fn new(name: String) -> VirtualColumn<T, U> {
         VirtualColumn {
             name,

@@ -5,7 +5,7 @@ use crate::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
 use crate::entity::slice_query_value_iter;
 
 #[async_trait]
-pub trait MaxColumn<T: ToSql, U: Entity<U> + Send + 'static> {
+pub trait MaxColumn<T: ToSql, U: Entity<U>> {
     async fn max(&self, connection: &DatabaseConnection) -> crate::Result<T>;
 
     async fn max_query(&self, connection: &DatabaseConnection, condition: QueryCondition<U>) -> crate::Result<T>;
@@ -14,7 +14,7 @@ pub trait MaxColumn<T: ToSql, U: Entity<U> + Send + 'static> {
 macro_rules! impl_max_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U> + Send + Sync + 'static> MaxColumn<$column_type, U> for EntityColumn<$column_type, U> {
+        impl<U: Entity<U> + Sync> MaxColumn<$column_type, U> for EntityColumn<$column_type, U> {
             async fn max(&self, connection: &DatabaseConnection) -> crate::Result<$column_type> {
                 let row = connection.query_one(
                     &*format!("SELECT MAX({}) FROM {}", self.get_name(), U::TABLE_NAME),
@@ -37,7 +37,7 @@ macro_rules! impl_max_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U> + Send + Sync + 'static> MaxColumn<Option<$column_type>, U> for EntityColumn<Option<$column_type>, U> {
+        impl<U: Entity<U> + Sync> MaxColumn<Option<$column_type>, U> for EntityColumn<Option<$column_type>, U> {
             async fn max(&self, connection: &DatabaseConnection) -> crate::Result<Option<$column_type>> {
                 let row = connection.query_one(
                     &*format!("SELECT MAX({}) FROM {}", self.get_name(), U::TABLE_NAME),
