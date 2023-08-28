@@ -26,16 +26,16 @@ impl<T: ToSql, U: Entity<U> + Send + 'static> Column<T, U> for EntityColumn<Opti
     }
 }
 
-pub trait SelectColumn<U: Entity<U> + Send + 'static> {
+pub trait UntypedColumn<U: Entity<U> + Send + 'static> {
     fn get_sql(&self) -> String;
 }
 
-impl<T: ToSql, U: Entity<U> + Send + 'static> SelectColumn<U> for EntityColumn<T, U> {
+impl<T: ToSql, U: Entity<U> + Send + 'static> UntypedColumn<U> for EntityColumn<T, U> {
     fn get_sql(&self) -> String {
         self.get_name()
     }
 }
-impl<T: ToSql, U: Entity<U> + Send + 'static> SelectColumn<U> for VirtualColumn<T, U> {
+impl<T: ToSql, U: Entity<U> + Send + 'static> UntypedColumn<U> for VirtualColumn<T, U> {
     fn get_sql(&self) -> String {
         self.get_name()
     }

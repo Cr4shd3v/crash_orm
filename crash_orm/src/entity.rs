@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{DatabaseConnection, QueryCondition, SelectColumn};
+use crate::{DatabaseConnection, QueryCondition, UntypedColumn};
 
 #[async_trait]
 pub trait Entity<T: Entity<T> + Send + 'static> {
@@ -47,7 +47,7 @@ pub trait Entity<T: Entity<T> + Send + 'static> {
         Ok(row.get(0))
     }
 
-    async fn select(columns: &[&(dyn SelectColumn<T>)]) -> crate::Result<Vec<Row>> {
+    async fn select(columns: &[&(dyn UntypedColumn<T>)]) -> crate::Result<Vec<Row>> {
         Ok(vec![])
     }
 }
