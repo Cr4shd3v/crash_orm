@@ -1,4 +1,4 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, LengthVirtualColumn, StringCaseVirtualColumn, Schema, StringReverseVirtualColumn, RoundVirtualColumn};
+use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, LengthVirtualColumn, StringCaseVirtualColumn, Schema, StringReverseVirtualColumn, RoundVirtualColumn, SqrtVirtualColumn};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
@@ -12,6 +12,7 @@ pub struct TestItem15 {
     pub active: bool,
     pub number: Option<i32>,
     pub decimal: f32,
+    pub sqrt: f64,
 }
 
 impl TestItem15 {
@@ -22,6 +23,7 @@ impl TestItem15 {
             active: false,
             number: Some(441),
             decimal: 1.5,
+            sqrt: 16.0,
         }
     }
 
@@ -32,6 +34,7 @@ impl TestItem15 {
             active: true,
             number: Some(440),
             decimal: 0.4,
+            sqrt: 0.0,
         }
     }
 }
@@ -103,6 +106,13 @@ async fn test_virtual_column() {
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
     assert!(!results[0].active);
+
+    let results = TestItem15::query(
+        &conn,
+        TestItem15Column::SQRT.sqrt().equals(4.0),
+    ).await;
+    assert!(results.is_ok());
+    assert_eq!(results.unwrap().len(), 1);
 
     assert!(TestItem15::drop_table(&conn).await.is_ok());
 }

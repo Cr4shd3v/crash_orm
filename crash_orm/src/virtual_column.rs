@@ -10,6 +10,9 @@ pub use string_reverse_column::*;
 mod round_column;
 pub use round_column::*;
 
+mod sqrt_column;
+pub use sqrt_column::*;
+
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 use crate::Entity;
