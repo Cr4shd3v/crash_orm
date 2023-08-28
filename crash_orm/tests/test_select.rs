@@ -52,5 +52,12 @@ async fn test_select() {
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 1);
 
+    let results = TestItem16::select(&conn, &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1, &TestItem16Column::ACTIVE]).await;
+    println!("{:?}", results);
+    assert!(results.is_ok());
+    let results = results.unwrap();
+    assert_eq!(results.len(), 2);
+    assert_eq!(results[0].len(), 3);
+
     assert!(TestItem16::drop_table(&conn).await.is_ok());
 }
