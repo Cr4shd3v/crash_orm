@@ -1,4 +1,4 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec, Schema};
+use crash_orm::{BoolQueryColumn, DatabaseConnection, Entity, EntityVec, Schema};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
@@ -52,12 +52,26 @@ async fn test_select() {
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 1);
 
-    let results = TestItem16::select(&conn, &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1, &TestItem16Column::ACTIVE]).await;
+    let results = TestItem16::select(
+        &conn,
+        &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1, &TestItem16Column::ACTIVE]
+    ).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 3);
+
+    let results = TestItem16::select_query(
+        &conn,
+        &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1],
+        TestItem16Column::ACTIVE.is_true(),
+    ).await;
+    println!("{:?}", results);
+    assert!(results.is_ok());
+    let results = results.unwrap();
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].len(), 2);
 
     assert!(TestItem16::drop_table(&conn).await.is_ok());
 }

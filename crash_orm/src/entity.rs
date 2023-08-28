@@ -57,6 +57,18 @@ pub trait Entity<T: Entity<T>>: Send + 'static {
 
         Ok(rows)
     }
+
+    async fn select_query(connection: &DatabaseConnection, columns: &[&(dyn UntypedColumn<T>)], condition: QueryCondition<T>) -> crate::Result<Vec<Row>> {
+        let (query, values, _) = condition.resolve(1);
+        let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<String>>().join(",");
+
+        let rows = connection.query(
+            &*format!("SELECT {} FROM {} WHERE {}", columns, Self::TABLE_NAME, query),
+            slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
+        ).await?;
+
+        Ok(rows)
+    }
 }
 
 pub(crate) fn slice_query_value_iter<'a>(
