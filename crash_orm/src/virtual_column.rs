@@ -1,8 +1,11 @@
 mod length_column;
+pub use length_column::*;
+
+mod string_case_column;
+pub use string_case_column::*;
 
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
-pub use length_column::*;
 use crate::Entity;
 
 pub struct VirtualColumn<T: ToSql, U: Entity<U> + Send + 'static> {
