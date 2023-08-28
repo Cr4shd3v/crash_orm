@@ -25,3 +25,18 @@ impl<T: ToSql, U: Entity<U> + Send + 'static> Column<T, U> for EntityColumn<Opti
         self.get_name()
     }
 }
+
+pub trait SelectColumn<U: Entity<U> + Send + 'static> {
+    fn get_sql(&self) -> String;
+}
+
+impl<T: ToSql, U: Entity<U> + Send + 'static> SelectColumn<U> for EntityColumn<T, U> {
+    fn get_sql(&self) -> String {
+        self.get_name()
+    }
+}
+impl<T: ToSql, U: Entity<U> + Send + 'static> SelectColumn<U> for VirtualColumn<T, U> {
+    fn get_sql(&self) -> String {
+        self.get_name()
+    }
+}
