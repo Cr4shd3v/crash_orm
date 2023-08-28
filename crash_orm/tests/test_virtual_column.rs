@@ -1,4 +1,4 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, LengthVirtualColumn, StringCaseVirtualColumn, Schema};
+use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, LengthVirtualColumn, StringCaseVirtualColumn, Schema, StringReverseVirtualColumn};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
@@ -60,6 +60,13 @@ async fn test_virtual_column() {
     let results = TestItem15::query(
         &conn,
         TestItem15Column::NAME1.uppercase().equals(String::from("TEST123"))
+    ).await;
+    assert!(results.is_ok());
+    assert_eq!(results.unwrap().len(), 1);
+
+    let results = TestItem15::query(
+        &conn,
+        TestItem15Column::NAME1.reverse().equals(String::from("321tset"))
     ).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);

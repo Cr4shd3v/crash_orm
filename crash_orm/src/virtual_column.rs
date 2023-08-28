@@ -4,6 +4,9 @@ pub use length_column::*;
 mod string_case_column;
 pub use string_case_column::*;
 
+mod string_reverse_column;
+pub use string_reverse_column::*;
+
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 use crate::Entity;
