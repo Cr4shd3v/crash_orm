@@ -1,4 +1,4 @@
-use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, LengthVirtualColumn, StringCaseVirtualColumn, Schema, StringReverseVirtualColumn};
+use crash_orm::{DatabaseConnection, Entity, EntityVec, EqualQueryColumn, LengthVirtualColumn, StringCaseVirtualColumn, Schema, StringReverseVirtualColumn, RoundVirtualColumn};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
@@ -11,6 +11,7 @@ pub struct TestItem15 {
     pub name1: Option<String>,
     pub active: bool,
     pub number: Option<i32>,
+    pub decimal: f32,
 }
 
 impl TestItem15 {
@@ -20,6 +21,7 @@ impl TestItem15 {
             name1: Some(String::from("Test1234")),
             active: false,
             number: Some(441),
+            decimal: 1.5,
         }
     }
 
@@ -29,6 +31,7 @@ impl TestItem15 {
             name1: Some(String::from("test123")),
             active: true,
             number: Some(440),
+            decimal: 0.4,
         }
     }
 }
@@ -70,6 +73,36 @@ async fn test_virtual_column() {
     ).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
+
+    let results = TestItem15::query(
+        &conn,
+        TestItem15Column::DECIMAL.ceil().equals(1.0),
+    ).await;
+    println!("{:?}", results);
+    assert!(results.is_ok());
+    let results = results.unwrap();
+    assert_eq!(results.len(), 1);
+    assert!(results[0].active);
+
+    let results = TestItem15::query(
+        &conn,
+        TestItem15Column::DECIMAL.floor().equals(0.0),
+    ).await;
+    println!("{:?}", results);
+    assert!(results.is_ok());
+    let results = results.unwrap();
+    assert_eq!(results.len(), 1);
+    assert!(results[0].active);
+
+    let results = TestItem15::query(
+        &conn,
+        TestItem15Column::DECIMAL.round().equals(2.0),
+    ).await;
+    println!("{:?}", results);
+    assert!(results.is_ok());
+    let results = results.unwrap();
+    assert_eq!(results.len(), 1);
+    assert!(!results[0].active);
 
     assert!(TestItem15::drop_table(&conn).await.is_ok());
 }

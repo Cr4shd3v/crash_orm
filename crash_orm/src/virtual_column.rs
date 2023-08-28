@@ -7,6 +7,9 @@ pub use string_case_column::*;
 mod string_reverse_column;
 pub use string_reverse_column::*;
 
+mod round_column;
+pub use round_column::*;
+
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 use crate::Entity;
