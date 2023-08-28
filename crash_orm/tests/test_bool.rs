@@ -45,11 +45,11 @@ async fn test_bool() {
 
     vec![TestItem13::test(), TestItem13::test2()].persist_all(&conn).await.unwrap();
 
-    let results = TestItem13::query(&conn, TestItem13Column::ACTIVE.is_true()).await;
+    let results = TestItem13::query().condition(TestItem13Column::ACTIVE.is_true()).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem13::query(&conn, TestItem13Column::ACTIVE.is_false()).await;
+    let results = TestItem13::query().condition(TestItem13Column::ACTIVE.is_false()).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 

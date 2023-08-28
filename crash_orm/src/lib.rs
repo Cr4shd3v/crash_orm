@@ -30,3 +30,6 @@ pub use virtual_column::*;
 
 mod column;
 pub use column::*;
+
+mod query;
+pub use query::*;

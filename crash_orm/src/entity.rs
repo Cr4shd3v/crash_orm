@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{DatabaseConnection, QueryCondition, UntypedColumn};
+use crate::{DatabaseConnection, Query, QueryCondition, SelectQuery, UntypedColumn};
 
 #[async_trait]
 pub trait Entity<T: Entity<T>>: Send + 'static {
@@ -25,15 +25,8 @@ pub trait Entity<T: Entity<T>>: Send + 'static {
 
     async fn persist(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
 
-    async fn query(connection: &DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<Vec<T>> {
-        let (query, values, _) = condition.resolve(1);
-
-        let rows = connection.query(
-            &*format!("SELECT * FROM {} WHERE {}", Self::TABLE_NAME, query),
-            slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
-        ).await?;
-
-        Ok(rows.iter().map(|r| Self::load_from_row(r)).collect())
+    fn query() -> Query<T> {
+        Query::new(format!("SELECT * FROM {}", Self::TABLE_NAME))
     }
 
     async fn count_query(connection: &DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<i64> {
@@ -47,27 +40,10 @@ pub trait Entity<T: Entity<T>>: Send + 'static {
         Ok(row.get(0))
     }
 
-    async fn select(connection: &DatabaseConnection, columns: &[&(dyn UntypedColumn<T>)]) -> crate::Result<Vec<Row>> {
+    fn select_query(columns: &[&(dyn UntypedColumn<T>)]) -> SelectQuery<T> {
         let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<String>>().join(",");
 
-        let rows = connection.query(
-            &*format!("SELECT {} FROM {}", columns, Self::TABLE_NAME),
-            &[],
-        ).await?;
-
-        Ok(rows)
-    }
-
-    async fn select_query(connection: &DatabaseConnection, columns: &[&(dyn UntypedColumn<T>)], condition: QueryCondition<T>) -> crate::Result<Vec<Row>> {
-        let (query, values, _) = condition.resolve(1);
-        let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<String>>().join(",");
-
-        let rows = connection.query(
-            &*format!("SELECT {} FROM {} WHERE {}", columns, Self::TABLE_NAME, query),
-            slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
-        ).await?;
-
-        Ok(rows)
+        SelectQuery::new(format!("SELECT {} FROM {}", columns, Self::TABLE_NAME))
     }
 }
 

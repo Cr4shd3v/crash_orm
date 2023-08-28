@@ -45,17 +45,16 @@ async fn test_select() {
 
     vec![TestItem16::test(), TestItem16::test2()].persist_all(&conn).await.unwrap();
 
-    let results = TestItem16::select(&conn, &[&TestItem16Column::NUMBER]).await;
+    let results = TestItem16::select_query(&[&TestItem16Column::NUMBER]).execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 1);
 
-    let results = TestItem16::select(
-        &conn,
+    let results = TestItem16::select_query(
         &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1, &TestItem16Column::ACTIVE]
-    ).await;
+    ).execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
@@ -63,10 +62,8 @@ async fn test_select() {
     assert_eq!(results[0].len(), 3);
 
     let results = TestItem16::select_query(
-        &conn,
         &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1.reverse()],
-        TestItem16Column::ACTIVE.is_true(),
-    ).await;
+    ).condition(TestItem16Column::ACTIVE.is_true()).execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();

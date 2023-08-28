@@ -39,7 +39,7 @@ async fn test_query_simple() {
 
     assert!(TestItem4::test().persist(&conn).await.is_ok());
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
-    let results = TestItem4::query(&conn, TestItem4Column::NAME.equals(String::from("test123"))).await;
+    let results = TestItem4::query().condition(TestItem4Column::NAME.equals(String::from("test123"))).execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
@@ -89,31 +89,26 @@ async fn test_query_complex() {
     assert!(TestItem5::test().persist(&conn).await.is_ok());
     assert!(TestItem5::test2().persist(&conn).await.is_ok());
 
-    let results = TestItem5::query(&conn, TestItem5Column::NAME1.equals(String::from("test123"))).await;
+    let results = TestItem5::query().condition(TestItem5Column::NAME1.equals(String::from("test123"))).execute(&conn).await;
     println!("1: {:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
-    let results = TestItem5::query(
-        &conn,
-        TestItem5Column::NAME1.equals(String::from("test123")).and(TestItem5Column::NUMBER.is_null()),
-    ).await;
+    let results = TestItem5::query()
+        .condition(TestItem5Column::NAME1.equals(String::from("test123")).and(TestItem5Column::NUMBER.is_null()))
+        .execute(&conn).await;
     println!("2: {:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem5::query(
-        &conn,
-        TestItem5Column::NUMBER.is_null().or(TestItem5Column::NAME2.is_null()),
-    ).await;
+    let results = TestItem5::query()
+        .condition(TestItem5Column::NUMBER.is_null().or(TestItem5Column::NAME2.is_null()))
+        .execute(&conn).await;
     println!("3: {:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
-    let results = TestItem5::query(
-        &conn,
-        TestItem5Column::NAME2.is_null().not(),
-    ).await;
+    let results = TestItem5::query().condition(TestItem5Column::NAME2.is_null().not()).execute(&conn).await;
     println!("4: {:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();

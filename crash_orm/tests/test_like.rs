@@ -46,11 +46,11 @@ async fn test_like() {
 
     vec![TestItem11::test(), TestItem11::test2()].persist_all(&conn).await.unwrap();
 
-    let results = TestItem11::query(&conn, TestItem11Column::NAME1.like(String::from("test123%"))).await;
+    let results = TestItem11::query().condition(TestItem11Column::NAME1.like(String::from("test123%"))).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
-    let results = TestItem11::query(&conn, TestItem11Column::NAME1.not_like(String::from("test1234%"))).await;
+    let results = TestItem11::query().condition(TestItem11Column::NAME1.not_like(String::from("test1234%"))).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 

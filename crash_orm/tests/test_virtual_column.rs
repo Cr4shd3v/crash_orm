@@ -51,66 +51,59 @@ async fn test_virtual_column() {
 
     vec![TestItem15::test(), TestItem15::test2()].persist_all(&conn).await.unwrap();
 
-    let results = TestItem15::query(&conn, TestItem15Column::NAME1.length().equals(7)).await;
+    let results = TestItem15::query().condition(TestItem15Column::NAME1.length().equals(7)).execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem15::query(
-        &conn,
-        TestItem15Column::NAME1.lowercase().equals(String::from("test1234"))
-    ).await;
+    let results = TestItem15::query()
+        .condition(TestItem15Column::NAME1.lowercase().equals(String::from("test1234")))
+        .execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem15::query(
-        &conn,
-        TestItem15Column::NAME1.uppercase().equals(String::from("TEST123"))
-    ).await;
+    let results = TestItem15::query()
+        .condition(TestItem15Column::NAME1.uppercase().equals(String::from("TEST123")))
+        .execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem15::query(
-        &conn,
-        TestItem15Column::NAME1.reverse().equals(String::from("321tset"))
-    ).await;
+    let results = TestItem15::query()
+        .condition(TestItem15Column::NAME1.reverse().equals(String::from("321tset")))
+        .execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem15::query(
-        &conn,
-        TestItem15Column::DECIMAL.ceil().equals(1.0),
-    ).await;
+    let results = TestItem15::query()
+        .condition(TestItem15Column::DECIMAL.ceil().equals(1.0))
+        .execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
     assert!(results[0].active);
 
-    let results = TestItem15::query(
-        &conn,
-        TestItem15Column::DECIMAL.floor().equals(0.0),
-    ).await;
+    let results = TestItem15::query()
+        .condition(TestItem15Column::DECIMAL.floor().equals(0.0))
+        .execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
     assert!(results[0].active);
 
-    let results = TestItem15::query(
-        &conn,
-        TestItem15Column::DECIMAL.round().equals(2.0),
-    ).await;
+    let results = TestItem15::query()
+        .condition(TestItem15Column::DECIMAL.round().equals(2.0))
+        .execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
     assert!(!results[0].active);
 
-    let results = TestItem15::query(
-        &conn,
-        TestItem15Column::SQRT.sqrt().equals(4.0),
-    ).await;
+    let results = TestItem15::query()
+        .condition(TestItem15Column::SQRT.sqrt().equals(4.0))
+        .execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
