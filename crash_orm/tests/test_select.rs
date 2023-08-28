@@ -1,4 +1,4 @@
-use crash_orm::{BoolQueryColumn, DatabaseConnection, Entity, EntityVec, Schema};
+use crash_orm::{BoolQueryColumn, DatabaseConnection, Entity, EntityVec, Schema, StringReverseVirtualColumn};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
@@ -64,7 +64,7 @@ async fn test_select() {
 
     let results = TestItem16::select_query(
         &conn,
-        &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1],
+        &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1.reverse()],
         TestItem16Column::ACTIVE.is_true(),
     ).await;
     println!("{:?}", results);
@@ -72,6 +72,7 @@ async fn test_select() {
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].len(), 2);
+    assert_eq!(results[0].get::<usize, String>(1), String::from("321tset"));
 
     assert!(TestItem16::drop_table(&conn).await.is_ok());
 }
