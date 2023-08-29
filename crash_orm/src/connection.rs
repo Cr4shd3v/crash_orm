@@ -1,5 +1,6 @@
 use std::ops::Deref;
-use tokio_postgres::Client;
+use tokio_postgres::{Client, Socket};
+use tokio_postgres::tls::MakeTlsConnect;
 use crate::Entity;
 
 pub struct DatabaseConnection {
@@ -7,9 +8,10 @@ pub struct DatabaseConnection {
 }
 
 impl DatabaseConnection {
-    pub async fn new(config: &str) -> crate::Result<Self> {
+    /// Creates a new database connection with a connection string and tls
+    pub async fn new<T>(config: &str, tls: T) -> crate::Result<Self> where T: MakeTlsConnect<Socket>, <T as MakeTlsConnect<Socket>>::Stream: Send + 'static {
         let (client, connection) =
-            tokio_postgres::connect(config, tokio_postgres::NoTls).await?;
+            tokio_postgres::connect(config, tls).await?;
 
         tokio::spawn(async move {
             if let Err(e) = connection.await {
@@ -24,13 +26,15 @@ impl DatabaseConnection {
 
     #[cfg(test)]
     pub async fn test() -> crate::Result<Self> {
-        Self::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await
+        Self::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", tokio_postgres::NoTls).await
     }
 
+    /// Shortcut function for [`Entity::persist`]
     pub async fn persist<T: Entity<T>>(&self, entity: &mut T) -> crate::Result<()> {
         entity.persist(self).await
     }
 
+    /// Shortcut function for [`Entity::remove`]
     pub async fn remove<T: Entity<T>>(&self, entity: &mut T) -> crate::Result<()> {
         entity.remove(self).await
     }

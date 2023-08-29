@@ -1,9 +1,10 @@
 use rust_decimal::Decimal;
+use tokio_postgres::NoTls;
 use crash_orm::{DatabaseConnection, EntityVec, MaxColumn, MinColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
-    DatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test").await.unwrap()
+    DatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
