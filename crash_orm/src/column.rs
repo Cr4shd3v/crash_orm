@@ -48,6 +48,7 @@ impl<R: UntypedColumnValue + ToSql> ColumnValue<R> for R {}
 ///
 /// This value trait is untyped. For typed values use [`ColumnValue`].
 pub trait UntypedColumnValue {
+    /// Internal function to get a sql representation of the value
     fn get_sql(&self) -> String;
 }
 
