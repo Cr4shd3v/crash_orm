@@ -21,8 +21,8 @@ mod in_condition;
 pub use in_condition::*;
 
 pub enum QueryCondition<T: Entity<T>> {
-    Equals(String, Box<dyn ToSql + Sync + Send>),
-    NotEquals(String, Box<dyn ToSql + Sync + Send>),
+    Equals(String, String),
+    NotEquals(String, String),
     And(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
     Or(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
     IsNull(String),
@@ -47,10 +47,10 @@ impl<T: Entity<T>> QueryCondition<T> {
     pub(crate) fn resolve(self, index: usize) -> (String, Vec<Box<dyn ToSql + Send + Sync>>, usize) {
         match self {
             QueryCondition::Equals(name, value) => {
-                (format!("{} = ${}", name, index), vec![value], index + 1)
+                (format!("{} = {}", name, value), vec![], index)
             },
             QueryCondition::NotEquals(name, value) => {
-                (format!("{} <> ${}", name, index), vec![value], index + 1)
+                (format!("{} <> {}", name, value), vec![], index)
             },
             QueryCondition::And(first, second) => {
                 let (first_query, mut first_values, index) = first.resolve(index);

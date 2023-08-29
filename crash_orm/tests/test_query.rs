@@ -39,7 +39,7 @@ async fn test_query_simple() {
 
     assert!(TestItem4::test().persist(&conn).await.is_ok());
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
-    let results = TestItem4::query().condition(TestItem4Column::NAME.equals(String::from("test123"))).execute(&conn).await;
+    let results = TestItem4::query().condition(TestItem4Column::NAME.equals(&String::from("test123"))).execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
@@ -89,13 +89,15 @@ async fn test_query_complex() {
     assert!(TestItem5::test().persist(&conn).await.is_ok());
     assert!(TestItem5::test2().persist(&conn).await.is_ok());
 
-    let results = TestItem5::query().condition(TestItem5Column::NAME1.equals(String::from("test123"))).execute(&conn).await;
+    let results = TestItem5::query()
+        .condition(TestItem5Column::NAME1.equals(&String::from("test123")))
+        .execute(&conn).await;
     println!("1: {:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
     let results = TestItem5::query()
-        .condition(TestItem5Column::NAME1.equals(String::from("test123")).and(TestItem5Column::NUMBER.is_null()))
+        .condition(TestItem5Column::NAME1.equals(&String::from("test123")).and(TestItem5Column::NUMBER.is_null()))
         .execute(&conn).await;
     println!("2: {:?}", results);
     assert!(results.is_ok());

@@ -1,5 +1,5 @@
-use tokio_postgres::types::private::BytesMut;
-use tokio_postgres::types::{ToSql, Type};
+use rust_decimal::Decimal;
+use tokio_postgres::types::ToSql;
 use crate::{Entity, EntityColumn, VirtualColumn};
 
 pub trait Column<T: ToSql, U: Entity<U>>: UntypedColumn<U> {}
@@ -38,13 +38,31 @@ pub trait UntypedColumnValue {
     fn get_sql(&self) -> String;
 }
 
-impl<T: ToSql> UntypedColumnValue for T {
+impl UntypedColumnValue for String {
     fn get_sql(&self) -> String {
-        let mut bytes = BytesMut::new();
-        self.to_sql_checked(&Type::ANY, &mut bytes).unwrap();
-        String::from_utf8(bytes.to_vec()).unwrap()
+        format!("'{}'", self)
     }
 }
+
+macro_rules! simple_column_value {
+    ($column_type:ty) => {
+        impl UntypedColumnValue for $column_type {
+            fn get_sql(&self) -> String {
+                self.to_string()
+            }
+        }
+    };
+}
+
+simple_column_value!(bool);
+simple_column_value!(i8);
+simple_column_value!(i16);
+simple_column_value!(i32);
+simple_column_value!(i64);
+simple_column_value!(u32);
+simple_column_value!(f32);
+simple_column_value!(f64);
+simple_column_value!(Decimal);
 
 impl<T: ToSql, U: Entity<U>> UntypedColumnValue for VirtualColumn<T, U> {
     fn get_sql(&self) -> String {
