@@ -2,15 +2,11 @@ use tokio_postgres::types::private::BytesMut;
 use tokio_postgres::types::{ToSql, Type};
 use crate::{Entity, EntityColumn, VirtualColumn};
 
-pub trait Column<T: ToSql, U: Entity<U>>: UntypedColumn<U> {
-}
+pub trait Column<T: ToSql, U: Entity<U>>: UntypedColumn<U> {}
 
 impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for VirtualColumn<T, U> {}
-
 impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for VirtualColumn<Option<T>, U> {}
-
 impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for EntityColumn<T, U> {}
-
 impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for EntityColumn<Option<T>, U> {}
 
 pub trait UntypedColumn<U: Entity<U>>: Sync {
