@@ -46,7 +46,7 @@ async fn test_order() {
     vec![TestItem17::test(), TestItem17::test2()].persist_all(&conn).await.unwrap();
 
     let results = TestItem17::query()
-        .add_order(&TestItem17Column::NUMBER, OrderDirection::ASC)
+        .order(&TestItem17Column::NUMBER, OrderDirection::ASC)
         .execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -57,7 +57,7 @@ async fn test_order() {
 
     let results = TestItem17::query()
         .condition(TestItem17Column::NUMBER.greater_equal(&400))
-        .add_order(&TestItem17Column::NUMBER, OrderDirection::DESC)
+        .order(&TestItem17Column::NUMBER, OrderDirection::DESC)
         .execute(&conn).await;
     assert!(results.is_ok());
     let results = results.unwrap();
