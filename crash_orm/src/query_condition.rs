@@ -38,8 +38,8 @@ pub enum QueryCondition<T: Entity<T>> {
     NotBetween(String, String, String),
     IsTrue(String),
     IsFalse(String),
-    In(String, Vec<Box<dyn ToSql + Sync + Send>>),
-    NotIn(String, Vec<Box<dyn ToSql + Sync + Send>>),
+    In(String, Vec<String>),
+    NotIn(String, Vec<String>),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -114,21 +114,19 @@ impl<T: Entity<T>> QueryCondition<T> {
             }
             QueryCondition::In(name, values) => {
                 let mut format_string = String::new();
-                let length = values.len();
-                for i in 0..length {
-                    format_string.push_str(&*format!("${},", index + i))
+                for value in values {
+                    format_string.push_str(&*format!("{},", value))
                 }
 
-                (format!("{} IN ({})", name, format_string.strip_suffix(",").unwrap()), values, index + length)
+                (format!("{} IN ({})", name, format_string.strip_suffix(",").unwrap()), vec![], index)
             }
             QueryCondition::NotIn(name, values) => {
                 let mut format_string = String::new();
-                let length = values.len();
-                for i in 0..length {
-                    format_string.push_str(&*format!("${},", index + i))
+                for value in values {
+                    format_string.push_str(&*format!("{},", value))
                 }
 
-                (format!("{} NOT IN ({})", name, format_string.strip_suffix(",").unwrap()), values, index + length)
+                (format!("{} NOT IN ({})", name, format_string.strip_suffix(",").unwrap()), vec![], index)
             }
         }
     }

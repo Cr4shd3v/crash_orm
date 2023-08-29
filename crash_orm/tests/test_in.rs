@@ -45,16 +45,16 @@ async fn test_in() {
 
     vec![TestItem14::test(), TestItem14::test2()].persist_all(&conn).await.unwrap();
 
-    let results = TestItem14::query().condition(TestItem14Column::NUMBER.r#in(vec![439, 440])).execute(&conn).await;
+    let results = TestItem14::query().condition(TestItem14Column::NUMBER.in_vec(vec![&439, &440])).execute(&conn).await;
     println!("{:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem14::query().condition(TestItem14Column::NUMBER.not_in(vec![439, 440])).execute(&conn).await;
+    let results = TestItem14::query().condition(TestItem14Column::NUMBER.not_in_vec(vec![&439, &440])).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem14::query().condition(TestItem14Column::NAME1.r#in(vec![String::from("test12"), String::from("test1234")])).execute(&conn).await;
+    let results = TestItem14::query().condition(TestItem14Column::NAME1.in_vec(vec![&String::from("test12"), &String::from("test1234")])).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
