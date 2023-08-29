@@ -9,10 +9,10 @@ pub trait LikeQueryColumn<T: ToSql, U: Entity<U>> {
 
 impl<U: Entity<U>, R: Column<String, U>> LikeQueryColumn<String, U> for R {
     fn like(&self, like: String) -> QueryCondition<U> {
-        QueryCondition::Like(self.get_name(), like)
+        QueryCondition::Like(self.get_sql(), like)
     }
 
     fn not_like(&self, like: String) -> QueryCondition<U> {
-        QueryCondition::NotLike(self.get_name(), like)
+        QueryCondition::NotLike(self.get_sql(), like)
     }
 }

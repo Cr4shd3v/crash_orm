@@ -30,13 +30,13 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
         }
     }
 
-    pub fn get_name(&self) -> String {
+    pub fn get_sql(&self) -> String {
         self.name.to_string()
     }
 
     pub async fn count(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<i64> {
         let row = connection.query_one(
-            &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), U::TABLE_NAME),
+            &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), U::TABLE_NAME),
             &[],
         ).await?;
 
@@ -47,7 +47,7 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
         let (query, values, _) = condition.resolve(1);
 
         let row = connection.query_one(
-            &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), U::TABLE_NAME, query),
+            &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), U::TABLE_NAME, query),
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
         ).await?;
 

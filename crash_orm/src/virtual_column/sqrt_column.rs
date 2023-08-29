@@ -10,7 +10,7 @@ macro_rules! impl_sqrt_virtual_column {
     ($column_type:ty) => {
         impl<U: Entity<U>, R: Column<$column_type, U>> SqrtVirtualColumn<$column_type, U> for R {
             fn sqrt(&self) -> VirtualColumn<$column_type, U> {
-                VirtualColumn::new(format!("SQRT({})", self.get_name()))
+                VirtualColumn::new(format!("SQRT({})", self.get_sql()))
             }
         }
     };

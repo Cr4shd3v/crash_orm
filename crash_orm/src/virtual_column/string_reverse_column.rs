@@ -6,6 +6,6 @@ pub trait StringReverseVirtualColumn<U: Entity<U>> {
 
 impl<U: Entity<U>, R: Column<String, U>> StringReverseVirtualColumn<U> for R {
     fn reverse(&self) -> VirtualColumn<String, U> {
-        VirtualColumn::new(format!("REVERSE({})", self.get_name()))
+        VirtualColumn::new(format!("REVERSE({})", self.get_sql()))
     }
 }

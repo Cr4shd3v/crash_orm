@@ -16,7 +16,7 @@ macro_rules! impl_avg_column {
         impl<T: Entity<T> + Sync> AvgColumn<$in_type, $out_type, T> for EntityColumn<$in_type, T> {
             async fn avg(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
-                    &*format!("SELECT AVG({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),
+                    &*format!("SELECT AVG({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), T::TABLE_NAME),
                     &[],
                 ).await?;
 
@@ -27,7 +27,7 @@ macro_rules! impl_avg_column {
                 let (query, values, _) = condition.resolve(1);
 
                 let row = connection.query_one(
-                    &*format!("SELECT AVG({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME, query),
+                    &*format!("SELECT AVG({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), T::TABLE_NAME, query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
@@ -39,7 +39,7 @@ macro_rules! impl_avg_column {
         impl<T: Entity<T> + Sync> AvgColumn<$in_type, $out_type, T> for EntityColumn<Option<$in_type>, T> {
             async fn avg(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<$out_type> {
                 let row = connection.query_one(
-                    &*format!("SELECT AVG({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME),
+                    &*format!("SELECT AVG({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), T::TABLE_NAME),
                     &[],
                 ).await?;
 
@@ -50,7 +50,7 @@ macro_rules! impl_avg_column {
                 let (query, values, _) = condition.resolve(1);
 
                 let row = connection.query_one(
-                    &*format!("SELECT AVG({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_name(), T::TABLE_NAME, query),
+                    &*format!("SELECT AVG({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), T::TABLE_NAME, query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 

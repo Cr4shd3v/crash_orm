@@ -1,7 +1,22 @@
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{DatabaseConnection, Entity, QueryCondition};
+use crate::{DatabaseConnection, Entity, UntypedColumn, QueryCondition};
 use crate::entity::slice_query_value_iter;
+
+#[derive(Debug)]
+pub enum OrderDirection {
+    ASC,
+    DESC,
+}
+
+impl ToString for OrderDirection {
+    fn to_string(&self) -> String {
+        match self {
+            OrderDirection::ASC => String::from("ASC"),
+            OrderDirection::DESC => String::from("DESC"),
+        }
+    }
+}
 
 macro_rules! base_query_functions {
     ($base:ident) => {
@@ -9,11 +24,23 @@ macro_rules! base_query_functions {
             Self {
                 base_query,
                 condition: None,
+                order: vec![],
             }
         }
 
         pub fn condition(mut self, condition: QueryCondition<T>) -> $base<T> {
             self.condition = Some(condition);
+            self
+        }
+
+        pub fn add_order(mut self, order: &(dyn UntypedColumn<T>), order_direction: OrderDirection) -> $base<T> {
+            self.order.push((order.get_sql(), order_direction));
+            self
+        }
+
+        pub fn order(mut self, order: &(dyn UntypedColumn<T>), order_direction: OrderDirection) -> $base<T> {
+            self.order.clear();
+            self.order.push((order.get_sql(), order_direction));
             self
         }
 
@@ -29,6 +56,19 @@ macro_rules! base_query_functions {
                 query.push_str(&*condition_query);
             }
 
+            if !self.order.is_empty() {
+                query.push_str(" ORDER BY ");
+
+                for (order_name, order_dir) in self.order {
+                    query.push_str(&*order_name);
+                    query.push_str(" ");
+                    query.push_str(&*order_dir.to_string());
+                    query.push_str(",");
+                }
+
+                query = query.strip_suffix(",").unwrap().to_string();
+            }
+
             (query, values)
         }
     };
@@ -37,6 +77,7 @@ macro_rules! base_query_functions {
 pub struct Query<T: Entity<T>> {
     base_query: String,
     condition: Option<QueryCondition<T>>,
+    order: Vec<(String, OrderDirection)>,
 }
 
 impl<T: Entity<T>> Query<T> {
@@ -57,6 +98,7 @@ impl<T: Entity<T>> Query<T> {
 pub struct SelectQuery<T: Entity<T>> {
     base_query: String,
     condition: Option<QueryCondition<T>>,
+    order: Vec<(String, OrderDirection)>,
 }
 
 impl<T: Entity<T>> SelectQuery<T> {

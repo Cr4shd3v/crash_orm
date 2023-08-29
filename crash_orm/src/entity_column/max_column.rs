@@ -17,7 +17,7 @@ macro_rules! impl_max_column {
         impl<U: Entity<U> + Sync> MaxColumn<$column_type, U> for EntityColumn<$column_type, U> {
             async fn max(&self, connection: &DatabaseConnection) -> crate::Result<$column_type> {
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {}", self.get_name(), U::TABLE_NAME),
+                    &*format!("SELECT MAX({}) FROM {}", self.get_sql(), U::TABLE_NAME),
                     &[],
                 ).await?;
 
@@ -28,7 +28,7 @@ macro_rules! impl_max_column {
                 let (query, values, _) = condition.resolve(1);
 
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {} WHERE {}", self.get_name(), U::TABLE_NAME, query),
+                    &*format!("SELECT MAX({}) FROM {} WHERE {}", self.get_sql(), U::TABLE_NAME, query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
@@ -40,7 +40,7 @@ macro_rules! impl_max_column {
         impl<U: Entity<U> + Sync> MaxColumn<Option<$column_type>, U> for EntityColumn<Option<$column_type>, U> {
             async fn max(&self, connection: &DatabaseConnection) -> crate::Result<Option<$column_type>> {
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {}", self.get_name(), U::TABLE_NAME),
+                    &*format!("SELECT MAX({}) FROM {}", self.get_sql(), U::TABLE_NAME),
                     &[],
                 ).await?;
 
@@ -51,7 +51,7 @@ macro_rules! impl_max_column {
                 let (query, values, _) = condition.resolve(1);
 
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {} WHERE {}", self.get_name(), U::TABLE_NAME, query),
+                    &*format!("SELECT MAX({}) FROM {} WHERE {}", self.get_sql(), U::TABLE_NAME, query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 

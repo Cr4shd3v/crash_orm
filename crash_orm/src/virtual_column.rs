@@ -32,7 +32,7 @@ impl<T: ToSql, U: Entity<U>> VirtualColumn<T, U> {
         }
     }
 
-    pub fn get_name(&self) -> String {
+    pub fn get_sql(&self) -> String {
         self.name.clone()
     }
 }
