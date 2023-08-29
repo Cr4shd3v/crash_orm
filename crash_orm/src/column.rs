@@ -41,12 +41,12 @@ impl<T: ToSql + Sync, U: Entity<U> + Sync> UntypedColumn<U> for VirtualColumn<T,
     }
 }
 
-pub trait IntoColumnValue<U: Entity<U>> {
-    fn get_string(&self) -> String;
+pub trait IntoColumnValue<T: ToSql, U: Entity<U>> {
+    fn get_sql(&self) -> String;
 }
 
-impl<U: Entity<U>, R: UntypedColumn<U>> IntoColumnValue<U> for R {
-    fn get_string(&self) -> String {
+impl<T: ToSql, U: Entity<U>, R: Column<T, U>> IntoColumnValue<T, U> for R {
+    fn get_sql(&self) -> String {
         self.get_sql()
     }
 }
