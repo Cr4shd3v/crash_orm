@@ -45,27 +45,27 @@ async fn test_compare() {
 
     vec![TestItem12::test(), TestItem12::test2()].persist_all(&conn).await.unwrap();
 
-    let results = TestItem12::query().condition(TestItem12Column::NUMBER.greater_than(440)).execute(&conn).await;
+    let results = TestItem12::query().condition(TestItem12Column::NUMBER.greater_than(&440)).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem12::query().condition(TestItem12Column::NUMBER.greater_equal(440)).execute(&conn).await;
+    let results = TestItem12::query().condition(TestItem12Column::NUMBER.greater_equal(&440)).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
-    let results = TestItem12::query().condition(TestItem12Column::NUMBER.less_than(441)).execute(&conn).await;
+    let results = TestItem12::query().condition(TestItem12Column::NUMBER.less_than(&441)).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem12::query().condition(TestItem12Column::NUMBER.less_equal(441)).execute(&conn).await;
+    let results = TestItem12::query().condition(TestItem12Column::NUMBER.less_equal(&441)).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
-    let results = TestItem12::query().condition(TestItem12Column::NUMBER.between(0, 440)).execute(&conn).await;
+    let results = TestItem12::query().condition(TestItem12Column::NUMBER.between(&0, &440)).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem12::query().condition(TestItem12Column::NUMBER.not_between(0, 440)).execute(&conn).await;
+    let results = TestItem12::query().condition(TestItem12Column::NUMBER.not_between(&0, &440)).execute(&conn).await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 

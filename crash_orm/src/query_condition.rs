@@ -30,12 +30,12 @@ pub enum QueryCondition<T: Entity<T>> {
     Not(Box<QueryCondition<T>>),
     Like(String, String),
     NotLike(String, String),
-    GreaterThan(String, Box<dyn ToSql + Sync + Send>),
-    GreaterEqual(String, Box<dyn ToSql + Sync + Send>),
-    LessThan(String, Box<dyn ToSql + Sync + Send>),
-    LessEqual(String, Box<dyn ToSql + Sync + Send>),
-    Between(String, Box<dyn ToSql + Sync + Send>, Box<dyn ToSql + Sync + Send>),
-    NotBetween(String, Box<dyn ToSql + Sync + Send>, Box<dyn ToSql + Sync + Send>),
+    GreaterThan(String, String),
+    GreaterEqual(String, String),
+    LessThan(String, String),
+    LessEqual(String, String),
+    Between(String, String, String),
+    NotBetween(String, String, String),
     IsTrue(String),
     IsFalse(String),
     In(String, Vec<Box<dyn ToSql + Sync + Send>>),
@@ -89,22 +89,22 @@ impl<T: Entity<T>> QueryCondition<T> {
                 (format!("{} NOT LIKE ${}", name, index), vec![Box::new(like)], index + 1)
             }
             QueryCondition::GreaterThan(name, value) => {
-                (format!("{} > ${}", name, index), vec![value], index + 1)
+                (format!("{} > {}", name, value), vec![], index)
             }
             QueryCondition::GreaterEqual(name, value) => {
-                (format!("{} >= ${}", name, index), vec![value], index + 1)
+                (format!("{} >= {}", name, value), vec![], index)
             }
             QueryCondition::LessThan(name, value) => {
-                (format!("{} < ${}", name, index), vec![value], index + 1)
+                (format!("{} < {}", name, value), vec![], index)
             }
             QueryCondition::LessEqual(name, value) => {
-                (format!("{} <= ${}", name, index), vec![value], index + 1)
+                (format!("{} <= {}", name, value), vec![], index)
             }
             QueryCondition::Between(name, from, to) => {
-                (format!("{} BETWEEN ${} AND ${}", name, index, index + 1), vec![from, to], index + 2)
+                (format!("{} BETWEEN {} AND {}", name, from, to), vec![], index)
             }
             QueryCondition::NotBetween(name, from, to) => {
-                (format!("{} NOT BETWEEN ${} AND ${}", name, index, index + 1), vec![from, to], index + 2)
+                (format!("{} NOT BETWEEN {} AND {}", name, from, to), vec![], index)
             }
             QueryCondition::IsTrue(name) => {
                 (format!("{} IS TRUE", name), vec![], index)

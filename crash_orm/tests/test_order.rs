@@ -56,7 +56,7 @@ async fn test_order() {
     assert_eq!(results[1].number.unwrap(), 441);
 
     let results = TestItem17::query()
-        .condition(TestItem17Column::NUMBER.greater_equal(400))
+        .condition(TestItem17Column::NUMBER.greater_equal(&400))
         .add_order(&TestItem17Column::NUMBER, OrderDirection::DESC)
         .execute(&conn).await;
     assert!(results.is_ok());
