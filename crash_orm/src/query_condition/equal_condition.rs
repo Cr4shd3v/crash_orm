@@ -1,6 +1,7 @@
 use chrono::*;
 use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
+use uuid::Uuid;
 use crate::{Entity, QueryCondition, Column, TypedColumnValue};
 
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
@@ -39,3 +40,4 @@ impl_equal_entity_column!(DateTime<Local>);
 impl_equal_entity_column!(DateTime<FixedOffset>);
 impl_equal_entity_column!(NaiveDate);
 impl_equal_entity_column!(NaiveTime);
+impl_equal_entity_column!(Uuid);

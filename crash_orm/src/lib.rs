@@ -3,6 +3,7 @@ pub extern crate tokio_postgres;
 pub extern crate async_trait;
 pub extern crate rust_decimal;
 pub extern crate chrono;
+pub extern crate uuid;
 
 mod connection;
 pub use connection::*;
