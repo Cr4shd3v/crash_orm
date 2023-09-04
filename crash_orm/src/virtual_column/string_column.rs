@@ -12,6 +12,8 @@ pub trait StringVirtualColumn<U: Entity<U>> {
     fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U>;
 
     fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U>;
+
+    fn md5(&self) -> VirtualColumn<String, U>;
 }
 
 impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
@@ -53,5 +55,10 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         }
 
         VirtualColumn::new(sql)
+    }
+
+    fn md5(&self) -> VirtualColumn<String, U> {
+        let sql = self.get_sql();
+        VirtualColumn::new(BoxedColumnValue::new(format!("MD5({})", sql.sql), sql.value))
     }
 }
