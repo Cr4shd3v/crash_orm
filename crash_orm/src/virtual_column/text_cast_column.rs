@@ -17,10 +17,12 @@ macro_rules! impl_text_cast_virtual_column {
     };
 }
 
+impl_text_cast_virtual_column!(bool);
 impl_text_cast_virtual_column!(i8);
 impl_text_cast_virtual_column!(i16);
 impl_text_cast_virtual_column!(i32);
 impl_text_cast_virtual_column!(i64);
 impl_text_cast_virtual_column!(Decimal);
+impl_text_cast_virtual_column!(u32);
 impl_text_cast_virtual_column!(f32);
 impl_text_cast_virtual_column!(f64);
