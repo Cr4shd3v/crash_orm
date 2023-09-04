@@ -19,18 +19,18 @@ impl BoxedColumnValue {
 /// Trait implemented on all values
 ///
 /// This value trait is typed. For untyped values use [`UntypedColumnValue`].
-pub trait ColumnValue<T: ToSql>: UntypedColumnValue {}
+pub trait TypedColumnValue<T: ToSql>: UntypedColumnValue {}
 
-impl<T: ToSql, U: Entity<U>> ColumnValue<T> for VirtualColumn<T, U> {}
-impl<T: ToSql, U: Entity<U>> ColumnValue<T> for VirtualColumn<Option<T>, U> {}
-impl<T: ToSql, U: Entity<U>> ColumnValue<T> for EntityColumn<T, U> {}
-impl<T: ToSql, U: Entity<U>> ColumnValue<T> for EntityColumn<Option<T>, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for VirtualColumn<T, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for VirtualColumn<Option<T>, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for EntityColumn<T, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for EntityColumn<Option<T>, U> {}
 
-impl<R: UntypedColumnValue + ToSql> ColumnValue<R> for R {}
+impl<R: UntypedColumnValue + ToSql> TypedColumnValue<R> for R {}
 
 /// Trait implemented on all values
 ///
-/// This value trait is untyped. For typed values use [`ColumnValue`].
+/// This value trait is untyped. For typed values use [`TypedColumnValue`].
 pub trait UntypedColumnValue {
     /// Internal function to get a sql representation of the value
     fn get_sql(&self) -> String;
