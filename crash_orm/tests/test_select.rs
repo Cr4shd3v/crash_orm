@@ -1,5 +1,5 @@
 use tokio_postgres::NoTls;
-use crash_orm::{BoolQueryColumn, DatabaseConnection, Entity, EntityVec, Schema, StringReverseVirtualColumn};
+use crash_orm::{BoolQueryColumn, DatabaseConnection, Entity, EntityVec, Schema, StringVirtualColumn};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {

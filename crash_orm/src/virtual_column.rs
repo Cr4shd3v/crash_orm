@@ -1,11 +1,8 @@
 mod length_column;
 pub use length_column::*;
 
-mod string_case_column;
-pub use string_case_column::*;
-
-mod string_reverse_column;
-pub use string_reverse_column::*;
+mod string_column;
+pub use string_column::*;
 
 mod round_column;
 pub use round_column::*;
