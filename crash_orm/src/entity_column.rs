@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
-use crate::{DatabaseConnection, Entity, QueryCondition};
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, QueryCondition};
 use crate::entity::slice_query_value_iter;
 
 pub mod sum_column;
@@ -30,13 +30,13 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
         }
     }
 
-    pub fn get_sql(&self) -> String {
-        self.name.to_string()
+    pub fn get_sql(&self) -> BoxedColumnValue {
+        BoxedColumnValue::new(self.name.to_string(), vec![])
     }
 
     pub async fn count(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<i64> {
         let row = connection.query_one(
-            &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), U::TABLE_NAME),
+            &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.name.to_string(), U::TABLE_NAME),
             &[],
         ).await?;
 
@@ -47,7 +47,7 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
         let (query, values, _) = condition.resolve(1);
 
         let row = connection.query_one(
-            &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.get_sql(), U::TABLE_NAME, query),
+            &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.name.to_string(), U::TABLE_NAME, query),
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
         ).await?;
 

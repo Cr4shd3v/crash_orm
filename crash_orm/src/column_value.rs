@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, EntityColumn, VirtualColumn};
@@ -6,18 +6,18 @@ use crate::{Entity, EntityColumn, VirtualColumn};
 #[derive(Clone)]
 pub struct BoxedColumnValue {
     pub sql: String,
-    pub value: Vec<Rc<Box<dyn ToSql + Sync + Send>>>,
+    pub value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>,
 }
 
 impl BoxedColumnValue {
-    pub fn new(sql: String, value: Vec<Rc<Box<dyn ToSql + Sync + Send>>>) -> Self {
+    pub fn new(sql: String, value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>) -> Self {
         Self {
             sql,
             value,
         }
     }
 
-    pub fn resolve(&self, mut index: usize) -> (String, Vec<Rc<Box<dyn ToSql + Sync + Send>>>, usize) {
+    pub fn resolve(&self, mut index: usize) -> (String, Vec<Arc<Box<dyn ToSql + Sync + Send>>>, usize) {
         let mut sql = self.sql.clone();
         while sql.contains("_$i") {
             sql = sql.replacen("_$i", &*format!("${}", index), 1);
@@ -45,20 +45,14 @@ impl<R: UntypedColumnValue + ToSql> TypedColumnValue<R> for R {}
 /// This value trait is untyped. For typed values use [`TypedColumnValue`].
 pub trait UntypedColumnValue {
     /// Internal function to get a sql representation of the value
-    fn get_sql(&self) -> String;
-}
-
-impl UntypedColumnValue for String {
-    fn get_sql(&self) -> String {
-        format!("'{}'", self)
-    }
+    fn get_sql(&self) -> BoxedColumnValue;
 }
 
 macro_rules! simple_column_value {
     ($column_type:ty) => {
         impl UntypedColumnValue for $column_type {
-            fn get_sql(&self) -> String {
-                self.to_string()
+            fn get_sql(&self) -> BoxedColumnValue {
+                BoxedColumnValue::new("_$i".to_string(), vec![Arc::new(Box::new(self.clone()))])
             }
         }
     };
@@ -73,15 +67,16 @@ simple_column_value!(u32);
 simple_column_value!(f32);
 simple_column_value!(f64);
 simple_column_value!(Decimal);
+simple_column_value!(String);
 
 impl<T: ToSql, U: Entity<U>> UntypedColumnValue for VirtualColumn<T, U> {
-    fn get_sql(&self) -> String {
+    fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }
 }
 
 impl<T: ToSql, U: Entity<U>> UntypedColumnValue for EntityColumn<T, U> {
-    fn get_sql(&self) -> String {
+    fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }
 }

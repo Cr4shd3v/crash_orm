@@ -15,24 +15,24 @@ pub use sqrt_column::*;
 
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
-use crate::Entity;
+use crate::{BoxedColumnValue, Entity};
 
 pub struct VirtualColumn<T: ToSql, U: Entity<U>> {
-    name: String,
+    sql: BoxedColumnValue,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
 }
 
 impl<T: ToSql, U: Entity<U>> VirtualColumn<T, U> {
-    pub(crate) fn new(name: String) -> VirtualColumn<T, U> {
+    pub(crate) fn new(sql: BoxedColumnValue) -> VirtualColumn<T, U> {
         VirtualColumn {
-            name,
+            sql,
             phantom_1: PhantomData,
             phantom_2: PhantomData,
         }
     }
 
-    pub fn get_sql(&self) -> String {
-        self.name.clone()
+    pub fn get_sql(&self) -> BoxedColumnValue {
+        self.sql.clone()
     }
 }

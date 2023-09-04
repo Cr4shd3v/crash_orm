@@ -16,19 +16,23 @@ macro_rules! impl_max_column {
         #[async_trait]
         impl<U: Entity<U> + Sync> MaxColumn<$column_type, U> for EntityColumn<$column_type, U> {
             async fn max(&self, connection: &DatabaseConnection) -> crate::Result<$column_type> {
+                let (query, values, _) = self.get_sql().resolve(1);
+
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {}", self.get_sql(), U::TABLE_NAME),
-                    &[],
+                    &*format!("SELECT MAX({}) FROM {}", query, U::TABLE_NAME),
+                    slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
                 Ok(row.get(0))
             }
 
             async fn max_query(&self, connection: &DatabaseConnection, condition: QueryCondition<U>) -> crate::Result<$column_type> {
-                let (query, values, _) = condition.resolve(1);
+                let (query, mut values, index) = self.get_sql().resolve(1);
+                let (con_query, con_values, _) = condition.resolve(index);
+                values.extend(con_values);
 
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {} WHERE {}", self.get_sql(), U::TABLE_NAME, query),
+                    &*format!("SELECT MAX({}) FROM {} WHERE {}", query, U::TABLE_NAME, con_query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
@@ -39,19 +43,23 @@ macro_rules! impl_max_column {
         #[async_trait]
         impl<U: Entity<U> + Sync> MaxColumn<Option<$column_type>, U> for EntityColumn<Option<$column_type>, U> {
             async fn max(&self, connection: &DatabaseConnection) -> crate::Result<Option<$column_type>> {
+                let (query, values, _) = self.get_sql().resolve(1);
+
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {}", self.get_sql(), U::TABLE_NAME),
-                    &[],
+                    &*format!("SELECT MAX({}) FROM {}", query, U::TABLE_NAME),
+                    slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
                 Ok(row.get(0))
             }
 
             async fn max_query(&self, connection: &DatabaseConnection, condition: QueryCondition<U>) -> crate::Result<Option<$column_type>> {
-                let (query, values, _) = condition.resolve(1);
+                let (query, mut values, index) = self.get_sql().resolve(1);
+                let (con_query, con_values, _) = condition.resolve(index);
+                values.extend(con_values);
 
                 let row = connection.query_one(
-                    &*format!("SELECT MAX({}) FROM {} WHERE {}", self.get_sql(), U::TABLE_NAME, query),
+                    &*format!("SELECT MAX({}) FROM {} WHERE {}", query, U::TABLE_NAME, con_query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 

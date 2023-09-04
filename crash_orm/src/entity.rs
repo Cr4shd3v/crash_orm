@@ -1,7 +1,8 @@
+use std::sync::Arc;
 use async_trait::async_trait;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{DatabaseConnection, Query, QueryCondition, SelectQuery, UntypedColumn};
+use crate::{BoxedColumnValue, DatabaseConnection, Query, QueryCondition, SelectQuery, UntypedColumn};
 
 #[async_trait]
 pub trait Entity<T: Entity<T>>: Send + 'static {
@@ -26,7 +27,7 @@ pub trait Entity<T: Entity<T>>: Send + 'static {
     async fn persist(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
 
     fn query() -> Query<T> {
-        Query::new(format!("SELECT * FROM {}", Self::TABLE_NAME))
+        Query::new(BoxedColumnValue::new(format!("SELECT * FROM {}", Self::TABLE_NAME), vec![]))
     }
 
     async fn count_query(connection: &DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<i64> {
@@ -41,14 +42,24 @@ pub trait Entity<T: Entity<T>>: Send + 'static {
     }
 
     fn select_query(columns: &[&(dyn UntypedColumn<T>)]) -> SelectQuery<T> {
-        let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<String>>().join(",");
+        let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<BoxedColumnValue>>();
+        let mut query = vec![];
+        let mut values = vec![];
+        let mut index = 1;
 
-        SelectQuery::new(format!("SELECT {} FROM {}", columns, Self::TABLE_NAME))
+        for column in columns {
+            let (new_query, new_values, next_index) =  column.resolve(index);
+            query.push(new_query);
+            values.extend(new_values);
+            index = next_index;
+        }
+
+        SelectQuery::new(BoxedColumnValue::new(format!("SELECT {} FROM {}", query.join(","), Self::TABLE_NAME), values))
     }
 }
 
 pub(crate) fn slice_query_value_iter<'a>(
-    s: &'a [Box<dyn ToSql + Send + Sync>],
+    s: &'a [Arc<Box<dyn ToSql + Send + Sync>>],
 ) -> impl ExactSizeIterator<Item = &'a (dyn ToSql + Sync)> + 'a {
-    s.iter().map(|s| &**s as _)
+    s.iter().map(|s| &***s as _)
 }

@@ -1,6 +1,7 @@
+use std::sync::Arc;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{DatabaseConnection, Entity, UntypedColumn, QueryCondition};
+use crate::{DatabaseConnection, Entity, UntypedColumn, QueryCondition, BoxedColumnValue};
 use crate::entity::slice_query_value_iter;
 
 #[derive(Debug)]
@@ -20,7 +21,7 @@ impl ToString for OrderDirection {
 
 macro_rules! base_query_functions {
     ($base:ident) => {
-        pub fn new(base_query: String) -> $base<T> {
+        pub fn new(base_query: BoxedColumnValue) -> $base<T> {
             Self {
                 base_query,
                 condition: None,
@@ -44,13 +45,12 @@ macro_rules! base_query_functions {
             self
         }
 
-        pub fn get_raw_query(self) -> (String, Vec<Box<dyn ToSql+Send+Sync>>) {
-            let mut query = String::new();
-            let mut values: Vec<Box<dyn ToSql+Send+Sync>> = vec![];
-            query.push_str(&*self.base_query);
+        pub fn get_raw_query(self) -> (String, Vec<Arc<Box<dyn ToSql+Send+Sync>>>) {
+            let (mut query, mut values, mut index) = self.base_query.resolve(1);
 
             if self.condition.is_some() {
-                let (condition_query, condition_values, _) = self.condition.unwrap().resolve(1);
+                let (condition_query, condition_values, next_index) = self.condition.unwrap().resolve(index);
+                index = next_index;
                 values = condition_values;
                 query.push_str(" WHERE ");
                 query.push_str(&*condition_query);
@@ -58,15 +58,15 @@ macro_rules! base_query_functions {
 
             if !self.order.is_empty() {
                 query.push_str(" ORDER BY ");
+                let mut orders = vec![];
 
                 for (order_name, order_dir) in self.order {
-                    query.push_str(&*order_name);
-                    query.push_str(" ");
-                    query.push_str(&*order_dir.to_string());
-                    query.push_str(",");
+                    let (order_query, order_values, _) = order_name.resolve(index);
+                    values.extend(order_values);
+                    orders.push(format!("{} {}", order_query, order_dir.to_string()));
                 }
 
-                query = query.strip_suffix(",").unwrap().to_string();
+                query.push_str(&*orders.join(","));
             }
 
             (query, values)
@@ -75,9 +75,9 @@ macro_rules! base_query_functions {
 }
 
 pub struct Query<T: Entity<T>> {
-    base_query: String,
+    base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T>>,
-    order: Vec<(String, OrderDirection)>,
+    order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
 impl<T: Entity<T>> Query<T> {
@@ -96,9 +96,9 @@ impl<T: Entity<T>> Query<T> {
 }
 
 pub struct SelectQuery<T: Entity<T>> {
-    base_query: String,
+    base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T>>,
-    order: Vec<(String, OrderDirection)>,
+    order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
 impl<T: Entity<T>> SelectQuery<T> {

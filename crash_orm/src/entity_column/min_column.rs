@@ -16,19 +16,23 @@ macro_rules! impl_min_column {
         #[async_trait]
         impl<U: Entity<U> + Sync> MinColumn<$column_type, U> for EntityColumn<$column_type, U> {
             async fn min(&self, connection: &DatabaseConnection) -> crate::Result<$column_type> {
+                let (query, values, _) = self.get_sql().resolve(1);
+
                 let row = connection.query_one(
-                    &*format!("SELECT MIN({}) FROM {}", self.get_sql(), U::TABLE_NAME),
-                    &[],
+                    &*format!("SELECT MIN({}) FROM {}", query, U::TABLE_NAME),
+                    slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
                 Ok(row.get(0))
             }
 
             async fn min_query(&self, connection: &DatabaseConnection, condition: QueryCondition<U>) -> crate::Result<$column_type> {
-                let (query, values, _) = condition.resolve(1);
+                let (query, mut values, index) = self.get_sql().resolve(1);
+                let (con_query, con_values, _) = condition.resolve(index);
+                values.extend(con_values);
 
                 let row = connection.query_one(
-                    &*format!("SELECT MIN({}) FROM {} WHERE {}", self.get_sql(), U::TABLE_NAME, query),
+                    &*format!("SELECT MIN({}) FROM {} WHERE {}", query, U::TABLE_NAME, con_query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
@@ -39,19 +43,23 @@ macro_rules! impl_min_column {
         #[async_trait]
         impl<U: Entity<U> + Sync> MinColumn<Option<$column_type>, U> for EntityColumn<Option<$column_type>, U> {
             async fn min(&self, connection: &DatabaseConnection) -> crate::Result<Option<$column_type>> {
+                let (query, values, _) = self.get_sql().resolve(1);
+
                 let row = connection.query_one(
-                    &*format!("SELECT MIN({}) FROM {}", self.get_sql(), U::TABLE_NAME),
-                    &[],
+                    &*format!("SELECT MIN({}) FROM {}", query, U::TABLE_NAME),
+                    slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 
                 Ok(row.get(0))
             }
 
             async fn min_query(&self, connection: &DatabaseConnection, condition: QueryCondition<U>) -> crate::Result<Option<$column_type>> {
-                let (query, values, _) = condition.resolve(1);
+                let (query, mut values, index) = self.get_sql().resolve(1);
+                let (con_query, con_values, _) = condition.resolve(index);
+                values.extend(con_values);
 
                 let row = connection.query_one(
-                    &*format!("SELECT MIN({}) FROM {} WHERE {}", self.get_sql(), U::TABLE_NAME, query),
+                    &*format!("SELECT MIN({}) FROM {} WHERE {}", query, U::TABLE_NAME, con_query),
                     slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
                 ).await?;
 

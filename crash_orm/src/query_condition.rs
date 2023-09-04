@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
+use std::sync::Arc;
 use tokio_postgres::types::ToSql;
-use crate::Entity;
+use crate::{BoxedColumnValue, Entity};
 
 mod null_condition;
 pub use null_condition::*;
@@ -21,36 +22,44 @@ mod in_condition;
 pub use in_condition::*;
 
 pub enum QueryCondition<T: Entity<T>> {
-    Equals(String, String),
-    NotEquals(String, String),
+    Equals(BoxedColumnValue, BoxedColumnValue),
+    NotEquals(BoxedColumnValue, BoxedColumnValue),
     And(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
     Or(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
-    IsNull(String),
-    IsNotNull(String),
+    IsNull(BoxedColumnValue),
+    IsNotNull(BoxedColumnValue),
     Not(Box<QueryCondition<T>>),
-    Like(String, String),
-    NotLike(String, String),
-    GreaterThan(String, String),
-    GreaterEqual(String, String),
-    LessThan(String, String),
-    LessEqual(String, String),
-    Between(String, String, String),
-    NotBetween(String, String, String),
-    IsTrue(String),
-    IsFalse(String),
-    In(String, Vec<String>),
-    NotIn(String, Vec<String>),
+    Like(BoxedColumnValue, BoxedColumnValue),
+    NotLike(BoxedColumnValue, BoxedColumnValue),
+    GreaterThan(BoxedColumnValue, BoxedColumnValue),
+    GreaterEqual(BoxedColumnValue, BoxedColumnValue),
+    LessThan(BoxedColumnValue, BoxedColumnValue),
+    LessEqual(BoxedColumnValue, BoxedColumnValue),
+    Between(BoxedColumnValue, BoxedColumnValue, BoxedColumnValue),
+    NotBetween(BoxedColumnValue, BoxedColumnValue, BoxedColumnValue),
+    IsTrue(BoxedColumnValue),
+    IsFalse(BoxedColumnValue),
+    In(BoxedColumnValue, Vec<BoxedColumnValue>),
+    NotIn(BoxedColumnValue, Vec<BoxedColumnValue>),
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
 impl<T: Entity<T>> QueryCondition<T> {
-    pub(crate) fn resolve(self, index: usize) -> (String, Vec<Box<dyn ToSql + Send + Sync>>, usize) {
+    pub(crate) fn resolve(self, index: usize) -> (String, Vec<Arc<Box<dyn ToSql + Send + Sync>>>, usize) {
         match self {
             QueryCondition::Equals(name, value) => {
-                (format!("{} = {}", name, value), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (value_query, value_values, index) = value.resolve(index);
+                name_values.extend(value_values);
+
+                (format!("{} = {}", name_query, value_query), name_values, index)
             },
             QueryCondition::NotEquals(name, value) => {
-                (format!("{} <> {}", name, value), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (value_query, value_values, index) = value.resolve(index);
+                name_values.extend(value_values);
+
+                (format!("{} <> {}", name_query, value_query), name_values, index)
             },
             QueryCondition::And(first, second) => {
                 let (first_query, mut first_values, index) = first.resolve(index);
@@ -72,10 +81,14 @@ impl<T: Entity<T>> QueryCondition<T> {
                 panic!("Invalid Condition (PhantomData)");
             }
             QueryCondition::IsNull(name) => {
-                (format!("{} IS NULL", name), vec![], index)
+                let (name_query, name_values, index) = name.resolve(index);
+
+                (format!("{} IS NULL", name_query), name_values, index)
             }
             QueryCondition::IsNotNull(name) => {
-                (format!("{} IS NOT NULL", name), vec![], index)
+                let (name_query, name_values, index) = name.resolve(index);
+
+                (format!("{} IS NOT NULL", name_query), name_values, index)
             }
             QueryCondition::Not(other) => {
                 let (query, values, index) = other.resolve(index);
@@ -83,50 +96,100 @@ impl<T: Entity<T>> QueryCondition<T> {
                 (format!("NOT ({})", query), values, index)
             }
             QueryCondition::Like(name, like) => {
-                (format!("{} LIKE ${}", name, index), vec![Box::new(like)], index + 1)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (like_query, like_values, index) = like.resolve(index);
+                name_values.extend(like_values);
+
+                (format!("{} LIKE {}", name_query, like_query), name_values, index)
             }
             QueryCondition::NotLike(name, like) => {
-                (format!("{} NOT LIKE ${}", name, index), vec![Box::new(like)], index + 1)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (like_query, like_values, index) = like.resolve(index);
+                name_values.extend(like_values);
+
+                (format!("{} NOT LIKE {}", name_query, like_query), name_values, index)
             }
             QueryCondition::GreaterThan(name, value) => {
-                (format!("{} > {}", name, value), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (value_query, value_values, index) = value.resolve(index);
+                name_values.extend(value_values);
+
+                (format!("{} > {}", name_query, value_query), name_values, index)
             }
             QueryCondition::GreaterEqual(name, value) => {
-                (format!("{} >= {}", name, value), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (value_query, value_values, index) = value.resolve(index);
+                name_values.extend(value_values);
+
+                (format!("{} >= {}", name_query, value_query), name_values, index)
             }
             QueryCondition::LessThan(name, value) => {
-                (format!("{} < {}", name, value), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (value_query, value_values, index) = value.resolve(index);
+                name_values.extend(value_values);
+
+                (format!("{} < {}", name_query, value_query), name_values, index)
             }
             QueryCondition::LessEqual(name, value) => {
-                (format!("{} <= {}", name, value), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (value_query, value_values, index) = value.resolve(index);
+                name_values.extend(value_values);
+
+                (format!("{} <= {}", name_query, value_query), name_values, index)
             }
             QueryCondition::Between(name, from, to) => {
-                (format!("{} BETWEEN {} AND {}", name, from, to), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (from_query, from_values, index) = from.resolve(index);
+                let (to_query, to_values, index) = to.resolve(index);
+                name_values.extend(from_values);
+                name_values.extend(to_values);
+
+                (format!("{} BETWEEN {} AND {}", name_query, from_query, to_query), name_values, index)
             }
             QueryCondition::NotBetween(name, from, to) => {
-                (format!("{} NOT BETWEEN {} AND {}", name, from, to), vec![], index)
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (from_query, from_values, index) = from.resolve(index);
+                let (to_query, to_values, index) = to.resolve(index);
+                name_values.extend(from_values);
+                name_values.extend(to_values);
+
+                (format!("{} NOT BETWEEN {} AND {}", name_query, from_query, to_query), name_values, index)
             }
             QueryCondition::IsTrue(name) => {
-                (format!("{} IS TRUE", name), vec![], index)
+                let (name_query, name_values, index) = name.resolve(index);
+
+                (format!("{} IS TRUE", name_query), name_values, index)
             }
             QueryCondition::IsFalse(name) => {
-                (format!("{} IS FALSE", name), vec![], index)
+                let (name_query, name_values, index) = name.resolve(index);
+
+                (format!("{} IS FALSE", name_query), name_values, index)
             }
             QueryCondition::In(name, values) => {
-                let mut format_string = String::new();
+                let (name_query, mut name_values, mut index) = name.resolve(index);
+
+                let mut list = vec![];
                 for value in values {
-                    format_string.push_str(&*format!("{},", value))
+                    let (value_query, value_values, next_index) = value.resolve(index);
+                    index = next_index;
+                    list.push(value_query);
+                    name_values.extend(value_values);
                 }
 
-                (format!("{} IN ({})", name, format_string.strip_suffix(",").unwrap()), vec![], index)
+                (format!("{} IN ({})", name_query, list.join(",")), name_values, index)
             }
             QueryCondition::NotIn(name, values) => {
-                let mut format_string = String::new();
+                let (name_query, mut name_values, mut index) = name.resolve(index);
+
+                let mut list = vec![];
                 for value in values {
-                    format_string.push_str(&*format!("{},", value))
+                    let (value_query, value_values, next_index) = value.resolve(index);
+                    index = next_index;
+                    list.push(value_query);
+                    name_values.extend(value_values);
                 }
 
-                (format!("{} NOT IN ({})", name, format_string.strip_suffix(",").unwrap()), vec![], index)
+                (format!("{} NOT IN ({})", name_query, list.join(",")), name_values, index)
             }
         }
     }
