@@ -41,3 +41,4 @@ impl_equal_entity_column!(DateTime<FixedOffset>);
 impl_equal_entity_column!(NaiveDate);
 impl_equal_entity_column!(NaiveTime);
 impl_equal_entity_column!(Uuid);
+impl_equal_entity_column!(Vec<u8>);
