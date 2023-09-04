@@ -1,21 +1,21 @@
 use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
-use crate::{Entity, QueryCondition, Column, ColumnValue};
+use crate::{Entity, QueryCondition, Column, TypedColumnValue};
 
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
-    fn equals(&self, other: &(dyn ColumnValue<T>)) -> QueryCondition<U>;
+    fn equals(&self, other: &(dyn TypedColumnValue<T>)) -> QueryCondition<U>;
 
-    fn not_equals(&self, other: &(dyn ColumnValue<T>)) -> QueryCondition<U>;
+    fn not_equals(&self, other: &(dyn TypedColumnValue<T>)) -> QueryCondition<U>;
 }
 
 macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
         impl<T: Entity<T>, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
-            fn equals(&self, other: &(dyn ColumnValue<$column_type>)) -> QueryCondition<T> {
+            fn equals(&self, other: &(dyn TypedColumnValue<$column_type>)) -> QueryCondition<T> {
                 QueryCondition::Equals(self.get_sql(), other.get_sql())
             }
 
-            fn not_equals(&self, other: &(dyn ColumnValue<$column_type>)) -> QueryCondition<T> {
+            fn not_equals(&self, other: &(dyn TypedColumnValue<$column_type>)) -> QueryCondition<T> {
                 QueryCondition::NotEquals(self.get_sql(), other.get_sql())
             }
         }
