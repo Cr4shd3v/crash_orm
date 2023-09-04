@@ -5,13 +5,15 @@ use crate::{Entity, EntityColumn, VirtualColumn};
 
 #[derive(Clone)]
 pub struct BoxedColumnValue {
-    pub value: Rc<Box<dyn ToSql + Sync + Send>>,
+    pub sql: String,
+    pub value: Vec<Rc<Box<dyn ToSql + Sync + Send>>>,
 }
 
 impl BoxedColumnValue {
-    pub fn new(value: Box<dyn ToSql + Sync + Send>) -> Self {
+    pub fn new(sql: String, value: Vec<Rc<Box<dyn ToSql + Sync + Send>>>) -> Self {
         Self {
-            value: Rc::new(value),
+            sql,
+            value,
         }
     }
 }
