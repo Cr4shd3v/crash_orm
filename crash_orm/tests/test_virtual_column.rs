@@ -76,6 +76,12 @@ async fn test_virtual_column() {
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem15::query()
+        .condition(TestItem15Column::NAME1.repeat(&2).equals(&String::from("test123test123")))
+        .execute(&conn).await;
+    assert!(results.is_ok());
+    assert_eq!(results.unwrap().len(), 1);
+
+    let results = TestItem15::query()
         .condition(TestItem15Column::DECIMAL.ceil().equals(&1.0))
         .execute(&conn).await;
     println!("{:?}", results);
