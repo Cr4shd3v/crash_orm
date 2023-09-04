@@ -16,6 +16,16 @@ impl BoxedColumnValue {
             value,
         }
     }
+
+    pub fn resolve(&self, mut index: usize) -> (String, Vec<Rc<Box<dyn ToSql + Sync + Send>>>, usize) {
+        let mut sql = self.sql.clone();
+        while sql.contains("_$i") {
+            sql = sql.replacen("_$i", &*format!("${}", index), 1);
+            index += 1;
+        }
+
+        (sql, self.value.clone(), index)
+    }
 }
 
 /// Trait implemented on all values
