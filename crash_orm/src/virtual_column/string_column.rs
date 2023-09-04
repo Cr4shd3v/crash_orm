@@ -52,6 +52,6 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
             sql.value.extend(value_sql.value);
         }
 
-        VirtualColumn::new(BoxedColumnValue::new(sql.sql, sql.value))
+        VirtualColumn::new(sql)
     }
 }
