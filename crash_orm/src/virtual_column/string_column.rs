@@ -9,7 +9,7 @@ pub trait StringVirtualColumn<U: Entity<U>> {
 
     fn length(&self) -> VirtualColumn<i32, U>;
 
-    fn repeat(&self, value: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U>;
+    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U>;
 }
 
 impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
@@ -33,11 +33,11 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         VirtualColumn::new(BoxedColumnValue::new(format!("LENGTH({})", sql.sql), sql.value))
     }
 
-    fn repeat(&self, value: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U> {
+    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U> {
         let sql = self.get_sql();
-        let value_sql = value.get_sql();
+        let repetition_sql = repetition.get_sql();
         let mut values = sql.value;
-        values.extend(value_sql.value);
-        VirtualColumn::new(BoxedColumnValue::new(format!("REPEAT({},{})", sql.sql, value_sql.sql), values))
+        values.extend(repetition_sql.value);
+        VirtualColumn::new(BoxedColumnValue::new(format!("REPEAT({},{})", sql.sql, repetition_sql.sql), values))
     }
 }
