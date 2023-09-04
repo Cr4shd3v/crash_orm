@@ -16,3 +16,5 @@ async-trait = { workspace = true }
 rust_decimal = { workspace = true, features = ["db-tokio-postgres"] }
 chrono = { workspace = true }
 uuid = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

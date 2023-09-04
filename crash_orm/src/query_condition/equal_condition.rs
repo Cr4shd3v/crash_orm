@@ -1,5 +1,6 @@
 use chrono::*;
 use rust_decimal::Decimal;
+use serde_json::Value;
 use tokio_postgres::types::ToSql;
 use uuid::Uuid;
 use crate::{Entity, QueryCondition, Column, TypedColumnValue};
@@ -42,3 +43,4 @@ impl_equal_entity_column!(NaiveDate);
 impl_equal_entity_column!(NaiveTime);
 impl_equal_entity_column!(Uuid);
 impl_equal_entity_column!(Vec<u8>);
+impl_equal_entity_column!(Value);
