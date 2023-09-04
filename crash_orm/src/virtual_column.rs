@@ -11,6 +11,9 @@ use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 use crate::{BoxedColumnValue, Entity};
 
+mod text_cast_column;
+pub use text_cast_column::*;
+
 pub struct VirtualColumn<T: ToSql, U: Entity<U>> {
     sql: BoxedColumnValue,
     phantom_1: PhantomData<T>,
