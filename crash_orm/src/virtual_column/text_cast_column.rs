@@ -1,3 +1,4 @@
+use chrono::*;
 use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{BoxedColumnValue, Column, Entity, VirtualColumn};
@@ -26,3 +27,9 @@ impl_text_cast_virtual_column!(Decimal);
 impl_text_cast_virtual_column!(u32);
 impl_text_cast_virtual_column!(f32);
 impl_text_cast_virtual_column!(f64);
+impl_text_cast_virtual_column!(NaiveDateTime);
+impl_text_cast_virtual_column!(DateTime<Utc>);
+impl_text_cast_virtual_column!(DateTime<Local>);
+impl_text_cast_virtual_column!(DateTime<FixedOffset>);
+impl_text_cast_virtual_column!(NaiveDate);
+impl_text_cast_virtual_column!(NaiveTime);

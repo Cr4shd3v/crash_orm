@@ -10,7 +10,8 @@ default = []
 
 [dependencies]
 crash_orm_derive = { path = "../crash_orm_derive" }
-tokio-postgres = { workspace = true }
+tokio-postgres = { workspace = true, features = ["with-chrono-0_4"] }
 tokio = { workspace = true, features = ["full"] }
 async-trait = { workspace = true }
 rust_decimal = { workspace = true, features = ["db-tokio-postgres"] }
+chrono = { workspace = true }

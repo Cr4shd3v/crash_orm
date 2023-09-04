@@ -1,3 +1,4 @@
+use chrono::*;
 use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, Column, QueryCondition, TypedColumnValue};
@@ -48,3 +49,9 @@ impl_compare_entity_column!(i64);
 impl_compare_entity_column!(Decimal);
 impl_compare_entity_column!(f32);
 impl_compare_entity_column!(f64);
+impl_compare_entity_column!(NaiveDateTime);
+impl_compare_entity_column!(DateTime<Utc>);
+impl_compare_entity_column!(DateTime<Local>);
+impl_compare_entity_column!(DateTime<FixedOffset>);
+impl_compare_entity_column!(NaiveDate);
+impl_compare_entity_column!(NaiveTime);
