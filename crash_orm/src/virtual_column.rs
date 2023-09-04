@@ -1,6 +1,3 @@
-mod length_column;
-pub use length_column::*;
-
 mod string_column;
 pub use string_column::*;
 
