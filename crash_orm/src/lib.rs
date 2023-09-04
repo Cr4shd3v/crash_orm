@@ -32,3 +32,6 @@ pub use column::*;
 
 mod query;
 pub use query::*;
+
+mod column_value;
+pub use column_value::*;
