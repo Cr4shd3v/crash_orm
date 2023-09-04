@@ -1,4 +1,4 @@
-use crate::{BoxedColumnValue, Column, Entity, TypedColumnValue, VirtualColumn};
+use crate::{BoxedColumnValue, Column, Entity, TypedColumnValue, UntypedColumnValue, VirtualColumn};
 
 pub trait StringVirtualColumn<U: Entity<U>> {
     fn lowercase(&self) -> VirtualColumn<String, U>;
@@ -10,6 +10,8 @@ pub trait StringVirtualColumn<U: Entity<U>> {
     fn length(&self) -> VirtualColumn<i32, U>;
 
     fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U>;
+
+    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U>;
 }
 
 impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
@@ -39,5 +41,17 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         let mut values = sql.value;
         values.extend(repetition_sql.value);
         VirtualColumn::new(BoxedColumnValue::new(format!("REPEAT({},{})", sql.sql, repetition_sql.sql), values))
+    }
+
+    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U> {
+        let mut sql = self.get_sql();
+        for value in other {
+            let value_sql = value.get_sql();
+            sql.sql.push_str(" || ");
+            sql.sql.push_str(&*value_sql.sql);
+            sql.value.extend(value_sql.value);
+        }
+
+        VirtualColumn::new(BoxedColumnValue::new(sql.sql, sql.value))
     }
 }
