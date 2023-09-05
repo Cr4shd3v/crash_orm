@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
-use quote::{quote, ToTokens};
+use quote::quote;
 use syn::{Data, DeriveInput, parse_macro_input};
+use crate::util::rust_to_postgres_type;
 
 pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -14,29 +15,8 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let ident_str = ident.to_string().to_lowercase();
 
     for field in struct_data.fields {
-        let syn::Type::Path(path) = field.ty else { panic!("unsupported") };
-        let path = path.into_token_stream().to_string().replace(" ", "");
-        let field_name = field.ident.unwrap().to_string();
-
-        let (path, nullable) = if path.starts_with("Option<") {
-            (path.strip_prefix("Option<").unwrap().strip_suffix(">").unwrap().to_string(), &*field_name != "id")
-        } else {
-            (path, false)
-        };
-
-        let column_type = match &*path {
-            "bool" => "bool",
-            "i8" => "char",
-            "i16" => "int2",
-            "i32" => "int4",
-            "i64" => "int8",
-            "u32" => "oid",
-            "f32" => "float4",
-            "f64" => "float8",
-            "String" => "text",
-            "Decimal" => "numeric",
-            _ => panic!("unsupported type {}", path),
-        };
+        let field_name = field.ident.clone().unwrap().to_string();
+        let (column_type, nullable) = rust_to_postgres_type(field);
 
         create_fields_string.push_str(&*format!("{} {} {}", field_name, column_type, if nullable { "" } else { "NOT NULL" }));
 
