@@ -4,10 +4,13 @@ use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
 use crate::entity::slice_query_value_iter;
 
+/// Trait implementing the min functions for columns
 #[async_trait]
 pub trait MinColumn<T: ToSql, U: Entity<U> + Send + 'static> {
+    /// Return the minimum value of this column
     async fn min(&self, connection: &DatabaseConnection) -> crate::Result<T>;
 
+    /// Return the minimum value of this column based on the condition
     async fn min_query(&self, connection: &DatabaseConnection, condition: QueryCondition<U>) -> crate::Result<T>;
 }
 

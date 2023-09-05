@@ -3,10 +3,17 @@ use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, QueryCondition, EntityColumn, slice_query_value_iter};
 
+/// Trait implementing the avg functions for columns
 #[async_trait]
 pub trait AvgColumn<T: ToSql, R: ToSql, U: Entity<U>> {
+    /// Return the average value of this column
+    ///
+    /// [`distinct`]: Only unique entries. Duplicates are ignored.
     async fn avg(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<R>;
 
+    /// Return the average value of this column based on the condition
+    ///
+    /// [`distinct`]: Only unique entries. Duplicates are ignored.
     async fn avg_query(&self, connection: &DatabaseConnection, distinct: bool, condition: QueryCondition<U>) -> crate::Result<R>;
 }
 

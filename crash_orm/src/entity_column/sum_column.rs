@@ -4,10 +4,13 @@ use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, QueryCondition};
 use crate::{slice_query_value_iter, EntityColumn};
 
+/// Trait implementing the sum functions for columns
 #[async_trait]
 pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U>> {
+    /// Return the sum of this column
     async fn sum(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<R>;
 
+    /// Return the sum of this column based on the condition
     async fn sum_query(&self, connection: &DatabaseConnection, distinct: bool, condition: QueryCondition<U>) -> crate::Result<R>;
 }
 

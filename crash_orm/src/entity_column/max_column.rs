@@ -4,10 +4,13 @@ use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
 use crate::entity::slice_query_value_iter;
 
+/// Trait implementing the max functions for columns
 #[async_trait]
 pub trait MaxColumn<T: ToSql, U: Entity<U>> {
+    /// Return the maximum value of this column
     async fn max(&self, connection: &DatabaseConnection) -> crate::Result<T>;
 
+    /// Return the maximum value of this column based on the condition
     async fn max_query(&self, connection: &DatabaseConnection, condition: QueryCondition<U>) -> crate::Result<T>;
 }
 
