@@ -33,10 +33,12 @@ impl<T: ToSql, U: Entity<U>> VirtualColumn<T, U> {
         self.sql.clone()
     }
 
+    /// Constant Column Pi ([`f64::PI`])
     pub fn pi() -> VirtualColumn<f64, U> {
         VirtualColumn::new(BoxedColumnValue::new(String::from("PI()"), vec![]))
     }
 
+    /// Generates a random value in the range 0.0 <= x < 1.0
     pub fn random() -> VirtualColumn<f64, U> {
         VirtualColumn::new(BoxedColumnValue::new(String::from("RANDOM()"), vec![]))
     }
