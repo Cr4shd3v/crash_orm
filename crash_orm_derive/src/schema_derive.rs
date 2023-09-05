@@ -16,9 +16,9 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
 
     for field in struct_data.fields {
         let field_name = field.ident.clone().unwrap().to_string();
-        let (column_type, nullable) = rust_to_postgres_type(&field.ty);
+        let column_type = rust_to_postgres_type(&field.ty, &*field_name);
 
-        create_fields_string.push_str(&*format!("{} {} {}", field_name, column_type, if nullable && &*field_name != "id" { "" } else { "NOT NULL" }));
+        create_fields_string.push_str(&*format!("{} {}", field_name, column_type));
 
         if &*field_name == "id" {
             create_fields_string.push_str(&*format!(" DEFAULT nextval('{}_id_seq'::regclass)", ident_str));
@@ -28,7 +28,6 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     }
 
     create_fields_string.push_str("PRIMARY KEY (id)");
-    println!("{}", create_fields_string);
 
     let create_string = format!("CREATE TABLE public.{}({});", ident_str, create_fields_string);
 
