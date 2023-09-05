@@ -1,5 +1,5 @@
 use quote::ToTokens;
-use syn::{Field, GenericArgument, Path, PathArguments, Type};
+use syn::{GenericArgument, Path, PathArguments, Type};
 
 pub(crate) fn extract_type_from_option(ty: &Type) -> Option<Type> {
     fn path_is_option(path: &Path) -> bool {
@@ -33,16 +33,10 @@ pub(crate) fn extract_generic_type(ty: &Type) -> Option<Type> {
     })
 }
 
-pub(crate) fn rust_to_postgres_type(field: &Field) -> (String, bool) {
-    let Type::Path(path) = &field.ty else { panic!("unsupported") };
+pub(crate) fn rust_to_postgres_type(field_type: &Type) -> (String, bool) {
+    let Type::Path(path) = field_type else { panic!("unsupported") };
+    let path = path.path.segments.last().unwrap().clone().ident;
     let path = path.into_token_stream().to_string().replace(" ", "");
-    let field_name = field.ident.clone().unwrap().to_string();
-
-    let (path, nullable) = if path.starts_with("Option<") {
-        (path.strip_prefix("Option<").unwrap().strip_suffix(">").unwrap().to_string(), &*field_name != "id")
-    } else {
-        (path, false)
-    };
 
     let column_type = match &*path {
         "bool" => "bool",
@@ -55,8 +49,12 @@ pub(crate) fn rust_to_postgres_type(field: &Field) -> (String, bool) {
         "f64" => "float8",
         "String" => "text",
         "Decimal" => "numeric",
+        "Option" => {
+            let (res, _) = rust_to_postgres_type(&extract_generic_type(field_type).unwrap());
+            return (res, true);
+        },
         _ => panic!("unsupported type {}", path),
     };
 
-    (column_type.to_string(), nullable)
+    (column_type.to_string(), false)
 }
