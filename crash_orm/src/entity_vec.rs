@@ -3,8 +3,10 @@ use crate::{DatabaseConnection, Entity};
 
 #[async_trait]
 pub trait EntityVec {
+    /// Shortcut function to call [Entity::persist] on every entity in this vector.
     async fn persist_all(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
 
+    /// Shortcut function to call [Entity::remove] on every entity in this vector.
     async fn remove_all(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
 }
 

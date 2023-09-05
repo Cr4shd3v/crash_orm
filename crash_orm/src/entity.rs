@@ -6,30 +6,51 @@ use crate::{BoxedColumnValue, DatabaseConnection, Query, QueryCondition, SelectQ
 
 #[async_trait]
 pub trait Entity<T: Entity<T>>: Send + 'static {
+    /// Name of the table
     const TABLE_NAME: &'static str;
 
+    /// Parses a [`Row`] into [`T`]
     fn load_from_row(row: &Row) -> T;
 
+    /// Retrieves an entity by its id
     async fn get_by_id(connection: &DatabaseConnection, id: u32) -> crate::Result<T>;
 
+    /// Retrieves all entities
     async fn get_all(connection: &DatabaseConnection) -> crate::Result<Vec<T>>;
 
+    /// Returns the count of entries in the table
     async fn count(connection: &DatabaseConnection) -> crate::Result<i64>;
 
+    /// Insert and returns the id
+    ///
+    /// This DOES NOT set the id in the entity
     async fn insert_get_id(&self, connection: &DatabaseConnection) -> crate::Result<u32>;
 
+    /// Insert and set id
+    ///
+    /// This DOES set the id in the entity
     async fn insert_set_id(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
 
+    /// Removes the entity from the database
     async fn remove(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
 
+    /// Updates the entity in the database
     async fn update(&self, connection: &DatabaseConnection) -> crate::Result<()>;
 
+    /// Persist this entity.
+    ///
+    /// If the entity is not yet inserted, [`Self::insert_set_id`] is called.
+    /// If the entity is already inserted, [`Self::update`] is called.
     async fn persist(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
 
+    /// Creates a [Query] for this Entity.
+    ///
+    /// See [Query] for more details on how to build a query.
     fn query() -> Query<T> {
         Query::new(BoxedColumnValue::new(format!("SELECT * FROM {}", Self::TABLE_NAME), vec![]))
     }
 
+    /// Count the entries based on a [QueryCondition].
     async fn count_query(connection: &DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
@@ -41,6 +62,9 @@ pub trait Entity<T: Entity<T>>: Send + 'static {
         Ok(row.get(0))
     }
 
+    /// Select specific columns ([crate::EntityColumn] or [crate::VirtualColumn]) from this entity.
+    ///
+    /// This returns a [SelectQuery]. See [SelectQuery] for more details.
     fn select_query(columns: &[&(dyn UntypedColumn<T>)]) -> SelectQuery<T> {
         let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<BoxedColumnValue>>();
         let mut query = vec![];

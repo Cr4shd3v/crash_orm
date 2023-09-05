@@ -29,7 +29,7 @@ impl<T: ToSql, U: Entity<U>> VirtualColumn<T, U> {
         }
     }
 
-    pub fn get_sql(&self) -> BoxedColumnValue {
+    pub(crate) fn get_sql(&self) -> BoxedColumnValue {
         self.sql.clone()
     }
 }

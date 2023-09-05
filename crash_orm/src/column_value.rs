@@ -10,14 +10,16 @@ pub struct BoxedColumnValue {
 }
 
 impl BoxedColumnValue {
-    pub fn new(sql: String, value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>) -> Self {
+    /// Creates a new instance
+    pub(crate) fn new(sql: String, value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>) -> Self {
         Self {
             sql,
             value,
         }
     }
 
-    pub fn resolve(&self, mut index: usize) -> (String, Vec<Arc<Box<dyn ToSql + Sync + Send>>>, usize) {
+    /// Resolves this value into it's parts with inserted IDs
+    pub(crate) fn resolve(&self, mut index: usize) -> (String, Vec<Arc<Box<dyn ToSql + Sync + Send>>>, usize) {
         let mut sql = self.sql.clone();
         while sql.contains("_$i") {
             sql = sql.replacen("_$i", &*format!("${}", index), 1);

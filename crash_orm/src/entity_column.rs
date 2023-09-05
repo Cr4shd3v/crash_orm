@@ -22,6 +22,7 @@ pub struct EntityColumn<T: ToSql, U: Entity<U>> {
 }
 
 impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
+    /// DO NOT USE THIS IN YOUR CODE, INTERNAL USE ONLY
     pub const fn new(name: &'static str) -> EntityColumn<T, U> {
         Self {
             name,
@@ -30,10 +31,14 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
         }
     }
 
-    pub fn get_sql(&self) -> BoxedColumnValue {
+    /// Convert [EntityColumn] into a [BoxedColumnValue]
+    pub(crate) fn get_sql(&self) -> BoxedColumnValue {
         BoxedColumnValue::new(self.name.to_string(), vec![])
     }
 
+    /// Count entries in this column.
+    ///
+    /// [`distinct`]: Only count unique entries. Duplicates are ignored.
     pub async fn count(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<i64> {
         let row = connection.query_one(
             &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.name.to_string(), U::TABLE_NAME),
@@ -43,6 +48,9 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
         Ok(row.get(0))
     }
 
+    /// Count entries in this column based on a condition.
+    ///
+    /// [`distinct`]: Only count unique entries. Duplicates are ignored.
     pub async fn count_query(&self, connection: &DatabaseConnection, distinct: bool, condition: QueryCondition<U>) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 

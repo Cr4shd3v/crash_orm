@@ -4,6 +4,7 @@ use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, UntypedColumn, QueryCondition, BoxedColumnValue};
 use crate::entity::slice_query_value_iter;
 
+/// Direction of the Order
 #[derive(Debug)]
 pub enum OrderDirection {
     ASC,
@@ -21,7 +22,8 @@ impl ToString for OrderDirection {
 
 macro_rules! base_query_functions {
     ($base:ident) => {
-        pub fn new(base_query: BoxedColumnValue) -> $base<T> {
+        /// Create a new query from a [BoxedColumnValue]
+        pub(crate) fn new(base_query: BoxedColumnValue) -> $base<T> {
             Self {
                 base_query,
                 condition: None,
@@ -29,23 +31,28 @@ macro_rules! base_query_functions {
             }
         }
 
+        /// Set the condition for this query.
         pub fn condition(mut self, condition: QueryCondition<T>) -> $base<T> {
             self.condition = Some(condition);
             self
         }
 
+        /// Add an order to this query.
         pub fn add_order(mut self, order: &(dyn UntypedColumn<T>), order_direction: OrderDirection) -> $base<T> {
             self.order.push((order.get_sql(), order_direction));
             self
         }
 
+        /// Set the order for this query.
+        ///
+        /// This will OVERRIDE all previous orders.
         pub fn order(mut self, order: &(dyn UntypedColumn<T>), order_direction: OrderDirection) -> $base<T> {
             self.order.clear();
             self.order.push((order.get_sql(), order_direction));
             self
         }
 
-        pub fn get_raw_query(self) -> (String, Vec<Arc<Box<dyn ToSql+Send+Sync>>>) {
+        fn get_raw_query(self) -> (String, Vec<Arc<Box<dyn ToSql+Send+Sync>>>) {
             let (mut query, mut values, mut index) = self.base_query.resolve(1);
 
             if self.condition.is_some() {
@@ -83,6 +90,7 @@ pub struct Query<T: Entity<T>> {
 impl<T: Entity<T>> Query<T> {
     base_query_functions!(Query);
 
+    /// Execute this query and returns the result as a vector of entities of type [T].
     pub async fn execute(self, connection: &DatabaseConnection) -> crate::Result<Vec<T>> {
         let (query, values) = self.get_raw_query();
 
@@ -104,6 +112,9 @@ pub struct SelectQuery<T: Entity<T>> {
 impl<T: Entity<T>> SelectQuery<T> {
     base_query_functions!(SelectQuery);
 
+    /// Execute this query and returns the result as a vector of [Row].
+    ///
+    /// This can't be parsed automatically, since the selected columns can be anything you want.
     pub async fn execute(self, connection: &DatabaseConnection) -> crate::Result<Vec<Row>> {
         let (query, values) = self.get_raw_query();
 

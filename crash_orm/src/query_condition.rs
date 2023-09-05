@@ -21,26 +21,47 @@ pub use bool_condition::*;
 mod in_condition;
 pub use in_condition::*;
 
+/// Query condition for entity [T]
 pub enum QueryCondition<T: Entity<T>> {
+    /// SQL: v1 = v2
     Equals(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 <> v2
     NotEquals(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: (c1) AND (c2)
     And(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
+    /// SQL: (c1) OR (c2)
     Or(Box<QueryCondition<T>>, Box<QueryCondition<T>>),
+    /// SQL: v1 IS NULL
     IsNull(BoxedColumnValue),
+    /// SQL: v1 IS NOT NULL
     IsNotNull(BoxedColumnValue),
+    /// SQL: NOT (c1)
     Not(Box<QueryCondition<T>>),
+    /// SQL: v1 LIKE v2
     Like(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 NOT LIKE v2
     NotLike(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 > v2
     GreaterThan(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 >= v2
     GreaterEqual(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 < v2
     LessThan(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 <= v2
     LessEqual(BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 BETWEEN v2 AND v3
     Between(BoxedColumnValue, BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 NOT BETWEEN v2 AND v3
     NotBetween(BoxedColumnValue, BoxedColumnValue, BoxedColumnValue),
+    /// SQL: v1 IS TRUE
     IsTrue(BoxedColumnValue),
+    /// SQL: v1 IS FALSE
     IsFalse(BoxedColumnValue),
+    /// SQL: v1 IN (v2)
     In(BoxedColumnValue, Vec<BoxedColumnValue>),
+    /// SQL: v1 NOT IN (v2)
     NotIn(BoxedColumnValue, Vec<BoxedColumnValue>),
+    /// INTERNAL
     #[allow(non_camel_case_types)]__(PhantomData<T>),
 }
 
@@ -194,14 +215,17 @@ impl<T: Entity<T>> QueryCondition<T> {
         }
     }
 
+    /// Build [QueryCondition::And] from self and other
     pub fn and(self, other: QueryCondition<T>) -> QueryCondition<T> {
         QueryCondition::And(Box::new(self), Box::new(other))
     }
 
+    /// Build [QueryCondition::Or] from self and other
     pub fn or(self, other: QueryCondition<T>) -> QueryCondition<T> {
         QueryCondition::Or(Box::new(self), Box::new(other))
     }
 
+    /// Build [QueryCondition::Not] from self
     pub fn not(self) -> QueryCondition<T> {
         QueryCondition::Not(Box::new(self))
     }
