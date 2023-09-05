@@ -32,4 +32,12 @@ impl<T: ToSql, U: Entity<U>> VirtualColumn<T, U> {
     pub(crate) fn get_sql(&self) -> BoxedColumnValue {
         self.sql.clone()
     }
+
+    pub fn pi() -> VirtualColumn<f64, U> {
+        VirtualColumn::new(BoxedColumnValue::new(String::from("PI()"), vec![]))
+    }
+
+    pub fn random() -> VirtualColumn<f64, U> {
+        VirtualColumn::new(BoxedColumnValue::new(String::from("RANDOM()"), vec![]))
+    }
 }
