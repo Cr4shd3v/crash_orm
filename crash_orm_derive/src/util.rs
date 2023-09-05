@@ -33,8 +33,8 @@ pub(crate) fn extract_generic_type(ty: &Type) -> Option<Type> {
     })
 }
 
-pub(crate) fn rust_to_postgres_type(field: Field) -> (String, bool) {
-    let Type::Path(path) = field.ty else { panic!("unsupported") };
+pub(crate) fn rust_to_postgres_type(field: &Field) -> (String, bool) {
+    let Type::Path(path) = &field.ty else { panic!("unsupported") };
     let path = path.into_token_stream().to_string().replace(" ", "");
     let field_name = field.ident.clone().unwrap().to_string();
 
