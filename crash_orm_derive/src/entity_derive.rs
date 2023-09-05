@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Ident, parse_macro_input};
-use crate::util::extract_type_from_option;
+use crate::util::{extract_type_from_option, ident_to_table_name};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -10,7 +10,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     };
 
     let ident = derive_input.ident;
-    let ident_str = ident.to_string().to_lowercase();
+    let ident_str = ident_to_table_name(&ident);
     let vis = derive_input.vis;
 
     let mut select_fields = quote!();

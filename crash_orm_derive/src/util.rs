@@ -1,4 +1,4 @@
-use syn::{GenericArgument, Path, PathArguments, Type};
+use syn::{GenericArgument, Ident, Path, PathArguments, Type};
 
 pub(crate) fn extract_type_from_option(ty: &Type) -> Option<Type> {
     fn path_is_option(path: &Path) -> bool {
@@ -56,4 +56,8 @@ pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> Stri
     };
 
     column_type.to_string()
+}
+
+pub(crate) fn ident_to_table_name(ident: &Ident) -> String {
+    ident.to_string().to_lowercase()
 }
