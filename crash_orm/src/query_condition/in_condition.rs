@@ -2,6 +2,7 @@ use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, Column, QueryCondition, TypedColumnValue};
 
+/// Trait implementing IN operators
 pub trait InQueryColumn<T: ToSql, U: Entity<U>> {
     fn in_vec(&self, other: Vec<&(dyn TypedColumnValue<T>)>) -> QueryCondition<U>;
 

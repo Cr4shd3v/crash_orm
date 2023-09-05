@@ -3,6 +3,7 @@ use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, Column, QueryCondition, TypedColumnValue};
 
+/// Trait implementing comparison operators
 pub trait CompareQueryColumn<T: ToSql, U: Entity<U>> {
     fn greater_than(&self, other: &(dyn TypedColumnValue<T>)) -> QueryCondition<U>;
     fn greater_equal(&self, other: &(dyn TypedColumnValue<T>)) -> QueryCondition<U>;

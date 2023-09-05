@@ -1,6 +1,7 @@
 use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, QueryCondition, TypedColumnValue};
 
+/// Trait implementing like operators
 pub trait LikeQueryColumn<T: ToSql, U: Entity<U>> {
     fn like(&self, like: &(dyn TypedColumnValue<String>)) -> QueryCondition<U>;
 

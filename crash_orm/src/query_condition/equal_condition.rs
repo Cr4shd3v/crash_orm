@@ -5,6 +5,7 @@ use tokio_postgres::types::ToSql;
 use uuid::Uuid;
 use crate::{Entity, QueryCondition, Column, TypedColumnValue};
 
+/// Trait implementing equals operators
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
     fn equals(&self, other: &(dyn TypedColumnValue<T>)) -> QueryCondition<U>;
 
