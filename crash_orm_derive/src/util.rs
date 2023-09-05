@@ -7,8 +7,17 @@ pub fn extract_type_from_option(ty: &Type) -> Option<Type> {
             && path.segments.iter().next().unwrap().ident == "Option"
     }
 
+    match ty {
+        Type::Path(type_path) if path_is_option(&type_path.path) => {
+            extract_generic_type(ty)
+        }
+        _ => return None,
+    }
+}
+
+pub fn extract_generic_type(ty: &Type) -> Option<Type> {
     Some(match ty {
-        Type::Path(type_path) if type_path.qself.is_none() && path_is_option(&type_path.path) => {
+        Type::Path(type_path) if type_path.qself.is_none() => {
             let type_params = type_path.path.segments.first().unwrap().clone().arguments;
             let generic_arg = match type_params {
                 PathArguments::AngleBracketed(params) => params.args.first().unwrap().clone(),
