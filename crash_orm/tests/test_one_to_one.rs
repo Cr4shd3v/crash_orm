@@ -70,4 +70,5 @@ async fn test_one_to_one() {
     assert_eq!(result.get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
 
     assert!(TestItem19::drop_table(&conn).await.is_ok());
+    assert!(TestItem20::drop_table(&conn).await.is_ok());
 }
