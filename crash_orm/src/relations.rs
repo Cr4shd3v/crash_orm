@@ -1,12 +1,12 @@
 use crate::{DatabaseConnection, Entity};
 
-pub struct OneToOneOwner<T: Entity<T>> {
+pub struct OneToOne<T: Entity<T>> {
     target_id: u32,
     value: Option<T>,
 }
 
-impl<T: Entity<T>> OneToOneOwner<T> {
-    pub const fn new(target_id: u32) -> OneToOneOwner<T> {
+impl<T: Entity<T>> OneToOne<T> {
+    pub const fn new(target_id: u32) -> OneToOne<T> {
         Self {
             target_id,
             value: None,
@@ -19,30 +19,6 @@ impl<T: Entity<T>> OneToOneOwner<T> {
         }
 
         Ok(self.value.as_ref().unwrap())
-    }
-}
-
-pub struct OneToOne<T: Entity<T>> {
-    value: Option<T>,
-}
-
-impl<T: Entity<T>> OneToOne<T> {
-    pub const fn new() -> OneToOne<T> {
-        Self {
-            value: None,
-        }
-    }
-}
-
-pub struct OneToMany<T: Entity<T>> {
-    value: Option<Vec<T>>,
-}
-
-impl<T: Entity<T>> OneToMany<T> {
-    pub const fn new() -> OneToMany<T> {
-        Self {
-            value: None,
-        }
     }
 }
 
@@ -65,17 +41,5 @@ impl<T: Entity<T>> ManyToOne<T> {
         }
 
         Ok(self.value.as_ref().unwrap())
-    }
-}
-
-pub struct ManyToMany<T: Entity<T>> {
-    value: Option<Vec<T>>,
-}
-
-impl<T: Entity<T>> ManyToMany<T> {
-    pub const fn new() -> ManyToMany<T> {
-        Self {
-            value: None,
-        }
     }
 }
