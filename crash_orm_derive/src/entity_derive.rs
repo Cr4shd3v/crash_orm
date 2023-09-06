@@ -84,6 +84,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         impl crash_orm::Entity<#ident> for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
+            fn get_id(&self) -> Option<u32> {
+                self.id
+            }
+
             fn load_from_row(row: &crash_orm::tokio_postgres::Row) -> #ident {
                 #ident {
                     #select_fields

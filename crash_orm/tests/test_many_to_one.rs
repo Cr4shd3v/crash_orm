@@ -11,7 +11,7 @@ pub struct TestItem21 {
     pub id: Option<u32>,
     pub name1: Option<String>,
     pub active: bool,
-    pub other: ManyToOne<TestItem22>,
+    pub other: Option<ManyToOne<TestItem22>>,
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -27,7 +27,7 @@ impl TestItem21 {
             id: None,
             name1: Some(String::from("test123")),
             active: false,
-            other: ManyToOne::new(1),
+            other: None,
         }
     }
 
@@ -36,7 +36,7 @@ impl TestItem21 {
             id: None,
             name1: Some(String::from("test321")),
             active: true,
-            other: ManyToOne::new(1),
+            other: Some(ManyToOne::new(1)),
         }
     }
 }
@@ -67,8 +67,11 @@ async fn test_many_to_one() {
         assert!(TestItem21::truncate_table(&conn).await.is_ok());
     }
 
-    TestItem22::test().persist(&conn).await.unwrap();
-    vec![TestItem21::test(), TestItem21::test2()].persist_all(&conn).await.unwrap();
+    let mut target_item = TestItem22::test();
+    target_item.persist(&conn).await.unwrap();
+    let mut test_item = TestItem21::test();
+    test_item.other = Some(ManyToOne::from(target_item).unwrap());
+    vec![test_item, TestItem21::test2()].persist_all(&conn).await.unwrap();
 
     let results = TestItem21::query()
         .execute(&conn).await;
@@ -76,9 +79,9 @@ async fn test_many_to_one() {
     let mut results = results.unwrap();
     assert_eq!(results.len(), 2);
     let result1 = &mut results[0].other;
-    assert_eq!(result1.get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
+    assert_eq!(result1.as_mut().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
     let result2 = &mut results[1].other;
-    assert_eq!(result2.get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
+    assert_eq!(result2.as_mut().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
 
     assert!(TestItem21::drop_table(&conn).await.is_ok());
     assert!(TestItem22::drop_table(&conn).await.is_ok());

@@ -10,6 +10,8 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
+    fn get_id(&self) -> Option<u32>;
+
     /// Parses a [`Row`] into [`T`]
     fn load_from_row(row: &Row) -> T;
 
