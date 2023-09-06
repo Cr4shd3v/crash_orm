@@ -1,5 +1,5 @@
 use tokio_postgres::NoTls;
-use crash_orm::{DatabaseConnection, Entity, EqualQueryColumn, OneToOne, Schema};
+use crash_orm::{DatabaseConnection, Entity, OneToOne, Schema};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
@@ -62,7 +62,6 @@ async fn test_one_to_one() {
     TestItem19::test2().persist(&conn).await.unwrap();
 
     let results = TestItem19::query()
-        .condition(TestItem19Column::ID.equals(&1))
         .execute(&conn).await;
     assert!(results.is_ok());
     let mut results = results.unwrap();
