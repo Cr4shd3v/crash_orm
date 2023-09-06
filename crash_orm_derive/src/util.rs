@@ -1,3 +1,4 @@
+use quote::ToTokens;
 use syn::{GenericArgument, Ident, Path, PathArguments, Type};
 
 pub(crate) fn extract_type_from_option(ty: &Type) -> Option<Type> {
@@ -48,6 +49,14 @@ pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> Stri
         "f64" => "float8",
         "String" => "text",
         "Decimal" => "numeric",
+        "OneToOne" =>  {
+            let target_entity = extract_generic_type(field_type).unwrap();
+            return format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string()));
+        },
+        "ManyToOne" => {
+            let target_entity = extract_generic_type(field_type).unwrap();
+            return format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string()));
+        },
         "Option" => {
             let res = rust_to_postgres_type(&extract_generic_type(field_type).unwrap(), field_name);
             return format!("{}{}", res, if &*field_name != "id" { "" } else { " NOT NULL" });
@@ -59,5 +68,7 @@ pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> Stri
 }
 
 pub(crate) fn ident_to_table_name(ident: &Ident) -> String {
-    ident.to_string().to_lowercase()
+    string_to_table_name(ident.to_string())
 }
+
+pub(crate) fn string_to_table_name(string: String) -> String { string.to_lowercase() }

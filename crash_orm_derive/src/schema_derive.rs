@@ -28,6 +28,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     }
 
     create_fields_string.push_str("PRIMARY KEY (id)");
+    println!("{}", create_fields_string);
 
     let create_string = format!("CREATE TABLE public.{}({});", ident_str, create_fields_string);
 
