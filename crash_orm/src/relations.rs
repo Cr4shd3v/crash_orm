@@ -1,4 +1,4 @@
-use crate::Entity;
+use crate::{DatabaseConnection, Entity};
 
 pub struct OneToOneOwner<T: Entity<T>> {
     target_id: u32,
@@ -11,6 +11,14 @@ impl<T: Entity<T>> OneToOneOwner<T> {
             target_id,
             value: None,
         }
+    }
+
+    pub async fn get(&mut self, conn: &DatabaseConnection) -> crate::Result<&T> {
+        if self.value.is_none() {
+            self.value = Some(T::get_by_id(&conn, self.target_id).await?);
+        }
+
+        Ok(self.value.as_ref().unwrap())
     }
 }
 
@@ -49,6 +57,14 @@ impl<T: Entity<T>> ManyToOne<T> {
             target_id,
             value: None,
         }
+    }
+
+    pub async fn get(&mut self, conn: &DatabaseConnection) -> crate::Result<&T> {
+        if self.value.is_none() {
+            self.value = Some(T::get_by_id(&conn, self.target_id).await?);
+        }
+
+        Ok(self.value.as_ref().unwrap())
     }
 }
 
