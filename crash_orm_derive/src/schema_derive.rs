@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, parse_macro_input};
-use crate::util::rust_to_postgres_type;
+use crate::util::{is_relation, rust_to_postgres_type};
 
 pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -15,8 +15,12 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let ident_str = ident.to_string().to_lowercase();
 
     for field in struct_data.fields {
-        let field_name = field.ident.clone().unwrap().to_string();
+        let mut field_name = field.ident.clone().unwrap().to_string();
         let column_type = rust_to_postgres_type(&field.ty, &*field_name);
+
+        if is_relation(&field.ty) {
+            field_name.push_str("_id");
+        }
 
         create_fields_string.push_str(&*format!("{} {}", field_name, column_type));
 
