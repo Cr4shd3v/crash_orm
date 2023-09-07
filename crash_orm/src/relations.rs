@@ -6,6 +6,13 @@ use crate::{DatabaseConnection, Entity};
 
 macro_rules! default_relation_function {
     ($rel_type:tt) => {
+        pub const fn new(target_id: u32) -> $rel_type<T> {
+            Self {
+                target_id,
+                value: None,
+            }
+        }
+
         pub async fn get(&mut self, conn: &DatabaseConnection) -> crate::Result<&T> {
             if self.value.is_none() {
                 self.value = Some(T::get_by_id(&conn, self.target_id).await?);
@@ -63,13 +70,6 @@ pub struct OneToOne<T: Entity<T>> {
 }
 
 impl<T: Entity<T>> OneToOne<T> {
-    pub const fn new(target_id: u32) -> OneToOne<T> {
-        Self {
-            target_id,
-            value: None,
-        }
-    }
-
     default_relation_function!(OneToOne);
 }
 
@@ -82,13 +82,6 @@ pub struct ManyToOne<T: Entity<T>> {
 }
 
 impl<T: Entity<T>> ManyToOne<T> {
-    pub const fn new(target_id: u32) -> ManyToOne<T> {
-        Self {
-            target_id,
-            value: None,
-        }
-    }
-
     default_relation_function!(ManyToOne);
 }
 
