@@ -1,20 +1,5 @@
 use quote::ToTokens;
-use syn::{GenericArgument, Ident, Path, PathArguments, Type};
-
-pub(crate) fn extract_type_from_option(ty: &Type) -> Option<Type> {
-    fn path_is_option(path: &Path) -> bool {
-        path.leading_colon.is_none()
-            && path.segments.len() == 1
-            && path.segments.iter().next().unwrap().ident == "Option"
-    }
-
-    match ty {
-        Type::Path(type_path) if path_is_option(&type_path.path) => {
-            extract_generic_type(ty)
-        }
-        _ => return None,
-    }
-}
+use syn::{GenericArgument, Ident, PathArguments, Type};
 
 pub(crate) fn extract_generic_type(ty: &Type) -> Option<Type> {
     Some(match ty {

@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Ident, parse_macro_input};
-use crate::util::{extract_type_from_option, ident_to_table_name};
+use crate::util::ident_to_table_name;
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -27,19 +27,18 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         let field_ident = field.ident.unwrap();
         let field_ident_str = field_ident.to_string();
         let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
-        let field_type = if &*field_ident_str == "id" {
-            extract_type_from_option(&field.ty).unwrap_or(field.ty)
-        } else { field.ty };
-
-        column_consts.extend(quote! {
-            pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
-        });
 
         select_fields.extend(quote! {
             #field_ident: row.get(#all_index),
         });
 
         if field_ident.to_string() != "id" {
+            let field_type = field.ty;
+
+            column_consts.extend(quote! {
+                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
+            });
+
             insert_field_names.extend(quote! {
                 #field_ident,
             });
@@ -52,6 +51,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             update_fields.push_str(&*format!("{} = ${}", field_ident.to_string(), insert_index));
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
+        } else {
+            column_consts.extend(quote! {
+                pub const #field_ident_upper: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new(#field_ident_str);
+            });
         }
 
         all_index += 1;
