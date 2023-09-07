@@ -18,10 +18,24 @@ pub(crate) fn extract_generic_type(ty: &Type) -> Option<Type> {
     })
 }
 
-pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> String {
+pub(crate) fn get_type_string(field_type: &Type) -> String {
     let Type::Path(path) = field_type else { panic!("unsupported") };
     let path = path.path.segments.last().unwrap().clone().ident;
-    let path = path.to_string().replace(" ", "");
+    path.to_string().replace(" ", "")
+}
+
+pub(crate) fn is_relation(field_type: &Type) -> bool {
+    let path = get_type_string(field_type);
+
+    match &*path {
+        "OneToOne" => true,
+        "ManyToOne" => true,
+        _ => false,
+    }
+}
+
+pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> String {
+    let path = get_type_string(field_type);
 
     let column_type = match &*path {
         "bool" => "bool",
@@ -44,7 +58,7 @@ pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> Stri
         },
         "Option" => {
             let res = rust_to_postgres_type(&extract_generic_type(field_type).unwrap(), field_name);
-            return format!("{}{}", res, if &*field_name != "id" { "" } else { " NOT NULL" });
+            return format!("{}{}", res, if &*field_name != "id" { "" } else { " NULL" });
         },
         _ => panic!("unsupported type {}", path),
     };
