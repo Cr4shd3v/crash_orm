@@ -47,7 +47,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             }
 
             insert_field_names.extend(quote! {
-                #field_ident,
+                #field_ident_str,
             });
 
             insert_field_self_values.extend(quote! {
@@ -56,7 +56,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             insert_index += 1;
 
-            update_fields.push_str(&*format!("{} = ${}", field_ident.to_string(), insert_index));
+            update_fields.push_str(&*format!("{} = ${}", field_ident_str, insert_index));
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
         } else {
             column_consts.extend(quote! {

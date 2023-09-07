@@ -30,6 +30,7 @@ pub(crate) fn is_relation(field_type: &Type) -> bool {
     match &*path {
         "OneToOne" => true,
         "ManyToOne" => true,
+        "Option" => is_relation(&extract_generic_type(field_type).unwrap()),
         _ => false,
     }
 }
