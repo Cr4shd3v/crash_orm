@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Ident, parse_macro_input};
-use crate::util::{ident_to_table_name, is_relation};
+use crate::util::ident_to_table_name;
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -25,7 +25,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut insert_index = 0usize;
     for field in struct_data.fields {
         let field_ident = field.ident.unwrap();
-        let mut field_ident_str = field_ident.to_string();
+        let field_ident_str = field_ident.to_string();
         let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
 
         select_fields.extend(quote! {
@@ -35,16 +35,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         if field_ident.to_string() != "id" {
             let field_type = field.ty;
 
-            if is_relation(&field_type) {
-                field_ident_str.push_str("_id");
-                column_consts.extend(quote! {
-                    pub const #field_ident_upper: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new(#field_ident_str);
-                });
-            } else {
-                column_consts.extend(quote! {
-                    pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
-                });
-            }
+            column_consts.extend(quote! {
+                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
+            });
 
             insert_field_names.extend(quote! {
                 #field_ident_str,
