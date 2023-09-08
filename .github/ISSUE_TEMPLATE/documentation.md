@@ -1,6 +1,6 @@
 ---
 name: Documentation
-about: Request improvements for this documentation
+about: Request changes for this libraries documentation
 title: ''
 labels: documentation
 assignees: ''
