@@ -40,7 +40,14 @@ If you need a global variable for the database connection, take a look at the [E
 You can now start by declaring your first Entity.
 
 ```rust
+use crash_orm::crash_orm_derive::{Entity, Schema};
 
+#[derive(Debug, Entity, Schema)]
+struct Person {
+    id: Option<u32>,
+    name: String,
+}
 ```
 
+Learn more about entities, their functions and usage [here](../Entity/Readme.md).
 
