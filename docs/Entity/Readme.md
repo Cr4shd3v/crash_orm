@@ -104,14 +104,14 @@ entity.remove(&conn).await?;
 
 NOTE: After this function call, the id of the entity will be empty! (This is why it needs &mut self).
 
-## Functions for Vec of Entity
+## Functions for Vec\<Entity>
 There are two utility functions to help with saving or deleting many entities.
 
 ### Persist Vec\<Entity>
 You can save an entire vector of entities with just one function call:
 
 ```rust
-let entities = vec![entity_1, /*...,*/ entity_n];
+let mut entities = vec![entity_1, /*...,*/ entity_n];
 entities.persist_all(&conn).await?;
 ```
 
@@ -119,7 +119,7 @@ entities.persist_all(&conn).await?;
 You can also remove an entire vector of entities:
 
 ```rust
-let entities = vec![entity_1, /*...,*/ entity_n];
+let mut entities = vec![entity_1, /*...,*/ entity_n];
 entities.remove_all(&conn).await?;
 ```
 
