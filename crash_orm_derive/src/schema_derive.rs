@@ -35,7 +35,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let sequence_created_alter = format!("ALTER SEQUENCE {0}_id_seq OWNED BY {0}.id", ident_str);
 
     let drop_string = format!("DROP TABLE IF EXISTS {} CASCADE", ident_str);
-    let truncate_string = format!("TRUNCATE {} RESTART IDENTITY", ident_str);
+    let truncate_string = format!("TRUNCATE {} RESTART IDENTITY CASCADE", ident_str);
     let table_exists_string = format!("SELECT EXISTS(SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '{}')", ident_str);
 
     let output = quote! {
