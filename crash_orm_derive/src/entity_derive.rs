@@ -58,10 +58,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             update_fields.push_str(&*format!("{} = ${}", field_ident_str, insert_index));
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
-        } else {
-            column_consts.extend(quote! {
-                pub const #field_ident_upper: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new(#field_ident_str);
-            });
         }
 
         all_index += 1;
@@ -90,9 +86,13 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             #column_consts
         }
 
+        impl crash_orm::BaseColumn<#ident> for #ident_column {}
+
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Entity<#ident> for #ident {
             const TABLE_NAME: &'static str = #ident_str;
+
+            type ColumnType = #ident_column;
 
             fn get_id(&self) -> Option<u32> {
                 self.id

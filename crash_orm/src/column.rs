@@ -1,6 +1,10 @@
 use tokio_postgres::types::ToSql;
 use crate::{BoxedColumnValue, Entity, EntityColumn, VirtualColumn};
 
+pub trait BaseColumn<U: Entity<U>> {
+    const ID: EntityColumn<Option<u32>, U> = EntityColumn::<Option<u32>, U>::new("id");
+}
+
 /// Trait implemented on all Columns
 ///
 /// This column trait is typed. For untyped columns use [`UntypedColumn`].

@@ -3,12 +3,14 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{BoxedColumnValue, DatabaseConnection, Query, QueryCondition, SelectQuery, UntypedColumn};
+use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, Query, QueryCondition, SelectQuery, UntypedColumn};
 
 #[async_trait]
 pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
+
+    type ColumnType: BaseColumn<T>;
 
     fn get_id(&self) -> Option<u32>;
 
