@@ -13,8 +13,8 @@ macro_rules! default_relation_function {
             }
         }
 
-        pub async fn get(&mut self, conn: &DatabaseConnection) -> crate::Result<&T> {
-            if self.value.is_none() {
+        pub async fn get(&mut self, conn: &DatabaseConnection, use_cache: bool) -> crate::Result<&T> {
+            if use_cache && self.value.is_none() {
                 self.value = Some(T::get_by_id(&conn, self.target_id).await?);
             }
 
