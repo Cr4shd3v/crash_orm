@@ -35,17 +35,27 @@ pub(crate) fn is_relation(field_type: &Type) -> bool {
     }
 }
 
-pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> String {
-    let (str, nullable) = _rust_to_postgres_type(field_type);
+pub(crate) fn is_ignored_relation(field_type: &Type) -> bool {
+    let path = get_type_string(field_type);
 
-    if nullable && field_name != "id" {
-        format!("{} NULL", str)
-    } else {
-        format!("{} NOT NULL", str)
+    match &*path {
+        "OneToMany" => true,
+        "Option" => is_ignored_relation(&extract_generic_type(field_type).unwrap()),
+        _ => false,
     }
 }
 
-fn _rust_to_postgres_type(field_type: &Type) -> (String, bool) {
+pub(crate) fn rust_to_postgres_type(field_type: &Type, field_name: &str) -> Option<String> {
+    let (str, nullable) = _rust_to_postgres_type(field_type)?;
+
+    Some(if nullable && field_name != "id" {
+        format!("{} NULL", str)
+    } else {
+        format!("{} NOT NULL", str)
+    })
+}
+
+fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
     let path = get_type_string(field_type);
 
     let column_type = match &*path {
@@ -61,20 +71,23 @@ fn _rust_to_postgres_type(field_type: &Type) -> (String, bool) {
         "Decimal" => "numeric",
         "OneToOne" =>  {
             let target_entity = extract_generic_type(field_type).unwrap();
-            return (format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string())), false);
+            return Some((format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string())), false));
         },
         "ManyToOne" => {
             let target_entity = extract_generic_type(field_type).unwrap();
-            return (format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string())), false);
+            return Some((format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string())), false));
         },
+        "OneToMany" => {
+            return None;
+        }
         "Option" => {
-            let (res, _) = _rust_to_postgres_type(&extract_generic_type(field_type).unwrap());
-            return (res, true);
+            let (res, _) = _rust_to_postgres_type(&extract_generic_type(field_type).unwrap())?;
+            return Some((res, true));
         },
         _ => panic!("unsupported type {}", path),
     };
 
-    (column_type.to_string(), false)
+    Some((column_type.to_string(), false))
 }
 
 pub(crate) fn ident_to_table_name(ident: &Ident) -> String {

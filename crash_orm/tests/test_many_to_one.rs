@@ -1,5 +1,5 @@
 use tokio_postgres::NoTls;
-use crash_orm::{DatabaseConnection, Entity, EntityVec, ManyToOne, Schema};
+use crash_orm::{DatabaseConnection, Entity, EntityVec, ManyToOne, OneToMany, Schema};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> DatabaseConnection {
@@ -19,6 +19,7 @@ pub struct TestItem22 {
     pub id: Option<u32>,
     pub name1: Option<String>,
     pub active: bool,
+    pub test_items_21: OneToMany<TestItem21>,
 }
 
 impl TestItem21 {
@@ -47,6 +48,7 @@ impl TestItem22 {
             id: None,
             name1: Some(String::from("Test1234")),
             active: false,
+            test_items_21: OneToMany::new(),
         }
     }
 }

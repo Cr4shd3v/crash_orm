@@ -18,7 +18,11 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         let field_name = field.ident.clone().unwrap().to_string();
         let column_type = rust_to_postgres_type(&field.ty, &*field_name);
 
-        create_fields_string.push_str(&*format!("{} {}", field_name, column_type));
+        if column_type.is_none() {
+            continue;
+        }
+
+        create_fields_string.push_str(&*format!("{} {}", field_name, column_type.unwrap()));
 
         if &*field_name == "id" {
             create_fields_string.push_str(&*format!(" DEFAULT nextval('{}_id_seq'::regclass)", ident_str));

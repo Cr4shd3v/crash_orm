@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Ident, parse_macro_input};
-use crate::util::{ident_to_table_name, is_relation};
+use crate::util::{get_type_string, ident_to_table_name, is_ignored_relation, is_relation};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -27,14 +27,25 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         let field_ident = field.ident.unwrap();
         let field_ident_str = field_ident.to_string();
         let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
+        let field_type = field.ty;
+
+        if is_ignored_relation(&field_type) {
+            let field_type_name = get_type_string(&field_type);
+
+            if &*field_type_name == "OneToMany" {
+                select_fields.extend(quote! {
+                    #field_ident: crash_orm::OneToMany::new(),
+                });
+            }
+
+            continue;
+        }
 
         select_fields.extend(quote! {
             #field_ident: row.get(#all_index),
         });
 
         if field_ident.to_string() != "id" {
-            let field_type = field.ty;
-
             column_consts.extend(quote! {
                 pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
             });

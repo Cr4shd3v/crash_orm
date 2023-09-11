@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
 use tokio_postgres::types::private::BytesMut;
 use crate::{DatabaseConnection, Entity};
@@ -86,3 +87,16 @@ impl<T: Entity<T>> ManyToOne<T> {
 }
 
 sql_impl_for_relation!(ManyToOne);
+
+#[derive(Debug)]
+pub struct OneToMany<T: Entity<T>> {
+    _p: PhantomData<T>,
+}
+
+impl<T: Entity<T>> OneToMany<T> {
+    pub fn new() -> OneToMany<T> {
+        OneToMany {
+            _p: PhantomData,
+        }
+    }
+}
