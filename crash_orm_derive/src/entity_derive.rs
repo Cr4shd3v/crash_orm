@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
-use quote::quote;
-use syn::{Data, DeriveInput, Ident, parse_macro_input};
-use crate::util::{get_type_string, ident_to_table_name, is_ignored_relation, is_relation};
+use quote::{quote, ToTokens};
+use syn::{Attribute, Data, DeriveInput, Ident, parse_macro_input};
+use crate::util::{extract_generic_type_ignore_option, get_type_string, ident_to_table_name, is_ignored_relation, is_relation, string_to_table_name};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -20,6 +20,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut insert_field_self_values_format = String::new();
     let mut update_fields = String::new();
     let mut column_consts = quote!();
+    let mut trait_signatures = quote!();
+    let mut trait_functions = quote!();
 
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
@@ -31,10 +33,34 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         if is_ignored_relation(&field_type) {
             let field_type_name = get_type_string(&field_type);
+            let entity_type = extract_generic_type_ignore_option(&field_type).unwrap();
+            let entity_table_name = string_to_table_name(get_type_string(&entity_type));
 
             if &*field_type_name == "OneToMany" {
                 select_fields.extend(quote! {
                     #field_ident: crash_orm::OneToMany::new(),
+                });
+
+                let mapped_by = field.attrs.iter().find(|a| a.meta.path().segments.last().unwrap().to_token_stream().to_string() == "mapped_by");
+
+                if mapped_by.is_none() {
+                    panic!("The attribute \"mapped_by\" is required on OneToMany objects");
+                }
+
+                let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
+
+                let query = format!("SELECT * FROM {} WHERE {} = $1", entity_table_name, mapped_by);
+                let function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
+
+                trait_signatures.extend(quote! {
+                    async fn #function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>>;
+                });
+
+                trait_functions.extend(quote! {
+                    async fn #function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
+                        let rows = connection.query(#query, &[&self.id]).await?;
+                        Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
+                    }
                 });
             }
 
@@ -45,7 +71,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             #field_ident: row.get(#all_index),
         });
 
-        if field_ident.to_string() != "id" {
+        if field_ident_str != "id" {
             column_consts.extend(quote! {
                 pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
             });
@@ -90,10 +116,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let update_string = format!("UPDATE {} SET {} WHERE id = ${}", ident_str, update_fields, insert_index);
     let ident_column = Ident::new(&*format!("{}Column", ident.to_string()), ident.span());
 
-    let output = quote! {
+    let mut output = quote! {
         #vis struct #ident_column;
 
         impl #ident_column {
+            pub const ID: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new("id");
+
             #column_consts
         }
 
@@ -171,5 +199,30 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         }
     };
 
+    if !trait_signatures.is_empty() {
+        let ident_trait = Ident::new(&*format!("{}Trait", ident.to_string()), ident.span());
+        output.extend(quote! {
+        #[crash_orm::async_trait::async_trait]
+        #vis trait #ident_trait {
+            #trait_signatures
+        }
+
+        #[crash_orm::async_trait::async_trait]
+        impl #ident_trait for #ident {
+            #trait_functions
+        }
+    });
+    }
+
     output.into()
+}
+
+fn parse_mapped_by_arg(attribute: &Attribute) -> String {
+    let mapped_by = attribute.parse_args::<syn::LitStr>();
+
+    if mapped_by.is_err() {
+        panic!("The attribute \"mapped_by\" requires a string as the argument");
+    }
+
+    mapped_by.unwrap().value()
 }

@@ -19,6 +19,7 @@ pub struct TestItem22 {
     pub id: Option<u32>,
     pub name1: Option<String>,
     pub active: bool,
+    #[mapped_by("other")]
     pub test_items_21: OneToMany<TestItem21>,
 }
 
@@ -72,7 +73,7 @@ async fn test_many_to_one() {
     let mut target_item = TestItem22::test();
     target_item.persist(&conn).await.unwrap();
     let mut test_item = TestItem21::test();
-    test_item.other = Some(ManyToOne::from(target_item).unwrap());
+    test_item.other = Some(ManyToOne::from(&target_item).unwrap());
     vec![test_item, TestItem21::test2()].persist_all(&conn).await.unwrap();
 
     let results = TestItem21::query()
@@ -82,6 +83,10 @@ async fn test_many_to_one() {
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].other.as_ref().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
     assert_eq!(results[1].other.as_ref().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
+
+    let results = target_item.get_test_items_21(&conn).await;
+    assert!(results.is_ok());
+    assert_eq!(results.unwrap().len(), 2);
 
     assert!(TestItem21::drop_table(&conn).await.is_ok());
     assert!(TestItem22::drop_table(&conn).await.is_ok());

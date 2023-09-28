@@ -8,7 +8,7 @@ mod entity_derive;
 mod schema_derive;
 mod util;
 
-#[proc_macro_derive(Entity)]
+#[proc_macro_derive(Entity, attributes(mapped_by))]
 pub fn derive_entity(input: TokenStream) -> TokenStream {
     derive_entity_impl(input)
 }

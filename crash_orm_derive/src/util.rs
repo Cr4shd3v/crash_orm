@@ -1,6 +1,14 @@
 use quote::ToTokens;
 use syn::{GenericArgument, Ident, PathArguments, Type};
 
+pub(crate) fn extract_generic_type_ignore_option(ty: &Type) -> Option<Type> {
+    if &*get_type_string(ty) == "Option" {
+        extract_generic_type(&extract_generic_type(ty).unwrap())
+    } else {
+        extract_generic_type(ty)
+    }
+}
+
 pub(crate) fn extract_generic_type(ty: &Type) -> Option<Type> {
     Some(match ty {
         Type::Path(type_path) if type_path.qself.is_none() => {
