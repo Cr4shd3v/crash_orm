@@ -64,10 +64,9 @@ async fn test_one_to_one() {
     let results = TestItem19::query()
         .execute(&conn).await;
     assert!(results.is_ok());
-    let mut results = results.unwrap();
+    let results = results.unwrap();
     assert_eq!(results.len(), 1);
-    let result = results[0].other.as_mut().unwrap();
-    assert_eq!(result.get(&conn, true).await.unwrap().name1, Some(String::from("Test1234")));
+    assert_eq!(results[0].other.as_ref().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
 
     assert!(TestItem19::drop_table(&conn).await.is_ok());
     assert!(TestItem20::drop_table(&conn).await.is_ok());

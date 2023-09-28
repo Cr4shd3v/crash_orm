@@ -9,17 +9,13 @@ macro_rules! default_relation_function {
     ($rel_type:tt) => {
         pub const fn new(target_id: u32) -> $rel_type<T> {
             Self {
+                _p: PhantomData,
                 target_id,
-                value: None,
             }
         }
 
-        pub async fn get(&mut self, conn: &DatabaseConnection, use_cache: bool) -> crate::Result<&T> {
-            if use_cache && self.value.is_none() {
-                self.value = Some(T::get_by_id(&conn, self.target_id).await?);
-            }
-
-            Ok(self.value.as_ref().unwrap())
+        pub async fn get(&self, conn: &DatabaseConnection) -> crate::Result<T> {
+            T::get_by_id(&conn, self.target_id).await
         }
 
         pub fn from(entity: impl Entity<T>) -> crate::Result<$rel_type<T>> {
@@ -29,8 +25,8 @@ macro_rules! default_relation_function {
             }
 
             Ok(Self {
+                 _p: PhantomData,
                 target_id: id.unwrap(),
-                value: None,
             })
         }
     };
@@ -66,8 +62,8 @@ macro_rules! sql_impl_for_relation {
 
 #[derive(Debug)]
 pub struct OneToOne<T: Entity<T>> {
+    _p: PhantomData<T>,
     target_id: u32,
-    value: Option<T>,
 }
 
 impl<T: Entity<T>> OneToOne<T> {
@@ -78,8 +74,8 @@ sql_impl_for_relation!(OneToOne);
 
 #[derive(Debug)]
 pub struct ManyToOne<T: Entity<T>> {
+    _p: PhantomData<T>,
     target_id: u32,
-    value: Option<T>,
 }
 
 impl<T: Entity<T>> ManyToOne<T> {
