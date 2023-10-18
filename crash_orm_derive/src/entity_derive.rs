@@ -36,7 +36,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             let entity_type = extract_generic_type_ignore_option(&field_type).unwrap();
             let entity_table_name = string_to_table_name(get_type_string(&entity_type));
 
-            if &*field_type_name == "OneToMany" {
+            if field_type_name == "OneToMany" {
                 select_fields.extend(quote! {
                     #field_ident: crash_orm::OneToMany::new(),
                 });
