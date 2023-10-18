@@ -2,7 +2,6 @@
 members = [
     "crash_orm",
     "crash_orm_derive",
-    "example_app",
 ]
 resolver = "2"
 
