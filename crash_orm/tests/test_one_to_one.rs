@@ -1,5 +1,5 @@
 use tokio_postgres::NoTls;
-use crash_orm::{CrashOrmDatabaseConnection, Entity, OneToOne, Schema};
+use crash_orm::{CrashOrmDatabaseConnection, Entity, OneToOne, OneToOneRef, Schema};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
@@ -19,6 +19,8 @@ pub struct TestItem20 {
     pub id: Option<u32>,
     pub name1: Option<String>,
     pub active: bool,
+    #[mapped_by("other")]
+    pub other: OneToOneRef<TestItem19>,
 }
 
 impl TestItem19 {
@@ -38,6 +40,7 @@ impl TestItem20 {
             id: None,
             name1: Some(String::from("Test1234")),
             active: false,
+            other: OneToOneRef::new(),
         }
     }
 }
@@ -58,15 +61,20 @@ async fn test_one_to_one() {
         assert!(TestItem19::truncate_table(&conn).await.is_ok());
     }
 
-    TestItem20::test().persist(&conn).await.unwrap();
+    let mut test_item_20 = TestItem20::test();
+    test_item_20.persist(&conn).await.unwrap();
     TestItem19::test2().persist(&conn).await.unwrap();
+
+    let result = test_item_20.get_other(&conn).await;
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap().name1, Some(String::from("test123")));
 
     let results = TestItem19::query()
         .execute(&conn).await;
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].other.as_ref().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
+    assert_eq!(results[0].get_other(&conn).await.unwrap().unwrap().name1, Some(String::from("Test1234")));
 
     assert!(TestItem19::drop_table(&conn).await.is_ok());
     assert!(TestItem20::drop_table(&conn).await.is_ok());

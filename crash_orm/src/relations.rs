@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
 use tokio_postgres::types::private::BytesMut;
-use crate::{Entity, DatabaseConnection};
+use crate::Entity;
 
 macro_rules! default_relation_function {
     ($rel_type:tt) => {
@@ -12,10 +12,6 @@ macro_rules! default_relation_function {
                 _p: PhantomData,
                 target_id,
             }
-        }
-
-        pub async fn get(&self, conn: &impl DatabaseConnection) -> crate::Result<T> {
-            T::get_by_id(conn, self.target_id).await
         }
 
         pub fn from(entity: &impl Entity<T>) -> crate::Result<$rel_type<T>> {
@@ -63,7 +59,7 @@ macro_rules! sql_impl_for_relation {
 #[derive(Debug)]
 pub struct OneToOne<T: Entity<T>> {
     _p: PhantomData<T>,
-    target_id: u32,
+    pub target_id: u32,
 }
 
 impl<T: Entity<T>> OneToOne<T> {
@@ -73,9 +69,22 @@ impl<T: Entity<T>> OneToOne<T> {
 sql_impl_for_relation!(OneToOne);
 
 #[derive(Debug)]
+pub struct OneToOneRef<T: Entity<T>> {
+    _p: PhantomData<T>,
+}
+
+impl<T: Entity<T>> OneToOneRef<T> {
+    pub fn new() -> OneToOneRef<T> {
+        OneToOneRef {
+            _p: PhantomData,
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct ManyToOne<T: Entity<T>> {
     _p: PhantomData<T>,
-    target_id: u32,
+    pub target_id: u32,
 }
 
 impl<T: Entity<T>> ManyToOne<T> {

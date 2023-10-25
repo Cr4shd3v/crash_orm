@@ -47,6 +47,8 @@ pub(crate) fn is_relation(field_type: &Type) -> bool {
     let path = get_type_string(field_type);
 
     match &*path {
+        "OneToOneRef" => true,
+        "OneToOne" => true,
         "OneToMany" => true,
         "ManyToOne" => true,
         "Option" => is_relation(&extract_generic_type(field_type).unwrap()),
@@ -87,6 +89,9 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
             return Some((format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string())), false));
         },
         "OneToMany" => {
+            return None;
+        }
+        "OneToOneRef" => {
             return None;
         }
         "Option" => {

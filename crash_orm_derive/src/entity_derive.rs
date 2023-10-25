@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{Attribute, Data, DeriveInput, Ident, parse_macro_input};
+use syn::{Attribute, Data, DeriveInput, Field, Ident, parse_macro_input};
 use crate::util::{extract_generic_type, extract_generic_type_ignore_option, get_type_string, ident_to_table_name, is_relation, is_relation_value_holder, string_to_table_name};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
@@ -26,41 +26,42 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
     for field in struct_data.fields {
-        let field_ident = field.ident.unwrap();
+        let field_ident = field.ident.as_ref().unwrap();
         let field_ident_str = field_ident.to_string();
         let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
-        let field_type = field.ty;
+        let field_type = &field.ty;
 
-        if is_relation(&field_type) {
-            let field_type_name = get_type_string(&field_type);
+        if is_relation(field_type) {
+            let field_type_name = get_type_string(field_type);
             let (field_type_name, is_option) = if field_type_name == "Option" {
-                (get_type_string(&extract_generic_type(&field_type).unwrap()), true)
+                (get_type_string(&extract_generic_type(field_type).unwrap()), true)
             } else { (field_type_name, false) };
-            let entity_type = extract_generic_type_ignore_option(&field_type).unwrap();
+            let entity_type = extract_generic_type_ignore_option(field_type).unwrap();
             let entity_table_name = string_to_table_name(get_type_string(&entity_type));
+            let set_function_ident = Ident::new(&*format!("set_{}", field_ident_str), ident.span());
+            let get_function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
 
             if field_type_name == "OneToMany" {
-                select_fields.extend(quote! {
-                    #field_ident: crash_orm::OneToMany::new(),
-                });
-
-                let mapped_by = field.attrs.iter().find(|a| a.meta.path().segments.last().unwrap().to_token_stream().to_string() == "mapped_by");
+                let mapped_by = get_mapped_by_attribute(&field);
 
                 if mapped_by.is_none() {
                     panic!("The attribute \"mapped_by\" is required on OneToMany objects");
                 }
 
+                select_fields.extend(quote! {
+                    #field_ident: crash_orm::OneToMany::new(),
+                });
+
                 let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
 
                 let query = format!("SELECT * FROM {} WHERE {} = $1", entity_table_name, mapped_by);
-                let function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
 
                 trait_signatures.extend(quote! {
-                    async fn #function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>>;
+                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>>;
                 });
 
                 trait_functions.extend(quote! {
-                    async fn #function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
+                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
                         let rows = connection.query_many(#query, &[&self.id]).await?;
                         Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
                     }
@@ -68,9 +69,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                 continue;
             } else if field_type_name == "ManyToOne" {
-                let set_function_ident = Ident::new(&*format!("set_{}", field_ident_str), ident.span());
-                let get_function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
-
                 if is_option {
                     trait_signatures.extend(quote! {
                         fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()>;
@@ -91,7 +89,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
-                                Ok(Some(self.#field_ident.as_ref().unwrap().get(connection).await?))
+                                Ok(Some(#entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
                             } else {
                                 Ok(None)
                             }
@@ -112,10 +110,82 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         }
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
-                            self.#field_ident.as_ref().unwrap().get(connection).await
+                            #entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await
                         }
                     });
                 }
+            } else if field_type_name == "OneToOne" {
+                if is_option {
+                    trait_signatures.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()>;
+
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>>;
+                    });
+
+                    trait_functions.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()> {
+                            self.#field_ident = if #field_ident.is_some() {
+                                Some(crash_orm::OneToOne::from(#field_ident.unwrap())?)
+                            } else {
+                                None
+                            };
+
+                            Ok(())
+                        }
+
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
+                            if self.#field_ident.is_some() {
+                                Ok(Some(#entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
+                            } else {
+                                Ok(None)
+                            }
+                        }
+                    });
+                } else {
+                    trait_signatures.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()>;
+
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
+                    });
+
+                    trait_functions.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()> {
+                            self.#field_ident = crash_orm::OneToOne::from(#field_ident)?;
+
+                            Ok(())
+                        }
+
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                            #entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await
+                        }
+                    });
+                }
+            } else if field_type_name == "OneToOneRef" {
+                let mapped_by = get_mapped_by_attribute(&field);
+
+                if mapped_by.is_none() {
+                    panic!("The attribute \"mapped_by\" is required on OneToOneRef objects");
+                }
+
+                select_fields.extend(quote! {
+                    #field_ident: crash_orm::OneToOneRef::new(),
+                });
+
+                let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
+                let query = format!("SELECT * FROM {} WHERE {} = $1", entity_table_name, mapped_by);
+
+                trait_signatures.extend(quote! {
+                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
+                });
+
+                trait_functions.extend(quote! {
+                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                        let row = connection.query_single(#query, &[&self.id]).await?;
+                        Ok(#entity_type::load_from_row(&row))
+                    }
+                });
+
+                continue;
             }
         }
 
@@ -267,6 +337,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     }
 
     output.into()
+}
+
+fn get_mapped_by_attribute(field: &Field) -> Option<&Attribute> {
+    field.attrs.iter().find(|a| a.meta.path().segments.last().unwrap().to_token_stream().to_string() == "mapped_by")
 }
 
 fn parse_mapped_by_arg(attribute: &Attribute) -> String {
