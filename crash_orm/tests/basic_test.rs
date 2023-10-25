@@ -55,7 +55,7 @@ async fn test_persist() {
     item.persist(&conn).await.unwrap();
     assert!(item.id.is_some());
     item.name = String::from("test_updated");
-    assert!(conn.persist(&mut item).await.is_ok());
+    assert!(item.persist(&conn).await.is_ok());
     let item_from_db = TestItem1::get_by_id(&conn, item.id.unwrap()).await;
     assert!(item_from_db.is_ok());
     let item_from_db = item_from_db.unwrap();
@@ -63,7 +63,7 @@ async fn test_persist() {
     assert_eq!(item_from_db.id, item.id);
 
     // cleanup
-    assert!(conn.remove(&mut item).await.is_ok());
+    assert!(item.remove(&conn).await.is_ok());
 }
 
 #[derive(Entity, Debug, Schema)]
