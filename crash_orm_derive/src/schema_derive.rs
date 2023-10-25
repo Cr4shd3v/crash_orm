@@ -45,28 +45,28 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let output = quote! {
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Schema for #ident {
-            async fn create_table(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
-                connection.execute(#sequence_create, &[]).await?;
-                connection.execute(#create_string, &[]).await?;
-                connection.execute(#sequence_created_alter, &[]).await?;
+            async fn create_table(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+                connection.execute_query(#sequence_create, &[]).await?;
+                connection.execute_query(#create_string, &[]).await?;
+                connection.execute_query(#sequence_created_alter, &[]).await?;
 
                 Ok(())
             }
 
-            async fn drop_table(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
-                connection.execute(#drop_string, &[]).await?;
+            async fn drop_table(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+                connection.execute_query(#drop_string, &[]).await?;
 
                 Ok(())
             }
 
-            async fn truncate_table(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
-                connection.execute(#truncate_string, &[]).await?;
+            async fn truncate_table(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+                connection.execute_query(#truncate_string, &[]).await?;
 
                 Ok(())
             }
 
-            async fn table_exists(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<bool> {
-                let row = connection.query_one(#table_exists_string, &[]).await?;
+            async fn table_exists(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<bool> {
+                let row = connection.query_single(#table_exists_string, &[]).await?;
                 let exists: bool = row.get(0);
                 Ok(exists)
             }

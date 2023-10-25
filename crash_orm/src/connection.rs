@@ -1,12 +1,22 @@
 use std::ops::Deref;
-use tokio_postgres::{Client, Socket};
+use tokio_postgres::{Client, Row, Socket};
 use tokio_postgres::tls::MakeTlsConnect;
+use tokio_postgres::types::ToSql;
 
-pub struct DatabaseConnection {
+#[async_trait::async_trait]
+pub trait DatabaseConnection: Sync {
+    async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row>;
+
+    async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>>;
+
+    async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64>;
+}
+
+pub struct CrashOrmDatabaseConnection {
     client: Client,
 }
 
-impl DatabaseConnection {
+impl CrashOrmDatabaseConnection {
     /// Creates a new database connection with a connection string and tls
     pub async fn new<T>(config: &str, tls: T) -> crate::Result<Self> where T: MakeTlsConnect<Socket>, <T as MakeTlsConnect<Socket>>::Stream: Send + 'static {
         let (client, connection) =
@@ -29,7 +39,22 @@ impl DatabaseConnection {
     }
 }
 
-impl Deref for DatabaseConnection {
+#[async_trait::async_trait]
+impl DatabaseConnection for CrashOrmDatabaseConnection {
+    async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row> {
+        self.query_one(statement, params).await.map_err(|e| e.into())
+    }
+
+    async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>> {
+        self.query(statement, params).await.map_err(|e| e.into())
+    }
+
+    async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64> {
+        self.execute(statement, params).await.map_err(|e| e.into())
+    }
+}
+
+impl Deref for CrashOrmDatabaseConnection {
     type Target = Client;
 
     fn deref(&self) -> &Self::Target {
@@ -39,11 +64,11 @@ impl Deref for DatabaseConnection {
 
 #[cfg(test)]
 mod tests {
-    use crate::DatabaseConnection;
+    use crate::CrashOrmDatabaseConnection;
 
     #[tokio::test]
     async fn test_connection() {
-        let connection = DatabaseConnection::test().await;
+        let connection = CrashOrmDatabaseConnection::test().await;
         assert!(connection.is_ok());
         let connection = connection.unwrap();
         let rows = connection.query_one("SELECT $1::TEXT;", &[&"hello world"]).await;

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{DatabaseConnection, Entity, UntypedColumn, QueryCondition, BoxedColumnValue};
+use crate::{Entity, UntypedColumn, QueryCondition, BoxedColumnValue, DatabaseConnection};
 use crate::entity::slice_query_value_iter;
 
 /// Direction of the Order
@@ -91,10 +91,10 @@ impl<T: Entity<T>> Query<T> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities of type [T].
-    pub async fn execute(self, connection: &DatabaseConnection) -> crate::Result<Vec<T>> {
+    pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<T>> {
         let (query, values) = self.get_raw_query();
 
-        let rows = connection.query(
+        let rows = connection.query_many(
             &*query,
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice()
         ).await?;
@@ -115,10 +115,10 @@ impl<T: Entity<T>> SelectQuery<T> {
     /// Execute this query and returns the result as a vector of [Row].
     ///
     /// This can't be parsed automatically, since the selected columns can be anything you want.
-    pub async fn execute(self, connection: &DatabaseConnection) -> crate::Result<Vec<Row>> {
+    pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<Row>> {
         let (query, values) = self.get_raw_query();
 
-        let rows = connection.query(
+        let rows = connection.query_many(
             &*query,
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice()
         ).await?;

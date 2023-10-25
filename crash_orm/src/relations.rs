@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
 use tokio_postgres::types::private::BytesMut;
-use crate::{DatabaseConnection, Entity};
+use crate::{Entity, DatabaseConnection};
 
 macro_rules! default_relation_function {
     ($rel_type:tt) => {
@@ -14,8 +14,8 @@ macro_rules! default_relation_function {
             }
         }
 
-        pub async fn get(&self, conn: &DatabaseConnection) -> crate::Result<T> {
-            T::get_by_id(&conn, self.target_id).await
+        pub async fn get(&self, conn: &impl DatabaseConnection) -> crate::Result<T> {
+            T::get_by_id(conn, self.target_id).await
         }
 
         pub fn from(entity: &impl Entity<T>) -> crate::Result<$rel_type<T>> {

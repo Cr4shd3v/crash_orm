@@ -56,12 +56,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 let function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
 
                 trait_signatures.extend(quote! {
-                    async fn #function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>>;
+                    async fn #function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>>;
                 });
 
                 trait_functions.extend(quote! {
-                    async fn #function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
-                        let rows = connection.query(#query, &[&self.id]).await?;
+                    async fn #function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
+                        let rows = connection.query_many(#query, &[&self.id]).await?;
                         Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
                     }
                 });
@@ -75,7 +75,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     trait_signatures.extend(quote! {
                         fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()>;
 
-                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>>;
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>>;
                     });
 
                     trait_functions.extend(quote! {
@@ -89,7 +89,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
                                 Ok(Some(self.#field_ident.as_ref().unwrap().get(connection).await?))
                             } else {
@@ -101,7 +101,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     trait_signatures.extend(quote! {
                         fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()>;
 
-                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
                     });
 
                     trait_functions.extend(quote! {
@@ -111,7 +111,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
                             self.#field_ident.as_ref().unwrap().get(connection).await
                         }
                     });
@@ -195,53 +195,53 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
             }
 
-            async fn get_by_id(connection: &crash_orm::DatabaseConnection, id: u32) -> crash_orm::Result<#ident> {
-                let row = connection.query_one(#select_by_id_string, &[&id]).await?;
+            async fn get_by_id(connection: &impl crash_orm::DatabaseConnection, id: u32) -> crash_orm::Result<#ident> {
+                let row = connection.query_single(#select_by_id_string, &[&id]).await?;
                 Ok(Self::load_from_row(&row))
             }
 
-            async fn get_all(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
-                let rows = connection.query(#select_all_string, &[]).await?;
+            async fn get_all(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
+                let rows = connection.query_many(#select_all_string, &[]).await?;
                 Ok(rows.iter().map(|v| Self::load_from_row(v)).collect::<Vec<Self>>())
             }
 
-            async fn count(connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<i64> {
-                let row = connection.query_one(#count_string, &[]).await?;
+            async fn count(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<i64> {
+                let row = connection.query_single(#count_string, &[]).await?;
                 Ok(row.get(0))
             }
 
-            async fn insert_get_id(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<u32> {
-                let rows = connection.query(#insert_string,&[#insert_field_self_values]).await?;
+            async fn insert_get_id(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<u32> {
+                let rows = connection.query_many(#insert_string,&[#insert_field_self_values]).await?;
                 Ok(rows.get(0).unwrap().get(0))
             }
 
-            async fn insert_set_id(&mut self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn insert_set_id(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 let id = self.insert_get_id(connection).await?;
                 self.id = Some(id);
                 Ok(())
             }
 
-            async fn remove(&mut self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn remove(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.id.is_none() {
                     return Ok(());
                 }
 
-                connection.execute(#delete_string, &[&self.id]).await?;
+                connection.execute_query(#delete_string, &[&self.id]).await?;
                 self.id = None;
                 Ok(())
             }
 
-            async fn update(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn update(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.id.is_none() {
                     return Err(crash_orm::Error::from_str("You can't update an entity without an id."));
                 }
 
-                connection.execute(#update_string,&[#insert_field_self_values &self.id],).await?;
+                connection.execute_query(#update_string,&[#insert_field_self_values &self.id]).await?;
 
                 Ok(())
             }
 
-            async fn persist(&mut self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn persist(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.id.is_none() {
                     self.insert_set_id(connection).await
                 } else {

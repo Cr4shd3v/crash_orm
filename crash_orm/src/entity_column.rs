@@ -39,8 +39,8 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
     /// Count entries in this column.
     ///
     /// [`distinct`]: Only count unique entries. Duplicates are ignored.
-    pub async fn count(&self, connection: &DatabaseConnection, distinct: bool) -> crate::Result<i64> {
-        let row = connection.query_one(
+    pub async fn count(&self, connection: &impl DatabaseConnection, distinct: bool) -> crate::Result<i64> {
+        let row = connection.query_single(
             &*format!("SELECT COUNT({}{}) FROM {}", if distinct { "DISTINCT " } else { "" }, self.name.to_string(), U::TABLE_NAME),
             &[],
         ).await?;
@@ -51,10 +51,10 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
     /// Count entries in this column based on a condition.
     ///
     /// [`distinct`]: Only count unique entries. Duplicates are ignored.
-    pub async fn count_query(&self, connection: &DatabaseConnection, distinct: bool, condition: QueryCondition<U>) -> crate::Result<i64> {
+    pub async fn count_query(&self, connection: &impl DatabaseConnection, distinct: bool, condition: QueryCondition<U>) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
-        let row = connection.query_one(
+        let row = connection.query_single(
             &*format!("SELECT COUNT({}{}) FROM {} WHERE {}", if distinct { "DISTINCT " } else { "" }, self.name.to_string(), U::TABLE_NAME, query),
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
         ).await?;

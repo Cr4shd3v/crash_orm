@@ -18,35 +18,35 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     fn load_from_row(row: &Row) -> T;
 
     /// Retrieves an entity by its id
-    async fn get_by_id(connection: &DatabaseConnection, id: u32) -> crate::Result<T>;
+    async fn get_by_id(connection: &impl DatabaseConnection, id: u32) -> crate::Result<T>;
 
     /// Retrieves all entities
-    async fn get_all(connection: &DatabaseConnection) -> crate::Result<Vec<T>>;
+    async fn get_all(connection: &impl DatabaseConnection) -> crate::Result<Vec<T>>;
 
     /// Returns the count of entries in the table
-    async fn count(connection: &DatabaseConnection) -> crate::Result<i64>;
+    async fn count(connection: &impl DatabaseConnection) -> crate::Result<i64>;
 
     /// Insert and returns the id
     ///
     /// This DOES NOT set the id in the entity
-    async fn insert_get_id(&self, connection: &DatabaseConnection) -> crate::Result<u32>;
+    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> crate::Result<u32>;
 
     /// Insert and set id
     ///
     /// This DOES set the id in the entity
-    async fn insert_set_id(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
+    async fn insert_set_id(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
     /// Removes the entity from the database
-    async fn remove(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
+    async fn remove(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
     /// Updates the entity in the database
-    async fn update(&self, connection: &DatabaseConnection) -> crate::Result<()>;
+    async fn update(&self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
     /// Persist this entity.
     ///
     /// If the entity is not yet inserted, [`Self::insert_set_id`] is called.
     /// If the entity is already inserted, [`Self::update`] is called.
-    async fn persist(&mut self, connection: &DatabaseConnection) -> crate::Result<()>;
+    async fn persist(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
     /// Creates a [Query] for this Entity.
     ///
@@ -56,10 +56,10 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     }
 
     /// Count the entries based on a [QueryCondition].
-    async fn count_query(connection: &DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<i64> {
+    async fn count_query(connection: &impl DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
-        let row = connection.query_one(
+        let row = connection.query_single(
             &*format!("SELECT COUNT(*) FROM {} WHERE {}", Self::TABLE_NAME, query),
             slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
         ).await?;
