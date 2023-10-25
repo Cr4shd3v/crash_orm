@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{Attribute, Data, DeriveInput, Ident, parse_macro_input};
-use crate::util::{extract_generic_type_ignore_option, get_type_string, ident_to_table_name, is_ignored_relation, is_relation, string_to_table_name};
+use crate::util::{extract_generic_type, extract_generic_type_ignore_option, get_type_string, ident_to_table_name, is_relation, is_relation_value_holder, string_to_table_name};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -31,8 +31,11 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
         let field_type = field.ty;
 
-        if is_ignored_relation(&field_type) {
+        if is_relation(&field_type) {
             let field_type_name = get_type_string(&field_type);
+            let (field_type_name, is_option) = if field_type_name == "Option" {
+                (get_type_string(&extract_generic_type(&field_type).unwrap()), true)
+            } else { (field_type_name, false) };
             let entity_type = extract_generic_type_ignore_option(&field_type).unwrap();
             let entity_table_name = string_to_table_name(get_type_string(&entity_type));
 
@@ -62,21 +65,72 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
                     }
                 });
-            }
 
-            continue;
+                continue;
+            } else if field_type_name == "ManyToOne" {
+                let set_function_ident = Ident::new(&*format!("set_{}", field_ident_str), ident.span());
+                let get_function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
+
+                if is_option {
+                    trait_signatures.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()>;
+
+                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>>;
+                    });
+
+                    trait_functions.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()> {
+                            self.#field_ident = if #field_ident.is_some() {
+                                Some(crash_orm::ManyToOne::from(#field_ident.unwrap())?)
+                            } else {
+                                None
+                            };
+
+                            Ok(())
+                        }
+
+                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
+                            if self.#field_ident.is_some() {
+                                Ok(Some(self.#field_ident.as_ref().unwrap().get(connection).await?))
+                            } else {
+                                Ok(None)
+                            }
+                        }
+                    });
+                } else {
+                    trait_signatures.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()>;
+
+                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
+                    });
+
+                    trait_functions.extend(quote! {
+                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()> {
+                            self.#field_ident = crash_orm::ManyToOne::from(#field_ident)?;
+
+                            Ok(())
+                        }
+
+                        async fn #get_function_ident(&self, connection: &crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                            self.#field_ident.as_ref().unwrap().get(connection).await
+                        }
+                    });
+                }
+            }
         }
 
         select_fields.extend(quote! {
             #field_ident: row.get(#all_index),
         });
 
+        all_index += 1;
+
         if field_ident_str != "id" {
             column_consts.extend(quote! {
                 pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
             });
 
-            if is_relation(&field_type) {
+            if is_relation_value_holder(&field_type) {
                 let field_ident_upper_id = Ident::new(&*format!("{}_ID", field_ident_str.to_uppercase()), field_ident.span());
                 column_consts.extend(quote! {
                     pub const #field_ident_upper_id: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new(#field_ident_str);
@@ -96,8 +150,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             update_fields.push_str(&*format!("{} = ${}", field_ident_str, insert_index));
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
         }
-
-        all_index += 1;
 
         all_field_self_values_format.push_str(&*format!("${},", all_index));
     }

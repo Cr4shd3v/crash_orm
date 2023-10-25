@@ -2,7 +2,7 @@ use quote::ToTokens;
 use syn::{GenericArgument, Ident, PathArguments, Type};
 
 pub(crate) fn extract_generic_type_ignore_option(ty: &Type) -> Option<Type> {
-    if &*get_type_string(ty) == "Option" {
+    if get_type_string(ty) == "Option" {
         extract_generic_type(&extract_generic_type(ty).unwrap())
     } else {
         extract_generic_type(ty)
@@ -32,23 +32,24 @@ pub(crate) fn get_type_string(field_type: &Type) -> String {
     path.to_string().replace(" ", "")
 }
 
-pub(crate) fn is_relation(field_type: &Type) -> bool {
+pub(crate) fn is_relation_value_holder(field_type: &Type) -> bool {
     let path = get_type_string(field_type);
 
     match &*path {
         "OneToOne" => true,
         "ManyToOne" => true,
-        "Option" => is_relation(&extract_generic_type(field_type).unwrap()),
+        "Option" => is_relation_value_holder(&extract_generic_type(field_type).unwrap()),
         _ => false,
     }
 }
 
-pub(crate) fn is_ignored_relation(field_type: &Type) -> bool {
+pub(crate) fn is_relation(field_type: &Type) -> bool {
     let path = get_type_string(field_type);
 
     match &*path {
         "OneToMany" => true,
-        "Option" => is_ignored_relation(&extract_generic_type(field_type).unwrap()),
+        "ManyToOne" => true,
+        "Option" => is_relation(&extract_generic_type(field_type).unwrap()),
         _ => false,
     }
 }

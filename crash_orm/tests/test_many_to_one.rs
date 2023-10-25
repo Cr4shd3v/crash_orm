@@ -58,22 +58,22 @@ impl TestItem22 {
 async fn test_many_to_one() {
     let conn = setup_test_connection().await;
 
-    if !TestItem22::table_exists(&conn).await.unwrap() {
-        assert!(TestItem22::create_table(&conn).await.is_ok());
-    } else {
-        assert!(TestItem22::truncate_table(&conn).await.is_ok());
+    if TestItem22::table_exists(&conn).await.unwrap() {
+        assert!(TestItem22::drop_table(&conn).await.is_ok());
     }
 
-    if !TestItem21::table_exists(&conn).await.unwrap() {
-        assert!(TestItem21::create_table(&conn).await.is_ok());
-    } else {
-        assert!(TestItem21::truncate_table(&conn).await.is_ok());
+    assert!(TestItem22::create_table(&conn).await.is_ok());
+
+    if TestItem21::table_exists(&conn).await.unwrap() {
+        assert!(TestItem21::drop_table(&conn).await.is_ok());
     }
+
+    assert!(TestItem21::create_table(&conn).await.is_ok());
 
     let mut target_item = TestItem22::test();
     target_item.persist(&conn).await.unwrap();
     let mut test_item = TestItem21::test();
-    test_item.other = Some(ManyToOne::from(&target_item).unwrap());
+    test_item.set_other(Some(&target_item)).unwrap();
     vec![test_item, TestItem21::test2()].persist_all(&conn).await.unwrap();
 
     let results = TestItem21::query()
@@ -81,8 +81,8 @@ async fn test_many_to_one() {
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 2);
-    assert_eq!(results[0].other.as_ref().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
-    assert_eq!(results[1].other.as_ref().unwrap().get(&conn).await.unwrap().name1, Some(String::from("Test1234")));
+    assert_eq!(results[0].get_other(&conn).await.unwrap().unwrap().name1, Some(String::from("Test1234")));
+    assert_eq!(results[1].get_other(&conn).await.unwrap().unwrap().name1, Some(String::from("Test1234")));
 
     let results = target_item.get_test_items_21(&conn).await;
     assert!(results.is_ok());
