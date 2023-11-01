@@ -1,4 +1,5 @@
 use std::ops::Deref;
+use std::sync::Arc;
 use tokio_postgres::{Client, Row, Socket};
 use tokio_postgres::tls::MakeTlsConnect;
 use tokio_postgres::types::ToSql;
@@ -68,6 +69,21 @@ macro_rules! impl_database_connection {
 
 impl_database_connection!(CrashOrmDatabaseConnection);
 impl_database_connection!(Client);
+
+#[async_trait::async_trait]
+impl<T: DatabaseConnection + Send> DatabaseConnection for Arc<T> {
+    async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row> {
+        self.deref().query_single(statement, params).await
+    }
+
+    async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>> {
+        self.deref().query_many(statement, params).await
+    }
+
+    async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64> {
+        self.deref().execute_query(statement, params).await
+    }
+}
 
 #[cfg(test)]
 mod tests {
