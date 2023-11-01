@@ -39,21 +39,6 @@ impl CrashOrmDatabaseConnection {
     }
 }
 
-#[async_trait::async_trait]
-impl DatabaseConnection for CrashOrmDatabaseConnection {
-    async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row> {
-        self.query_one(statement, params).await.map_err(|e| e.into())
-    }
-
-    async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>> {
-        self.query(statement, params).await.map_err(|e| e.into())
-    }
-
-    async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64> {
-        self.execute(statement, params).await.map_err(|e| e.into())
-    }
-}
-
 impl Deref for CrashOrmDatabaseConnection {
     type Target = Client;
 
@@ -61,6 +46,28 @@ impl Deref for CrashOrmDatabaseConnection {
         &self.client
     }
 }
+
+macro_rules! impl_database_connection {
+    ($class:ty) => {
+        #[async_trait::async_trait]
+        impl DatabaseConnection for $class {
+            async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row> {
+                self.query_one(statement, params).await.map_err(|e| e.into())
+            }
+
+            async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>> {
+                self.query(statement, params).await.map_err(|e| e.into())
+            }
+
+            async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64> {
+                self.execute(statement, params).await.map_err(|e| e.into())
+            }
+        }
+    };
+}
+
+impl_database_connection!(CrashOrmDatabaseConnection);
+impl_database_connection!(Client);
 
 #[cfg(test)]
 mod tests {
