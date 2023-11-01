@@ -1,5 +1,7 @@
 # Crash ORM
 
+![crates.io](https://img.shields.io/crates/v/crash_orm.svg)
+
 A simple, typed ORM for Postgres.
 
 The goal of this project is to provide an easy-to-use API to interact with your postgres database.
