@@ -1,6 +1,10 @@
 # Crash ORM
 
-This project is WIP, so expect bugs and unexpected behaviour.
+A simple, typed ORM for Postgres.
+
+## Getting Started
+
+
 
 ## Documentation
 The Documentation is located [here](docs/Readme.md).
