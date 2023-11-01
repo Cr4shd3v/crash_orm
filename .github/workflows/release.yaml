@@ -25,6 +25,9 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - run: cargo publish --token ${CRATES_TOKEN}
+      - run: cargo publish --token ${CRATES_TOKEN} -p crash_orm_derive
+        env:
+          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+      - run: cargo publish --token ${CRATES_TOKEN} -p crash_orm
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}

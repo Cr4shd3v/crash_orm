@@ -21,7 +21,7 @@ with-serde = ["serde", "serde_json", "tokio-postgres/with-serde_json-1"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crash_orm_derive = { path = "../crash_orm_derive" }
+crash_orm_derive = "^0.1.0"
 tokio-postgres = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 async-trait = { workspace = true }
