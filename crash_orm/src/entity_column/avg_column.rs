@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, QueryCondition, EntityColumn, slice_query_value_iter, DatabaseConnection};
 
@@ -75,10 +74,15 @@ macro_rules! impl_avg_column {
     };
 }
 
-impl_avg_column!(i8, Decimal);
-impl_avg_column!(i16, Decimal);
-impl_avg_column!(i32, Decimal);
-impl_avg_column!(i64, Decimal);
-impl_avg_column!(Decimal, Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_avg_column!(i8, rust_decimal::Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_avg_column!(i16, rust_decimal::Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_avg_column!(i32, rust_decimal::Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_avg_column!(i64, rust_decimal::Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_avg_column!(rust_decimal::Decimal, rust_decimal::Decimal);
 impl_avg_column!(f32, f64);
 impl_avg_column!(f64, f64);

@@ -1,5 +1,3 @@
-use chrono::*;
-use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{BoxedColumnValue, Column, Entity, VirtualColumn};
 
@@ -23,13 +21,20 @@ impl_text_cast_virtual_column!(i8);
 impl_text_cast_virtual_column!(i16);
 impl_text_cast_virtual_column!(i32);
 impl_text_cast_virtual_column!(i64);
-impl_text_cast_virtual_column!(Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_text_cast_virtual_column!(rust_decimal::Decimal);
 impl_text_cast_virtual_column!(u32);
 impl_text_cast_virtual_column!(f32);
 impl_text_cast_virtual_column!(f64);
-impl_text_cast_virtual_column!(NaiveDateTime);
-impl_text_cast_virtual_column!(DateTime<Utc>);
-impl_text_cast_virtual_column!(DateTime<Local>);
-impl_text_cast_virtual_column!(DateTime<FixedOffset>);
-impl_text_cast_virtual_column!(NaiveDate);
-impl_text_cast_virtual_column!(NaiveTime);
+#[cfg(feature = "with-chrono")]
+impl_text_cast_virtual_column!(chrono::NaiveDateTime);
+#[cfg(feature = "with-chrono")]
+impl_text_cast_virtual_column!(chrono::DateTime<chrono::Utc>);
+#[cfg(feature = "with-chrono")]
+impl_text_cast_virtual_column!(chrono::DateTime<chrono::Local>);
+#[cfg(feature = "with-chrono")]
+impl_text_cast_virtual_column!(chrono::DateTime<chrono::FixedOffset>);
+#[cfg(feature = "with-chrono")]
+impl_text_cast_virtual_column!(chrono::NaiveDate);
+#[cfg(feature = "with-chrono")]
+impl_text_cast_virtual_column!(chrono::NaiveTime);

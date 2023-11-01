@@ -1,4 +1,3 @@
-use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, Column, QueryCondition, TypedColumnValue};
 
@@ -33,7 +32,8 @@ impl_in_entity_column!(i8);
 impl_in_entity_column!(i16);
 impl_in_entity_column!(i32);
 impl_in_entity_column!(i64);
-impl_in_entity_column!(Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_in_entity_column!(rust_decimal::Decimal);
 impl_in_entity_column!(f32);
 impl_in_entity_column!(f64);
 impl_in_entity_column!(String);

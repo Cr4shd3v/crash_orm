@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Entity, EntityColumn, VirtualColumn};
 
@@ -68,7 +67,8 @@ simple_column_value!(i64);
 simple_column_value!(u32);
 simple_column_value!(f32);
 simple_column_value!(f64);
-simple_column_value!(Decimal);
+#[cfg(feature = "with-rust-decimal")]
+simple_column_value!(rust_decimal::Decimal);
 simple_column_value!(String);
 
 impl<T: ToSql, U: Entity<U>> UntypedColumnValue for VirtualColumn<T, U> {

@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
 use crate::entity::slice_query_value_iter;
@@ -76,7 +75,8 @@ impl_max_column!(i8);
 impl_max_column!(i16);
 impl_max_column!(i32);
 impl_max_column!(i64);
-impl_max_column!(Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_max_column!(rust_decimal::Decimal);
 impl_max_column!(u32);
 impl_max_column!(f32);
 impl_max_column!(f64);

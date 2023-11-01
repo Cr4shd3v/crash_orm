@@ -5,16 +5,23 @@ edition = "2021"
 
 [features]
 default = []
+with-rust-decimal = ["rust_decimal"]
+with-chrono = ["chrono", "tokio-postgres/with-chrono-0_4"]
+with-uuid = ["uuid", "tokio-postgres/with-uuid-1"]
+with-serde = ["serde", "serde_json", "tokio-postgres/with-serde_json-1"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 crash_orm_derive = { path = "../crash_orm_derive" }
-tokio-postgres = { workspace = true, features = ["with-chrono-0_4", "with-uuid-1", "with-serde_json-1"] }
+tokio-postgres = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 async-trait = { workspace = true }
-rust_decimal = { workspace = true, features = ["db-tokio-postgres"] }
-chrono = { workspace = true }
-uuid = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
+rust_decimal = { workspace = true, features = ["db-tokio-postgres"], optional = true }
+chrono = { workspace = true, optional = true }
+uuid = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+
+[dev-dependencies]
+crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "with-serde"] }

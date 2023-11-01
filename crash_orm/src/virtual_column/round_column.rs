@@ -1,4 +1,3 @@
-use rust_decimal::Decimal;
 use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, VirtualColumn, BoxedColumnValue};
 
@@ -33,4 +32,5 @@ macro_rules! impl_round_virtual_column {
 
 impl_round_virtual_column!(f32, f64);
 impl_round_virtual_column!(f64, f64);
-impl_round_virtual_column!(Decimal, Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_round_virtual_column!(rust_decimal::Decimal, rust_decimal::Decimal);

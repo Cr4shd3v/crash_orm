@@ -1,8 +1,4 @@
-use chrono::*;
-use rust_decimal::Decimal;
-use serde_json::Value;
 use tokio_postgres::types::ToSql;
-use uuid::Uuid;
 use crate::{Entity, QueryCondition, Column, TypedColumnValue};
 
 /// Trait implementing equals operators
@@ -31,17 +27,26 @@ impl_equal_entity_column!(i8);
 impl_equal_entity_column!(i16);
 impl_equal_entity_column!(i32);
 impl_equal_entity_column!(i64);
-impl_equal_entity_column!(Decimal);
+#[cfg(feature = "with-rust-decimal")]
+impl_equal_entity_column!(rust_decimal::Decimal);
 impl_equal_entity_column!(u32);
 impl_equal_entity_column!(f32);
 impl_equal_entity_column!(f64);
 impl_equal_entity_column!(String);
-impl_equal_entity_column!(NaiveDateTime);
-impl_equal_entity_column!(DateTime<Utc>);
-impl_equal_entity_column!(DateTime<Local>);
-impl_equal_entity_column!(DateTime<FixedOffset>);
-impl_equal_entity_column!(NaiveDate);
-impl_equal_entity_column!(NaiveTime);
-impl_equal_entity_column!(Uuid);
+#[cfg(feature = "with-chrono")]
+impl_equal_entity_column!(chrono::NaiveDateTime);
+#[cfg(feature = "with-chrono")]
+impl_equal_entity_column!(chrono::DateTime<chrono::Utc>);
+#[cfg(feature = "with-chrono")]
+impl_equal_entity_column!(chrono::DateTime<chrono::Local>);
+#[cfg(feature = "with-chrono")]
+impl_equal_entity_column!(chrono::DateTime<chrono::FixedOffset>);
+#[cfg(feature = "with-chrono")]
+impl_equal_entity_column!(chrono::NaiveDate);
+#[cfg(feature = "with-chrono")]
+impl_equal_entity_column!(chrono::NaiveTime);
+#[cfg(feature = "with-uuid")]
+impl_equal_entity_column!(uuid::Uuid);
 impl_equal_entity_column!(Vec<u8>);
-impl_equal_entity_column!(Value);
+#[cfg(feature = "with-serde")]
+impl_equal_entity_column!(serde_json::Value);
