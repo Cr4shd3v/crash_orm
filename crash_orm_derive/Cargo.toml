@@ -9,7 +9,7 @@ documentation = "https://github.com/Cr4shd3v/crash_orm/blob/master/docs/Readme.m
 repository = "https://github.com/Cr4shd3v/crash_orm"
 readme = "Readme.md"
 categories = ["database"]
-keywords = ["async", "database", "framework", "macro"]
+keywords = ["async", "database", "framework", "macro", "orm"]
 
 [lib]
 proc-macro = true
