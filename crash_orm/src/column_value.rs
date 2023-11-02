@@ -69,6 +69,20 @@ simple_column_value!(f32);
 simple_column_value!(f64);
 #[cfg(feature = "with-rust-decimal")]
 simple_column_value!(rust_decimal::Decimal);
+#[cfg(feature = "with-uuid")]
+simple_column_value!(uuid::Uuid);
+#[cfg(feature = "with-chrono")]
+simple_column_value!(chrono::NaiveDateTime);
+#[cfg(feature = "with-chrono")]
+simple_column_value!(chrono::DateTime<chrono::Utc>);
+#[cfg(feature = "with-chrono")]
+simple_column_value!(chrono::DateTime<chrono::Local>);
+#[cfg(feature = "with-chrono")]
+simple_column_value!(chrono::DateTime<chrono::FixedOffset>);
+#[cfg(feature = "with-chrono")]
+simple_column_value!(chrono::NaiveDate);
+#[cfg(feature = "with-chrono")]
+simple_column_value!(chrono::NaiveTime);
 simple_column_value!(String);
 
 impl<T: ToSql, U: Entity<U>> UntypedColumnValue for VirtualColumn<T, U> {
