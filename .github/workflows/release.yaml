@@ -19,6 +19,7 @@ jobs:
           title: $version
           branch: master|v[0-9]+
           token: ${{ secrets.GITHUB_TOKEN }}
+          changelog: CHANGELOG.md
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
