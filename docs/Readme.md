@@ -10,6 +10,7 @@ It might also be useful to inspect the [tests](../crash_orm/tests) if you look f
 - [Getting Started](Getting%20Started/Readme.md)
 - [Entity](Entity/Readme.md)
   - [Property Types](Entity/Types.md)
+  - [Relations](Entity/Relations.md)
 - [Query](Query/Readme.md)
 - [Schema](Schema/Readme.md)
 

@@ -22,6 +22,8 @@ All properties declared in the struct will be treated as a column in the resulti
 
 Take a look at all the [available types](Types.md).
 
+If you want to link different entities via relation, take a look [here](Relations.md).
+
 ## Save Entities
 There are a few functions on each entity to save them into the database.
 
