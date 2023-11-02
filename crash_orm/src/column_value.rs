@@ -96,3 +96,13 @@ impl<T: ToSql, U: Entity<U>> UnboundColumnValue for EntityColumn<T, U> {
         self.get_sql()
     }
 }
+
+impl<T: UnboundColumnValue> UnboundColumnValue for Option<T> {
+    fn get_sql(&self) -> BoxedColumnValue {
+        if self.is_some() {
+            self.as_ref().unwrap().get_sql()
+        } else {
+            BoxedColumnValue::new(String::from("NULL"), vec![])
+        }
+    }
+}
