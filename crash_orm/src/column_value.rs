@@ -31,27 +31,27 @@ impl BoxedColumnValue {
 
 /// Trait implemented on all values
 ///
-/// This value trait is typed. For untyped values use [`UnboundColumnValue`].
-pub trait BoundColumnValue<T: ToSql>: UnboundColumnValue {}
+/// This value trait is typed. For untyped values use [`UntypedColumnValue`].
+pub trait TypedColumnValue<T: ToSql>: UntypedColumnValue {}
 
-impl<T: ToSql, U: Entity<U>> BoundColumnValue<T> for VirtualColumn<T, U> {}
-impl<T: ToSql, U: Entity<U>> BoundColumnValue<T> for VirtualColumn<Option<T>, U> {}
-impl<T: ToSql, U: Entity<U>> BoundColumnValue<T> for EntityColumn<T, U> {}
-impl<T: ToSql, U: Entity<U>> BoundColumnValue<T> for EntityColumn<Option<T>, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for VirtualColumn<T, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for VirtualColumn<Option<T>, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for EntityColumn<T, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for EntityColumn<Option<T>, U> {}
 
-impl<R: UnboundColumnValue + ToSql> BoundColumnValue<R> for R {}
+impl<R: UntypedColumnValue + ToSql> TypedColumnValue<R> for R {}
 
 /// Trait implemented on all values
 ///
-/// This value trait is untyped. For typed values use [`BoundColumnValue`].
-pub trait UnboundColumnValue {
+/// This value trait is untyped. For typed values use [`TypedColumnValue`].
+pub trait UntypedColumnValue {
     /// Internal function to get a sql representation of the value
     fn get_sql(&self) -> BoxedColumnValue;
 }
 
 macro_rules! simple_column_value {
     ($column_type:ty) => {
-        impl UnboundColumnValue for $column_type {
+        impl UntypedColumnValue for $column_type {
             fn get_sql(&self) -> BoxedColumnValue {
                 BoxedColumnValue::new("_$i".to_string(), vec![Arc::new(Box::new(self.clone()))])
             }
@@ -85,19 +85,19 @@ simple_column_value!(chrono::NaiveDate);
 simple_column_value!(chrono::NaiveTime);
 simple_column_value!(String);
 
-impl<T: ToSql, U: Entity<U>> UnboundColumnValue for VirtualColumn<T, U> {
+impl<T: ToSql, U: Entity<U>> UntypedColumnValue for VirtualColumn<T, U> {
     fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }
 }
 
-impl<T: ToSql, U: Entity<U>> UnboundColumnValue for EntityColumn<T, U> {
+impl<T: ToSql, U: Entity<U>> UntypedColumnValue for EntityColumn<T, U> {
     fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }
 }
 
-impl<T: UnboundColumnValue> UnboundColumnValue for Option<T> {
+impl<T: UntypedColumnValue> UntypedColumnValue for Option<T> {
     fn get_sql(&self) -> BoxedColumnValue {
         if self.is_some() {
             self.as_ref().unwrap().get_sql()
