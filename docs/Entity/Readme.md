@@ -1,5 +1,7 @@
 # Entity
 
+**IMPORTANT NOTE**: You might need to refresh your cargo project in your IDE to see the generated code for auto complete.
+
 ## Declaration
 To declare an entity you must do the following things:
 - declare a struct
