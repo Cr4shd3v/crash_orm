@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing};
 use quote::ToTokens;
 use syn::{GenericArgument, Ident, PathArguments, Type};
 
@@ -114,4 +115,4 @@ pub(crate) fn ident_to_table_name(ident: &Ident) -> String {
     string_to_table_name(ident.to_string())
 }
 
-pub(crate) fn string_to_table_name(string: String) -> String { string.to_lowercase() }
+pub(crate) fn string_to_table_name(string: String) -> String { string.to_case(Case::Snake) }

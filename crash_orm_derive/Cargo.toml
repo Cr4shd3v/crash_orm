@@ -19,3 +19,4 @@ proc-macro = true
 [dependencies]
 syn = { workspace = true, features = ["full"] }
 quote = { workspace = true }
+convert_case = { workspace = true }
