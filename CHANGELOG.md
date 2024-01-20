@@ -1,3 +1,6 @@
+# v0.1.3
+- fixed wrong crate version
+
 # v0.1.2
 - fixed bug with derives not detecting datetime/json in entity
 
