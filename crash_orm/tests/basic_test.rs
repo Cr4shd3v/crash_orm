@@ -43,20 +43,35 @@ async fn test_basic() {
     item.remove(&conn).await.unwrap();
 }
 
+#[derive(Entity, Debug, Schema)]
+pub struct TestItem01 {
+    pub id: Option<u32>,
+    pub name: String,
+}
+
+impl TestItem01 {
+    fn test() -> Self {
+        Self {
+            id: None,
+            name: String::from("test123"),
+        }
+    }
+}
+
 #[tokio::test]
 async fn test_persist() {
     let conn = setup_test_connection().await;
 
-    if !TestItem1::table_exists(&conn).await.unwrap() {
-        TestItem1::create_table(&conn).await.unwrap();
+    if !TestItem01::table_exists(&conn).await.unwrap() {
+        TestItem01::create_table(&conn).await.unwrap();
     }
 
-    let mut item = TestItem1::test();
+    let mut item = TestItem01::test();
     item.persist(&conn).await.unwrap();
     assert!(item.id.is_some());
     item.name = String::from("test_updated");
     assert!(item.persist(&conn).await.is_ok());
-    let item_from_db = TestItem1::get_by_id(&conn, item.id.unwrap()).await;
+    let item_from_db = TestItem01::get_by_id(&conn, item.id.unwrap()).await;
     assert!(item_from_db.is_ok());
     let item_from_db = item_from_db.unwrap();
     assert_eq!(&*item_from_db.name, "test_updated");
@@ -119,7 +134,7 @@ impl TestItem3 {
 async fn test_schema() {
     let conn = setup_test_connection().await;
 
-    assert_eq!(TestItem3::TABLE_NAME, "testitem3");
+    assert_eq!(TestItem3::TABLE_NAME, "test_item_3");
     assert!(TestItem3::create_table(&conn).await.is_ok());
     assert!(TestItem3::test().persist(&conn).await.is_ok());
     let all = TestItem3::get_all(&conn).await;
