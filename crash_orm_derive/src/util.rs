@@ -98,7 +98,7 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
             let (res, _) = _rust_to_postgres_type(&extract_generic_type(field_type).unwrap())?;
             return Some((res, true));
         },
-        "Datetime" => "timestamp with time zone",
+        "DateTime" => "timestamp with time zone",
         "NaiveDate" => "date",
         "NaiveTime" => "time",
         "Uuid" => "uuid",
