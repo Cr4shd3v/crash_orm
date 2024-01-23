@@ -5,16 +5,16 @@ use crate::{CrashOrmMigrator, Migrator};
 use crate::entity::{CrashOrmMigration, CrashOrmMigrationColumn};
 
 #[async_trait]
-pub trait CrashOrmMigrationManager {
-    fn get_migrations() -> Vec<Box<dyn Migrator>>;
+pub trait CrashOrmMigrationManager<T: DatabaseConnection> {
+    fn get_migrations() -> Vec<Box<dyn Migrator<T>>>;
 
-    fn get_all_migrations() -> Vec<Box<dyn Migrator>> {
+    fn get_all_migrations() -> Vec<Box<dyn Migrator<T>>> {
         let mut migrations = Self::get_migrations();
         migrations.push(Box::new(CrashOrmMigrator));
         migrations
     }
 
-    async fn migrate_up(conn: &impl DatabaseConnection) -> crash_orm::Result<()> {
+    async fn migrate_up(conn: &T) -> crash_orm::Result<()> {
         let local_migrations = Self::get_all_migrations();
 
         for local_migration in local_migrations {
