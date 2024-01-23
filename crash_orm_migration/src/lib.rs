@@ -1,16 +1,8 @@
 use crash_orm::{DatabaseConnection, Schema};
-use crate::entity::CrashOrmMigration;
 
 pub mod entity;
+mod migrator;
+pub use migrator::*;
 
-pub struct CrashOrmMigrator;
-
-impl CrashOrmMigrator {
-    pub async fn init(db: &impl DatabaseConnection) -> crash_orm::Result<()> {
-        if !CrashOrmMigration::table_exists(db).await? {
-            CrashOrmMigration::create_table(db).await?;
-        }
-
-        Ok(())
-    }
-}
+mod migration_manager;
+pub use migration_manager::*;

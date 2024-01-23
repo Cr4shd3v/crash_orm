@@ -6,5 +6,4 @@ pub struct CrashOrmMigration {
     pub id: Option<u32>,
     pub name: String,
     pub executed_at: DateTime<Utc>,
-    pub last_executed_line: i32,
 }
