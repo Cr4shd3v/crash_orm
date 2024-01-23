@@ -1,3 +1,6 @@
+# v0.1.4
+- added create_table_if_not_exists
+
 # v0.1.3
 - fixed wrong crate version
 
