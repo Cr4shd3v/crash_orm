@@ -28,7 +28,9 @@ pub(crate) fn extract_generic_type(ty: &Type) -> Option<Type> {
 }
 
 pub(crate) fn get_type_string(field_type: &Type) -> String {
-    let Type::Path(path) = field_type else { panic!("unsupported") };
+    let Type::Path(path) = field_type else {
+        panic!("unsupported")
+    };
     let path = path.path.segments.last().unwrap().clone().ident;
     path.to_string().replace(" ", "")
 }
@@ -81,14 +83,26 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "f64" => "float8",
         "String" => "text",
         "Decimal" => "numeric",
-        "OneToOne" =>  {
+        "OneToOne" => {
             let target_entity = extract_generic_type(field_type).unwrap();
-            return Some((format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string())), false));
-        },
+            return Some((
+                format!(
+                    "oid REFERENCES {}(id)",
+                    string_to_table_name(target_entity.into_token_stream().to_string())
+                ),
+                false,
+            ));
+        }
         "ManyToOne" => {
             let target_entity = extract_generic_type(field_type).unwrap();
-            return Some((format!("oid REFERENCES {}(id)", string_to_table_name(target_entity.into_token_stream().to_string())), false));
-        },
+            return Some((
+                format!(
+                    "oid REFERENCES {}(id)",
+                    string_to_table_name(target_entity.into_token_stream().to_string())
+                ),
+                false,
+            ));
+        }
         "OneToMany" => {
             return None;
         }
@@ -98,7 +112,7 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "Option" => {
             let (res, _) = _rust_to_postgres_type(&extract_generic_type(field_type).unwrap())?;
             return Some((res, true));
-        },
+        }
         "DateTime" => "timestamp with time zone",
         "NaiveDate" => "date",
         "NaiveTime" => "time",
@@ -115,4 +129,6 @@ pub(crate) fn ident_to_table_name(ident: &Ident) -> String {
     string_to_table_name(ident.to_string())
 }
 
-pub(crate) fn string_to_table_name(string: String) -> String { string.to_case(Case::Snake) }
+pub(crate) fn string_to_table_name(string: String) -> String {
+    string.to_case(Case::Snake)
+}

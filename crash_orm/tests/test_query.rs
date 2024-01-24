@@ -1,9 +1,14 @@
-use tokio_postgres::NoTls;
 use crash_orm::{CrashOrmDatabaseConnection, Entity, EqualQueryColumn, NullQueryColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -40,7 +45,10 @@ async fn test_query_simple() {
 
     assert!(TestItem4::test().persist(&conn).await.is_ok());
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
-    let results = TestItem4::query().condition(TestItem4Column::NAME.equals(&String::from("test123"))).execute(&conn).await;
+    let results = TestItem4::query()
+        .condition(TestItem4Column::NAME.equals(&String::from("test123")))
+        .execute(&conn)
+        .await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
@@ -92,26 +100,40 @@ async fn test_query_complex() {
 
     let results = TestItem5::query()
         .condition(TestItem5Column::NAME1.equals(&String::from("test123")))
-        .execute(&conn).await;
+        .execute(&conn)
+        .await;
     println!("1: {:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
     let results = TestItem5::query()
-        .condition(TestItem5Column::NAME1.equals(&String::from("test123")).and(TestItem5Column::NUMBER.is_null()))
-        .execute(&conn).await;
+        .condition(
+            TestItem5Column::NAME1
+                .equals(&String::from("test123"))
+                .and(TestItem5Column::NUMBER.is_null()),
+        )
+        .execute(&conn)
+        .await;
     println!("2: {:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem5::query()
-        .condition(TestItem5Column::NUMBER.is_null().or(TestItem5Column::NAME2.is_null()))
-        .execute(&conn).await;
+        .condition(
+            TestItem5Column::NUMBER
+                .is_null()
+                .or(TestItem5Column::NAME2.is_null()),
+        )
+        .execute(&conn)
+        .await;
     println!("3: {:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
-    let results = TestItem5::query().condition(TestItem5Column::NAME2.is_null().not()).execute(&conn).await;
+    let results = TestItem5::query()
+        .condition(TestItem5Column::NAME2.is_null().not())
+        .execute(&conn)
+        .await;
     println!("4: {:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();

@@ -1,9 +1,16 @@
-use tokio_postgres::NoTls;
-use crash_orm::{CrashOrmDatabaseConnection, EntityVec, MaxColumn, MinColumn, NullQueryColumn, Schema};
+use crash_orm::{
+    CrashOrmDatabaseConnection, EntityVec, MaxColumn, MinColumn, NullQueryColumn, Schema,
+};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -44,13 +51,18 @@ async fn test_min_max() {
         assert!(TestItem8::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem8::test(), TestItem8::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem8::test(), TestItem8::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
     let result = TestItem8Column::NUMBER.min(&conn).await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap().unwrap(), 2);
 
-    let result = TestItem8Column::NUMBER.min_query(&conn, TestItem8Column::NAME2.is_not_null()).await;
+    let result = TestItem8Column::NUMBER
+        .min_query(&conn, TestItem8Column::NAME2.is_not_null())
+        .await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap().unwrap(), 15);
 
@@ -58,7 +70,9 @@ async fn test_min_max() {
     assert!(result.is_ok());
     assert_eq!(result.unwrap().unwrap(), 15);
 
-    let result = TestItem8Column::NUMBER.max_query(&conn, TestItem8Column::NAME2.is_null()).await;
+    let result = TestItem8Column::NUMBER
+        .max_query(&conn, TestItem8Column::NAME2.is_null())
+        .await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap().unwrap(), 2);
 

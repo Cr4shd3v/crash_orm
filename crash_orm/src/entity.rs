@@ -1,9 +1,12 @@
+use crate::{
+    BaseColumn, BoxedColumnValue, DatabaseConnection, Query, QueryCondition, SelectQuery,
+    UntypedColumn,
+};
+use async_trait::async_trait;
 use std::fmt::Debug;
 use std::sync::Arc;
-use async_trait::async_trait;
-use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
-use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, Query, QueryCondition, SelectQuery, UntypedColumn};
+use tokio_postgres::Row;
 
 #[async_trait]
 pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
@@ -52,17 +55,27 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     ///
     /// See [Query] for more details on how to build a query.
     fn query() -> Query<T> {
-        Query::new(BoxedColumnValue::new(format!("SELECT * FROM {}", Self::TABLE_NAME), vec![]))
+        Query::new(BoxedColumnValue::new(
+            format!("SELECT * FROM {}", Self::TABLE_NAME),
+            vec![],
+        ))
     }
 
     /// Count the entries based on a [QueryCondition].
-    async fn count_query(connection: &impl DatabaseConnection, condition: QueryCondition<T>) -> crate::Result<i64> {
+    async fn count_query(
+        connection: &impl DatabaseConnection,
+        condition: QueryCondition<T>,
+    ) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
-        let row = connection.query_single(
-            &*format!("SELECT COUNT(*) FROM {} WHERE {}", Self::TABLE_NAME, query),
-            slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice(),
-        ).await?;
+        let row = connection
+            .query_single(
+                &*format!("SELECT COUNT(*) FROM {} WHERE {}", Self::TABLE_NAME, query),
+                slice_query_value_iter(values.as_slice())
+                    .collect::<Vec<&(dyn ToSql + Sync)>>()
+                    .as_slice(),
+            )
+            .await?;
 
         Ok(row.get(0))
     }
@@ -71,19 +84,25 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
     fn select_query(columns: &[&(dyn UntypedColumn<T>)]) -> SelectQuery<T> {
-        let columns = columns.iter().map(|v| v.get_sql()).collect::<Vec<BoxedColumnValue>>();
+        let columns = columns
+            .iter()
+            .map(|v| v.get_sql())
+            .collect::<Vec<BoxedColumnValue>>();
         let mut query = vec![];
         let mut values = vec![];
         let mut index = 1;
 
         for column in columns {
-            let (new_query, new_values, next_index) =  column.resolve(index);
+            let (new_query, new_values, next_index) = column.resolve(index);
             query.push(new_query);
             values.extend(new_values);
             index = next_index;
         }
 
-        SelectQuery::new(BoxedColumnValue::new(format!("SELECT {} FROM {}", query.join(","), Self::TABLE_NAME), values))
+        SelectQuery::new(BoxedColumnValue::new(
+            format!("SELECT {} FROM {}", query.join(","), Self::TABLE_NAME),
+            values,
+        ))
     }
 }
 

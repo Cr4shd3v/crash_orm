@@ -1,8 +1,8 @@
+use crate::entity::{CrashOrmMigrationRecord, CrashOrmMigrationRecordColumn};
+use crate::{CrashOrmBaseMigration, Migration};
 use chrono::Utc;
 use crash_orm::async_trait::async_trait;
 use crash_orm::{DatabaseConnection, Entity, EqualQueryColumn};
-use crate::{CrashOrmBaseMigration, Migration};
-use crate::entity::{CrashOrmMigrationRecord, CrashOrmMigrationRecordColumn};
 
 #[async_trait]
 pub trait CrashOrmMigrationManager<T: DatabaseConnection> {
@@ -24,7 +24,8 @@ pub trait CrashOrmMigrationManager<T: DatabaseConnection> {
 
             let migration_in_db = CrashOrmMigrationRecord::query()
                 .condition(CrashOrmMigrationRecordColumn::NAME.equals(&name))
-                .execute(conn).await?;
+                .execute(conn)
+                .await?;
 
             if migration_in_db.is_empty() {
                 local_migration.up(conn).await?;

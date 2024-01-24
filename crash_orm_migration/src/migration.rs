@@ -1,6 +1,6 @@
-use crash_orm::{DatabaseConnection, Schema};
-use crash_orm::async_trait::async_trait;
 use crate::entity::CrashOrmMigrationRecord;
+use crash_orm::async_trait::async_trait;
+use crash_orm::{DatabaseConnection, Schema};
 
 #[async_trait]
 pub trait Migration<T: DatabaseConnection>: Send + Sync {

@@ -1,10 +1,15 @@
-use rust_decimal::Decimal;
-use tokio_postgres::NoTls;
 use crash_orm::{AvgColumn, CrashOrmDatabaseConnection, EntityVec, NullQueryColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
+use rust_decimal::Decimal;
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -45,13 +50,18 @@ async fn test_avg() {
         assert!(TestItem10::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem10::test(), TestItem10::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem10::test(), TestItem10::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
     let result = TestItem10Column::NUMBER.avg(&conn, true).await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), Decimal::from(2));
 
-    let result = TestItem10Column::NUMBER.avg_query(&conn, true, TestItem10Column::NAME2.is_null()).await;
+    let result = TestItem10Column::NUMBER
+        .avg_query(&conn, true, TestItem10Column::NAME2.is_null())
+        .await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), Decimal::new(3200, 3));
 

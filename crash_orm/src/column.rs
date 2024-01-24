@@ -1,5 +1,5 @@
-use tokio_postgres::types::ToSql;
 use crate::{BoxedColumnValue, Entity, EntityColumn, VirtualColumn};
+use tokio_postgres::types::ToSql;
 
 pub trait BaseColumn<U: Entity<U>> {
     const ID: EntityColumn<Option<u32>, U> = EntityColumn::<Option<u32>, U>::new("id");

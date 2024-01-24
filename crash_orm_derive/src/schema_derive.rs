@@ -1,7 +1,7 @@
+use crate::util::{ident_to_table_name, rust_to_postgres_type};
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput, parse_macro_input};
-use crate::util::{ident_to_table_name, rust_to_postgres_type};
+use syn::{parse_macro_input, Data, DeriveInput};
 
 pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -25,7 +25,10 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         create_fields_string.push_str(&*format!("{} {}", field_name, column_type.unwrap()));
 
         if &*field_name == "id" {
-            create_fields_string.push_str(&*format!(" DEFAULT nextval('{}_id_seq'::regclass)", ident_str));
+            create_fields_string.push_str(&*format!(
+                " DEFAULT nextval('{}_id_seq'::regclass)",
+                ident_str
+            ));
         }
 
         create_fields_string.push_str(",");
@@ -33,14 +36,20 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
 
     create_fields_string.push_str("PRIMARY KEY (id)");
 
-    let create_string = format!("CREATE TABLE public.{}({});", ident_str, create_fields_string);
+    let create_string = format!(
+        "CREATE TABLE public.{}({});",
+        ident_str, create_fields_string
+    );
 
     let sequence_create = format!("CREATE SEQUENCE {}_id_seq", ident_str);
     let sequence_created_alter = format!("ALTER SEQUENCE {0}_id_seq OWNED BY {0}.id", ident_str);
 
     let drop_string = format!("DROP TABLE IF EXISTS {} CASCADE", ident_str);
     let truncate_string = format!("TRUNCATE {} RESTART IDENTITY CASCADE", ident_str);
-    let table_exists_string = format!("SELECT EXISTS(SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '{}')", ident_str);
+    let table_exists_string = format!(
+        "SELECT EXISTS(SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '{}')",
+        ident_str
+    );
 
     let output = quote! {
         #[crash_orm::async_trait::async_trait]

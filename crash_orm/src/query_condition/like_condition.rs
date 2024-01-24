@@ -1,5 +1,5 @@
-use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, QueryCondition, TypedColumnValue};
+use tokio_postgres::types::ToSql;
 
 /// Trait implementing like operators
 pub trait LikeQueryColumn<T: ToSql, U: Entity<U>> {

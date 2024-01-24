@@ -1,9 +1,14 @@
-use tokio_postgres::NoTls;
 use crash_orm::{CrashOrmDatabaseConnection, EntityVec, NullQueryColumn, Schema, SumColumn};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -44,13 +49,18 @@ async fn test_sum() {
         assert!(TestItem7::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem7::test(), TestItem7::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem7::test(), TestItem7::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
     let result = TestItem7Column::NUMBER.sum(&conn, true).await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), 17);
 
-    let result = TestItem7Column::NUMBER.sum_query(&conn, true, TestItem7Column::NAME2.is_not_null()).await;
+    let result = TestItem7Column::NUMBER
+        .sum_query(&conn, true, TestItem7Column::NAME2.is_not_null())
+        .await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), 15);
 

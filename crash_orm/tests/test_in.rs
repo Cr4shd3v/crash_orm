@@ -1,9 +1,14 @@
-use tokio_postgres::NoTls;
 use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, InQueryColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -44,18 +49,33 @@ async fn test_in() {
         assert!(TestItem14::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem14::test(), TestItem14::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem14::test(), TestItem14::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
-    let results = TestItem14::query().condition(TestItem14Column::NUMBER.in_vec(vec![&439, &440])).execute(&conn).await;
+    let results = TestItem14::query()
+        .condition(TestItem14Column::NUMBER.in_vec(vec![&439, &440]))
+        .execute(&conn)
+        .await;
     println!("{:?}", results);
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem14::query().condition(TestItem14Column::NUMBER.not_in_vec(vec![&439, &440])).execute(&conn).await;
+    let results = TestItem14::query()
+        .condition(TestItem14Column::NUMBER.not_in_vec(vec![&439, &440]))
+        .execute(&conn)
+        .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
-    let results = TestItem14::query().condition(TestItem14Column::NAME1.in_vec(vec![&String::from("test12"), &String::from("test1234")])).execute(&conn).await;
+    let results = TestItem14::query()
+        .condition(
+            TestItem14Column::NAME1
+                .in_vec(vec![&String::from("test12"), &String::from("test1234")]),
+        )
+        .execute(&conn)
+        .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 

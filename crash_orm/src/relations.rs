@@ -1,9 +1,9 @@
+use crate::Entity;
 use std::error::Error;
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
 use tokio_postgres::types::private::BytesMut;
-use crate::Entity;
+use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
 
 macro_rules! default_relation_function {
     ($rel_type:tt) => {
@@ -17,11 +17,13 @@ macro_rules! default_relation_function {
         pub fn from(entity: &impl Entity<T>) -> crate::Result<$rel_type<T>> {
             let id = entity.get_id();
             if id.is_none() {
-                return Err(crate::Error::from_str("Can't link an entity that hasn't been inserted yet"));
+                return Err(crate::Error::from_str(
+                    "Can't link an entity that hasn't been inserted yet",
+                ));
             }
 
             Ok(Self {
-                 _p: PhantomData,
+                _p: PhantomData,
                 target_id: id.unwrap(),
             })
         }
@@ -31,15 +33,29 @@ macro_rules! default_relation_function {
 macro_rules! sql_impl_for_relation {
     ($rel_type:tt) => {
         impl<T: Entity<T>> ToSql for $rel_type<T> {
-            fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>> where Self: Sized {
+            fn to_sql(
+                &self,
+                ty: &Type,
+                out: &mut BytesMut,
+            ) -> Result<IsNull, Box<dyn Error + Sync + Send>>
+            where
+                Self: Sized,
+            {
                 self.target_id.to_sql(ty, out)
             }
 
-            fn accepts(ty: &Type) -> bool where Self: Sized {
+            fn accepts(ty: &Type) -> bool
+            where
+                Self: Sized,
+            {
                 <u32 as ToSql>::accepts(ty)
             }
 
-            fn to_sql_checked(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
+            fn to_sql_checked(
+                &self,
+                ty: &Type,
+                out: &mut BytesMut,
+            ) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
                 self.target_id.to_sql_checked(ty, out)
             }
         }
@@ -75,9 +91,7 @@ pub struct OneToOneRef<T: Entity<T>> {
 
 impl<T: Entity<T>> OneToOneRef<T> {
     pub fn new() -> OneToOneRef<T> {
-        OneToOneRef {
-            _p: PhantomData,
-        }
+        OneToOneRef { _p: PhantomData }
     }
 }
 
@@ -100,8 +114,6 @@ pub struct OneToMany<T: Entity<T>> {
 
 impl<T: Entity<T>> OneToMany<T> {
     pub fn new() -> OneToMany<T> {
-        OneToMany {
-            _p: PhantomData,
-        }
+        OneToMany { _p: PhantomData }
     }
 }

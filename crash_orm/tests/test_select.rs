@@ -1,9 +1,16 @@
-use tokio_postgres::NoTls;
-use crash_orm::{BoolQueryColumn, CrashOrmDatabaseConnection, Entity, EntityVec, Schema, StringVirtualColumn};
+use crash_orm::{
+    BoolQueryColumn, CrashOrmDatabaseConnection, Entity, EntityVec, Schema, StringVirtualColumn,
+};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -44,27 +51,40 @@ async fn test_select() {
         assert!(TestItem16::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem16::test(), TestItem16::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem16::test(), TestItem16::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
-    let results = TestItem16::select_query(&[&TestItem16Column::NUMBER]).execute(&conn).await;
+    let results = TestItem16::select_query(&[&TestItem16Column::NUMBER])
+        .execute(&conn)
+        .await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 1);
 
-    let results = TestItem16::select_query(
-        &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1, &TestItem16Column::ACTIVE]
-    ).execute(&conn).await;
+    let results = TestItem16::select_query(&[
+        &TestItem16Column::NUMBER,
+        &TestItem16Column::NAME1,
+        &TestItem16Column::ACTIVE,
+    ])
+    .execute(&conn)
+    .await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 3);
 
-    let results = TestItem16::select_query(
-        &[&TestItem16Column::NUMBER, &TestItem16Column::NAME1.reverse()],
-    ).condition(TestItem16Column::ACTIVE.is_true()).execute(&conn).await;
+    let results = TestItem16::select_query(&[
+        &TestItem16Column::NUMBER,
+        &TestItem16Column::NAME1.reverse(),
+    ])
+    .condition(TestItem16Column::ACTIVE.is_true())
+    .execute(&conn)
+    .await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();

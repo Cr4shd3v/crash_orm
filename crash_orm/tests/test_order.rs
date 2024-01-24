@@ -1,9 +1,16 @@
-use tokio_postgres::NoTls;
-use crash_orm::{CompareQueryColumn, CrashOrmDatabaseConnection, Entity, EntityVec, OrderDirection, Schema};
+use crash_orm::{
+    CompareQueryColumn, CrashOrmDatabaseConnection, Entity, EntityVec, OrderDirection, Schema,
+};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -44,11 +51,15 @@ async fn test_order() {
         assert!(TestItem17::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem17::test(), TestItem17::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem17::test(), TestItem17::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
     let results = TestItem17::query()
         .order(&TestItem17Column::NUMBER, OrderDirection::ASC)
-        .execute(&conn).await;
+        .execute(&conn)
+        .await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
@@ -59,7 +70,8 @@ async fn test_order() {
     let results = TestItem17::query()
         .condition(TestItem17Column::NUMBER.greater_equal(&400))
         .order(&TestItem17Column::NUMBER, OrderDirection::DESC)
-        .execute(&conn).await;
+        .execute(&conn)
+        .await;
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 2);

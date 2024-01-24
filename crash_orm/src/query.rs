@@ -1,8 +1,8 @@
-use std::sync::Arc;
-use tokio_postgres::Row;
-use tokio_postgres::types::ToSql;
-use crate::{Entity, UntypedColumn, QueryCondition, BoxedColumnValue, DatabaseConnection};
 use crate::entity::slice_query_value_iter;
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, QueryCondition, UntypedColumn};
+use std::sync::Arc;
+use tokio_postgres::types::ToSql;
+use tokio_postgres::Row;
 
 /// Direction of the Order
 #[derive(Debug)]
@@ -38,7 +38,11 @@ macro_rules! base_query_functions {
         }
 
         /// Add an order to this query.
-        pub fn add_order(mut self, order: &(dyn UntypedColumn<T>), order_direction: OrderDirection) -> $base<T> {
+        pub fn add_order(
+            mut self,
+            order: &(dyn UntypedColumn<T>),
+            order_direction: OrderDirection,
+        ) -> $base<T> {
             self.order.push((order.get_sql(), order_direction));
             self
         }
@@ -46,17 +50,22 @@ macro_rules! base_query_functions {
         /// Set the order for this query.
         ///
         /// This will OVERRIDE all previous orders.
-        pub fn order(mut self, order: &(dyn UntypedColumn<T>), order_direction: OrderDirection) -> $base<T> {
+        pub fn order(
+            mut self,
+            order: &(dyn UntypedColumn<T>),
+            order_direction: OrderDirection,
+        ) -> $base<T> {
             self.order.clear();
             self.order.push((order.get_sql(), order_direction));
             self
         }
 
-        fn get_raw_query(self) -> (String, Vec<Arc<Box<dyn ToSql+Send+Sync>>>) {
+        fn get_raw_query(self) -> (String, Vec<Arc<Box<dyn ToSql + Send + Sync>>>) {
             let (mut query, mut values, mut index) = self.base_query.resolve(1);
 
             if self.condition.is_some() {
-                let (condition_query, condition_values, next_index) = self.condition.unwrap().resolve(index);
+                let (condition_query, condition_values, next_index) =
+                    self.condition.unwrap().resolve(index);
                 index = next_index;
                 values = condition_values;
                 query.push_str(" WHERE ");
@@ -94,10 +103,14 @@ impl<T: Entity<T>> Query<T> {
     pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<T>> {
         let (query, values) = self.get_raw_query();
 
-        let rows = connection.query_many(
-            &*query,
-            slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice()
-        ).await?;
+        let rows = connection
+            .query_many(
+                &*query,
+                slice_query_value_iter(values.as_slice())
+                    .collect::<Vec<&(dyn ToSql + Sync)>>()
+                    .as_slice(),
+            )
+            .await?;
 
         Ok(rows.iter().map(|r| T::load_from_row(r)).collect::<Vec<T>>())
     }
@@ -118,10 +131,14 @@ impl<T: Entity<T>> SelectQuery<T> {
     pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<Row>> {
         let (query, values) = self.get_raw_query();
 
-        let rows = connection.query_many(
-            &*query,
-            slice_query_value_iter(values.as_slice()).collect::<Vec<&(dyn ToSql + Sync)>>().as_slice()
-        ).await?;
+        let rows = connection
+            .query_many(
+                &*query,
+                slice_query_value_iter(values.as_slice())
+                    .collect::<Vec<&(dyn ToSql + Sync)>>()
+                    .as_slice(),
+            )
+            .await?;
 
         Ok(rows)
     }

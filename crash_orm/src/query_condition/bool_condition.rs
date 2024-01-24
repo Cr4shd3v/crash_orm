@@ -1,5 +1,5 @@
-use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, QueryCondition};
+use tokio_postgres::types::ToSql;
 
 /// Trait implementing true/false checks
 pub trait BoolQueryColumn<T: ToSql, U: Entity<U>> {

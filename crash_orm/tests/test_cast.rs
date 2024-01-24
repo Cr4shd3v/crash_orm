@@ -1,9 +1,16 @@
-use tokio_postgres::NoTls;
-use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, EqualQueryColumn, Schema, TextCastVirtualColumn};
+use crash_orm::{
+    CrashOrmDatabaseConnection, Entity, EntityVec, EqualQueryColumn, Schema, TextCastVirtualColumn,
+};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -44,11 +51,19 @@ async fn test_cast() {
         assert!(TestItem18::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem18::test(), TestItem18::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem18::test(), TestItem18::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
     let results = TestItem18::query()
-        .condition(TestItem18Column::NUMBER.cast_to_text().equals(&String::from("440")))
-        .execute(&conn).await;
+        .condition(
+            TestItem18Column::NUMBER
+                .cast_to_text()
+                .equals(&String::from("440")),
+        )
+        .execute(&conn)
+        .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 

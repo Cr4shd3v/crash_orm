@@ -1,7 +1,10 @@
+use crate::util::{
+    extract_generic_type, extract_generic_type_ignore_option, get_type_string, ident_to_table_name,
+    is_relation, is_relation_value_holder, string_to_table_name,
+};
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{Attribute, Data, DeriveInput, Field, Ident, parse_macro_input};
-use crate::util::{extract_generic_type, extract_generic_type_ignore_option, get_type_string, ident_to_table_name, is_relation, is_relation_value_holder, string_to_table_name};
+use syn::{parse_macro_input, Attribute, Data, DeriveInput, Field, Ident};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -34,8 +37,13 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         if is_relation(field_type) {
             let field_type_name = get_type_string(field_type);
             let (field_type_name, is_option) = if field_type_name == "Option" {
-                (get_type_string(&extract_generic_type(field_type).unwrap()), true)
-            } else { (field_type_name, false) };
+                (
+                    get_type_string(&extract_generic_type(field_type).unwrap()),
+                    true,
+                )
+            } else {
+                (field_type_name, false)
+            };
             let entity_type = extract_generic_type_ignore_option(field_type).unwrap();
             let entity_table_name = string_to_table_name(get_type_string(&entity_type));
             let set_function_ident = Ident::new(&*format!("set_{}", field_ident_str), ident.span());
@@ -54,7 +62,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                 let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
 
-                let query = format!("SELECT * FROM {} WHERE {} = $1", entity_table_name, mapped_by);
+                let query = format!(
+                    "SELECT * FROM {} WHERE {} = $1",
+                    entity_table_name, mapped_by
+                );
 
                 trait_signatures.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>>;
@@ -172,7 +183,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 });
 
                 let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
-                let query = format!("SELECT * FROM {} WHERE {} = $1", entity_table_name, mapped_by);
+                let query = format!(
+                    "SELECT * FROM {} WHERE {} = $1",
+                    entity_table_name, mapped_by
+                );
 
                 trait_signatures.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
@@ -201,7 +215,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             });
 
             if is_relation_value_holder(&field_type) {
-                let field_ident_upper_id = Ident::new(&*format!("{}_ID", field_ident_str.to_uppercase()), field_ident.span());
+                let field_ident_upper_id = Ident::new(
+                    &*format!("{}_ID", field_ident_str.to_uppercase()),
+                    field_ident.span(),
+                );
                 column_consts.extend(quote! {
                     pub const #field_ident_upper_id: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new(#field_ident_str);
                 });
@@ -228,14 +245,21 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let insert_field_names = insert_field_names.to_string();
     let insert_field_names = insert_field_names.strip_suffix(",").unwrap();
-    let insert_field_self_values_format = insert_field_self_values_format.strip_suffix(",").unwrap();
+    let insert_field_self_values_format =
+        insert_field_self_values_format.strip_suffix(",").unwrap();
 
     let select_by_id_string = format!("SELECT * FROM {} WHERE id = $1", ident_str);
     let select_all_string = format!("SELECT * FROM {}", ident_str);
     let count_string = format!("SELECT COUNT(*) FROM {}", ident_str);
-    let insert_string = format!("INSERT INTO {}({}) VALUES ({}) RETURNING id", ident_str, insert_field_names, insert_field_self_values_format);
+    let insert_string = format!(
+        "INSERT INTO {}({}) VALUES ({}) RETURNING id",
+        ident_str, insert_field_names, insert_field_self_values_format
+    );
     let delete_string = format!("DELETE FROM {} WHERE id = $1", ident_str);
-    let update_string = format!("UPDATE {} SET {} WHERE id = ${}", ident_str, update_fields, insert_index);
+    let update_string = format!(
+        "UPDATE {} SET {} WHERE id = ${}",
+        ident_str, update_fields, insert_index
+    );
     let ident_column = Ident::new(&*format!("{}Column", ident.to_string()), ident.span());
 
     let mut output = quote! {
@@ -324,23 +348,32 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     if !trait_signatures.is_empty() {
         let ident_trait = Ident::new(&*format!("{}Trait", ident.to_string()), ident.span());
         output.extend(quote! {
-        #[crash_orm::async_trait::async_trait]
-        #vis trait #ident_trait {
-            #trait_signatures
-        }
+            #[crash_orm::async_trait::async_trait]
+            #vis trait #ident_trait {
+                #trait_signatures
+            }
 
-        #[crash_orm::async_trait::async_trait]
-        impl #ident_trait for #ident {
-            #trait_functions
-        }
-    });
+            #[crash_orm::async_trait::async_trait]
+            impl #ident_trait for #ident {
+                #trait_functions
+            }
+        });
     }
 
     output.into()
 }
 
 fn get_mapped_by_attribute(field: &Field) -> Option<&Attribute> {
-    field.attrs.iter().find(|a| a.meta.path().segments.last().unwrap().to_token_stream().to_string() == "mapped_by")
+    field.attrs.iter().find(|a| {
+        a.meta
+            .path()
+            .segments
+            .last()
+            .unwrap()
+            .to_token_stream()
+            .to_string()
+            == "mapped_by"
+    })
 }
 
 fn parse_mapped_by_arg(attribute: &Attribute) -> String {

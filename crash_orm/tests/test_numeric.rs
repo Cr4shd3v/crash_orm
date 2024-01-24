@@ -1,10 +1,15 @@
-use rust_decimal::Decimal;
-use tokio_postgres::NoTls;
 use crash_orm::{CrashOrmDatabaseConnection, EntityVec, MaxColumn, MinColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
+use rust_decimal::Decimal;
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -45,7 +50,10 @@ async fn test_decimal() {
         assert!(TestItem9::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem9::test(), TestItem9::test2()].persist_all(&conn).await.unwrap();
+    vec![TestItem9::test(), TestItem9::test2()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
     let result = TestItem9Column::NUMBER.max(&conn).await;
     assert!(result.is_ok());

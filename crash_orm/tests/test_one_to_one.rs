@@ -1,9 +1,14 @@
-use tokio_postgres::NoTls;
 use crash_orm::{CrashOrmDatabaseConnection, Entity, OneToOne, OneToOneRef, Schema};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -69,12 +74,14 @@ async fn test_one_to_one() {
     assert!(result.is_ok());
     assert_eq!(result.unwrap().name1, Some(String::from("test123")));
 
-    let results = TestItem19::query()
-        .execute(&conn).await;
+    let results = TestItem19::query().execute(&conn).await;
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].get_other(&conn).await.unwrap().unwrap().name1, Some(String::from("Test1234")));
+    assert_eq!(
+        results[0].get_other(&conn).await.unwrap().unwrap().name1,
+        Some(String::from("Test1234"))
+    );
 
     assert!(TestItem19::drop_table(&conn).await.is_ok());
     assert!(TestItem20::drop_table(&conn).await.is_ok());

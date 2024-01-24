@@ -1,8 +1,8 @@
 extern crate proc_macro;
 
-use proc_macro::TokenStream;
 use crate::entity_derive::derive_entity_impl;
 use crate::schema_derive::derive_schema_impl;
+use proc_macro::TokenStream;
 
 mod entity_derive;
 mod schema_derive;

@@ -1,9 +1,14 @@
-use tokio_postgres::NoTls;
 use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, Schema};
 use crash_orm_derive::{Entity, Schema};
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", NoTls).await.unwrap()
+    CrashOrmDatabaseConnection::new(
+        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+        NoTls,
+    )
+    .await
+    .unwrap()
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -104,7 +109,10 @@ async fn test_get_all() {
         TestItem2::create_table(&conn).await.unwrap();
     }
 
-    vec![TestItem2::test(), TestItem2::test(), TestItem2::test()].persist_all(&conn).await.unwrap();
+    vec![TestItem2::test(), TestItem2::test(), TestItem2::test()]
+        .persist_all(&conn)
+        .await
+        .unwrap();
 
     let results = TestItem2::get_all(&conn).await;
     assert!(results.is_ok());

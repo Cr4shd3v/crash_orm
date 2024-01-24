@@ -7,9 +7,9 @@ pub use round_column::*;
 mod sqrt_column;
 pub use sqrt_column::*;
 
+use crate::{BoxedColumnValue, Entity};
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
-use crate::{BoxedColumnValue, Entity};
 
 mod text_cast_column;
 pub use text_cast_column::*;

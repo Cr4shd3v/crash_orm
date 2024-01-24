@@ -1,16 +1,28 @@
 use std::ops::Deref;
 use std::sync::Arc;
-use tokio_postgres::{Client, Row, Socket};
 use tokio_postgres::tls::MakeTlsConnect;
 use tokio_postgres::types::ToSql;
+use tokio_postgres::{Client, Row, Socket};
 
 #[async_trait::async_trait]
 pub trait DatabaseConnection: Sync {
-    async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row>;
+    async fn query_single(
+        &self,
+        statement: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> crate::Result<Row>;
 
-    async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>>;
+    async fn query_many(
+        &self,
+        statement: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> crate::Result<Vec<Row>>;
 
-    async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64>;
+    async fn execute_query(
+        &self,
+        statement: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> crate::Result<u64>;
 }
 
 pub struct CrashOrmDatabaseConnection {
@@ -19,9 +31,12 @@ pub struct CrashOrmDatabaseConnection {
 
 impl CrashOrmDatabaseConnection {
     /// Creates a new database connection with a connection string and tls
-    pub async fn new<T>(config: &str, tls: T) -> crate::Result<Self> where T: MakeTlsConnect<Socket>, <T as MakeTlsConnect<Socket>>::Stream: Send + 'static {
-        let (client, connection) =
-            tokio_postgres::connect(config, tls).await?;
+    pub async fn new<T>(config: &str, tls: T) -> crate::Result<Self>
+    where
+        T: MakeTlsConnect<Socket>,
+        <T as MakeTlsConnect<Socket>>::Stream: Send + 'static,
+    {
+        let (client, connection) = tokio_postgres::connect(config, tls).await?;
 
         tokio::spawn(async move {
             if let Err(e) = connection.await {
@@ -29,14 +44,16 @@ impl CrashOrmDatabaseConnection {
             }
         });
 
-        Ok(Self {
-            client,
-        })
+        Ok(Self { client })
     }
 
     #[cfg(test)]
     pub async fn test() -> crate::Result<Self> {
-        Self::new("postgresql://crash_orm:postgres@localhost/crash_orm_test", tokio_postgres::NoTls).await
+        Self::new(
+            "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+            tokio_postgres::NoTls,
+        )
+        .await
     }
 }
 
@@ -52,15 +69,29 @@ macro_rules! impl_database_connection {
     ($class:ty) => {
         #[async_trait::async_trait]
         impl DatabaseConnection for $class {
-            async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row> {
-                self.query_one(statement, params).await.map_err(|e| e.into())
+            async fn query_single(
+                &self,
+                statement: &str,
+                params: &[&(dyn ToSql + Sync)],
+            ) -> crate::Result<Row> {
+                self.query_one(statement, params)
+                    .await
+                    .map_err(|e| e.into())
             }
 
-            async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>> {
+            async fn query_many(
+                &self,
+                statement: &str,
+                params: &[&(dyn ToSql + Sync)],
+            ) -> crate::Result<Vec<Row>> {
                 self.query(statement, params).await.map_err(|e| e.into())
             }
 
-            async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64> {
+            async fn execute_query(
+                &self,
+                statement: &str,
+                params: &[&(dyn ToSql + Sync)],
+            ) -> crate::Result<u64> {
                 self.execute(statement, params).await.map_err(|e| e.into())
             }
         }
@@ -72,15 +103,27 @@ impl_database_connection!(Client);
 
 #[async_trait::async_trait]
 impl<T: DatabaseConnection + Send> DatabaseConnection for Arc<T> {
-    async fn query_single(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Row> {
+    async fn query_single(
+        &self,
+        statement: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> crate::Result<Row> {
         self.deref().query_single(statement, params).await
     }
 
-    async fn query_many(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<Vec<Row>> {
+    async fn query_many(
+        &self,
+        statement: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> crate::Result<Vec<Row>> {
         self.deref().query_many(statement, params).await
     }
 
-    async fn execute_query(&self, statement: &str, params: &[&(dyn ToSql + Sync)]) -> crate::Result<u64> {
+    async fn execute_query(
+        &self,
+        statement: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> crate::Result<u64> {
         self.deref().execute_query(statement, params).await
     }
 }
@@ -94,7 +137,9 @@ mod tests {
         let connection = CrashOrmDatabaseConnection::test().await;
         assert!(connection.is_ok());
         let connection = connection.unwrap();
-        let rows = connection.query_one("SELECT $1::TEXT;", &[&"hello world"]).await;
+        let rows = connection
+            .query_one("SELECT $1::TEXT;", &[&"hello world"])
+            .await;
         assert!(rows.is_ok());
         let rows = rows.unwrap();
         let column: &str = rows.get(0);

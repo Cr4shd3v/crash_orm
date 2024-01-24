@@ -1,5 +1,5 @@
+use crate::{Column, Entity, QueryCondition, TypedColumnValue};
 use tokio_postgres::types::ToSql;
-use crate::{Entity, QueryCondition, Column, TypedColumnValue};
 
 /// Trait implementing equals operators
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
@@ -15,7 +15,10 @@ macro_rules! impl_equal_entity_column {
                 QueryCondition::Equals(self.get_sql(), other.get_sql())
             }
 
-            fn not_equals(&self, other: &(dyn TypedColumnValue<$column_type>)) -> QueryCondition<T> {
+            fn not_equals(
+                &self,
+                other: &(dyn TypedColumnValue<$column_type>),
+            ) -> QueryCondition<T> {
                 QueryCondition::NotEquals(self.get_sql(), other.get_sql())
             }
         }
