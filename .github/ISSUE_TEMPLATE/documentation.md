@@ -2,7 +2,7 @@
 name: Documentation
 about: Request changes for this libraries documentation
 title: ''
-labels: documentation
+labels: B-Documentation
 assignees: ''
 
 ---

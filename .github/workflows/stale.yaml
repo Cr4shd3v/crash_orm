@@ -15,5 +15,5 @@ jobs:
           stale-pr-message: 'This pull request has been marked as "stale" because it has not had activity for 30 days.'
           days-before-stale: 30
           days-before-close: 7
-          stale-issue-label: 'stale'
-          stale-pr-label: 'stale'
+          stale-issue-label: 'Stale'
+          stale-pr-label: 'Stale'

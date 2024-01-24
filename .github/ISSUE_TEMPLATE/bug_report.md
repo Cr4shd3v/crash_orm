@@ -1,8 +1,8 @@
 ---
 name: Bug report
-about: Report any issue/unexpected behavior in the ORM
+about: Report any issue/unexpected behavior in the ORM / Migration
 title: ''
-labels: bug
+labels: B-Bug
 assignees: Cr4shd3v
 
 ---
