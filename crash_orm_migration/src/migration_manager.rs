@@ -1,23 +1,17 @@
 use crate::entity::{CrashOrmMigrationRecord, CrashOrmMigrationRecordColumn};
-use crate::{CrashOrmBaseMigration, Migration};
+use crate::Migration;
 use chrono::Utc;
 use crash_orm::async_trait::async_trait;
-use crash_orm::{DatabaseConnection, Entity, EqualQueryColumn};
+use crash_orm::{DatabaseConnection, Entity, EqualQueryColumn, Schema};
 
 #[async_trait]
 pub trait CrashOrmMigrationManager<T: DatabaseConnection> {
     fn get_migrations() -> Vec<Box<dyn Migration<T>>>;
 
-    fn get_all_migrations() -> Vec<Box<dyn Migration<T>>> {
-        let migrations = Self::get_migrations();
-        let mut all_migrations = Vec::<Box<dyn Migration<T>>>::with_capacity(migrations.len() + 1);
-        all_migrations.push(Box::new(CrashOrmBaseMigration));
-        all_migrations.extend(migrations);
-        all_migrations
-    }
-
     async fn migrate_up(conn: &T) -> crash_orm::Result<()> {
-        let local_migrations = Self::get_all_migrations();
+        CrashOrmMigrationRecord::create_table_if_not_exists(conn).await?;
+
+        let local_migrations = Self::get_migrations();
 
         for local_migration in local_migrations {
             let name = local_migration.get_name().to_string();
