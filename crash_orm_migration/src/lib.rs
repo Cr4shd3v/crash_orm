@@ -1,6 +1,6 @@
 pub mod entity;
-mod migrator;
-pub use migrator::*;
+mod migration;
+pub use migration::*;
 
 mod migration_manager;
 pub use migration_manager::*;

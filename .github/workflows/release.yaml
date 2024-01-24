@@ -20,15 +20,3 @@ jobs:
           branch: master|v[0-9]+
           token: ${{ secrets.GITHUB_TOKEN }}
           changelog: CHANGELOG.md
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: cargo publish --token ${CRATES_TOKEN} -p crash_orm_derive
-        env:
-          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
-      - run: cargo publish --token ${CRATES_TOKEN} -p crash_orm
-        env:
-          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}

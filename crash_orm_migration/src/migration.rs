@@ -1,9 +1,9 @@
 use crash_orm::{DatabaseConnection, Schema};
 use crash_orm::async_trait::async_trait;
-use crate::entity::CrashOrmMigration;
+use crate::entity::CrashOrmMigrationRecord;
 
 #[async_trait]
-pub trait Migrator<T: DatabaseConnection>: Send + Sync {
+pub trait Migration<T: DatabaseConnection>: Send + Sync {
     async fn up(&self, conn: &T) -> crash_orm::Result<()>;
 
     async fn down(&self, conn: &T) -> crash_orm::Result<()>;
@@ -11,16 +11,16 @@ pub trait Migrator<T: DatabaseConnection>: Send + Sync {
     fn get_name(&self) -> String;
 }
 
-pub struct CrashOrmMigrator;
+pub struct CrashOrmBaseMigration;
 
 #[async_trait]
-impl<T: DatabaseConnection> Migrator<T> for CrashOrmMigrator {
+impl<T: DatabaseConnection> Migration<T> for CrashOrmBaseMigration {
     async fn up(&self, conn: &T) -> crash_orm::Result<()> {
-        CrashOrmMigration::create_table_if_not_exists(conn).await
+        CrashOrmMigrationRecord::create_table_if_not_exists(conn).await
     }
 
     async fn down(&self, conn: &T) -> crash_orm::Result<()> {
-        CrashOrmMigration::drop_table(conn).await
+        CrashOrmMigrationRecord::drop_table(conn).await
     }
 
     fn get_name(&self) -> String {
