@@ -1,13 +1,13 @@
 [package]
 name = "crash_orm_migration"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "Migrations for Crash ORM"
 homepage = "https://github.com/Cr4shd3v/crash_orm"
 documentation = "https://github.com/Cr4shd3v/crash_orm/blob/master/docs/Readme.md"
 repository = "https://github.com/Cr4shd3v/crash_orm"
-readme = "../Readme.md"
+readme = "Readme.md"
 categories = ["database"]
 keywords = ["async", "database", "migration"]
 
