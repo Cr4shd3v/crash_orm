@@ -13,6 +13,7 @@ It might also be useful to inspect the [tests](../crash_orm/tests) if you look f
   - [Relations](Entity/Relations.md)
 - [Query](Query/Readme.md)
 - [Schema](Schema/Readme.md)
+- [Migration](Migration/Readme.md)
 
 ## Request changes for documentation
 Please [open an issue](https://github.com/Cr4shd3v/crash_orm/issues/new/choose) with the "Documentation" Template.
