@@ -1,3 +1,6 @@
+# v0.1.5
+- fix create table sql
+
 # v0.1.4
 - added create_table_if_not_exists
 

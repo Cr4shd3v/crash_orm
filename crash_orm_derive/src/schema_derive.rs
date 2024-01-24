@@ -42,7 +42,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     );
 
     let sequence_create = format!("CREATE SEQUENCE {}_id_seq", ident_str);
-    let sequence_created_alter = format!("ALTER SEQUENCE {0}_id_seq OWNED BY {0}.id", ident_str);
+    let sequence_created_alter = format!("ALTER SEQUENCE {0}_id_seq OWNED BY \"{0}\".id", ident_str);
 
     let drop_string = format!("DROP TABLE IF EXISTS {} CASCADE", ident_str);
     let truncate_string = format!("TRUNCATE {} RESTART IDENTITY CASCADE", ident_str);
