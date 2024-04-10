@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crate::entity::slice_query_value_iter;
 use crate::{BoxedColumnValue, DatabaseConnection, Entity, QueryCondition, UntypedColumn};
 use std::sync::Arc;
@@ -11,12 +12,13 @@ pub enum OrderDirection {
     DESC,
 }
 
-impl ToString for OrderDirection {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for OrderDirection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             OrderDirection::ASC => String::from("ASC"),
             OrderDirection::DESC => String::from("DESC"),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 
