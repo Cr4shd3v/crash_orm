@@ -13,6 +13,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
 
     let ident = derive_input.ident;
     let ident_str = ident_to_table_name(&ident);
+    let mut id_is_uuid = false;
 
     for field in struct_data.fields {
         let field_name = field.ident.clone().unwrap().to_string();
@@ -21,14 +22,20 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         if column_type.is_none() {
             continue;
         }
+        let column_type = column_type.unwrap();
 
-        create_fields_string.push_str(&*format!("{} {}", field_name, column_type.unwrap()));
+        create_fields_string.push_str(&*format!("{} {}", field_name, column_type));
 
         if &*field_name == "id" {
-            create_fields_string.push_str(&*format!(
-                " DEFAULT nextval('{}_id_seq'::regclass)",
-                ident_str
-            ));
+            if column_type == "Uuid" {
+                create_fields_string.push_str(" DEFAULT gen_random_uuid()");
+                id_is_uuid = true;
+            } else {
+                create_fields_string.push_str(&*format!(
+                    " DEFAULT nextval('{}_id_seq'::regclass)",
+                    ident_str
+                ));
+            }
         }
 
         create_fields_string.push_str(",");
@@ -41,8 +48,22 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         ident_str, create_fields_string
     );
 
-    let sequence_create = format!("CREATE SEQUENCE {}_id_seq", ident_str);
-    let sequence_created_alter = format!("ALTER SEQUENCE {0}_id_seq OWNED BY \"{0}\".id", ident_str);
+    let sequence_create_quote = if id_is_uuid {
+        let sequence_create = format!("CREATE SEQUENCE {}_id_seq", ident_str);
+        quote! {
+            connection.execute_query(#sequence_create, &[]).await?;
+        }
+    } else {
+        quote!()
+    };
+    let sequence_created_alter_quote = if id_is_uuid {
+        let sequence_created_alter = format!("ALTER SEQUENCE {0}_id_seq OWNED BY \"{0}\".id", ident_str);
+        quote! {
+            connection.execute_query(#sequence_created_alter, &[]).await?;
+        }
+    } else {
+        quote!()
+    };
 
     let drop_string = format!("DROP TABLE IF EXISTS {} CASCADE", ident_str);
     let truncate_string = format!("TRUNCATE {} RESTART IDENTITY CASCADE", ident_str);
@@ -55,9 +76,9 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Schema for #ident {
             async fn create_table(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
-                connection.execute_query(#sequence_create, &[]).await?;
+                #sequence_create_quote
                 connection.execute_query(#create_string, &[]).await?;
-                connection.execute_query(#sequence_created_alter, &[]).await?;
+                #sequence_created_alter_quote
 
                 Ok(())
             }
