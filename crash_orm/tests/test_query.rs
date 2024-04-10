@@ -1,6 +1,7 @@
-use crash_orm::{CrashOrmDatabaseConnection, Entity, EqualQueryColumn, NullQueryColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
 use tokio_postgres::NoTls;
+
+use crash_orm::{CrashOrmDatabaseConnection, Entity, EqualQueryColumn, NullQueryColumn, Schema};
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
     CrashOrmDatabaseConnection::new(
@@ -46,7 +47,7 @@ async fn test_query_simple() {
     assert!(TestItem4::test().persist(&conn).await.is_ok());
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
     let results = TestItem4::query()
-        .condition(TestItem4Column::NAME.equals(&String::from("test123")))
+        .condition(TestItem4Column::NAME.equals(String::from("test123")))
         .execute(&conn)
         .await;
     println!("{:?}", results);
@@ -99,7 +100,7 @@ async fn test_query_complex() {
     assert!(TestItem5::test2().persist(&conn).await.is_ok());
 
     let results = TestItem5::query()
-        .condition(TestItem5Column::NAME1.equals(&String::from("test123")))
+        .condition(TestItem5Column::NAME1.equals(String::from("test123")))
         .execute(&conn)
         .await;
     println!("1: {:?}", results);
@@ -109,7 +110,7 @@ async fn test_query_complex() {
     let results = TestItem5::query()
         .condition(
             TestItem5Column::NAME1
-                .equals(&String::from("test123"))
+                .equals(String::from("test123"))
                 .and(TestItem5Column::NUMBER.is_null()),
         )
         .execute(&conn)

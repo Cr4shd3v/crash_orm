@@ -1,6 +1,8 @@
-use crate::{Entity, EntityColumn, VirtualColumn};
 use std::sync::Arc;
+
 use tokio_postgres::types::ToSql;
+
+use crate::{Entity, EntityColumn, VirtualColumn};
 
 #[derive(Clone)]
 pub struct BoxedColumnValue {
@@ -107,5 +109,22 @@ impl<T: UntypedColumnValue> UntypedColumnValue for Option<T> {
         } else {
             BoxedColumnValue::new(String::from("NULL"), vec![])
         }
+    }
+}
+
+#[allow(clippy::wrong_self_convention)]
+pub trait IntoSql<T> {
+    fn into_typed_value(&self) -> &(dyn TypedColumnValue<T>);
+}
+
+impl<T: ToSql + UntypedColumnValue> IntoSql<T> for T {
+    fn into_typed_value(&self) -> &(dyn TypedColumnValue<T>) {
+        self
+    }
+}
+
+impl<T: ToSql + UntypedColumnValue> IntoSql<T> for &T {
+    fn into_typed_value(&self) -> &(dyn TypedColumnValue<T>) {
+        *self
     }
 }

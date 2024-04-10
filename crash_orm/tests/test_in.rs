@@ -1,6 +1,7 @@
-use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, InQueryColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
 use tokio_postgres::NoTls;
+
+use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, InQueryColumn, Schema};
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
     CrashOrmDatabaseConnection::new(
@@ -55,7 +56,7 @@ async fn test_in() {
         .unwrap();
 
     let results = TestItem14::query()
-        .condition(TestItem14Column::NUMBER.in_vec(vec![&439, &440]))
+        .condition(TestItem14Column::NUMBER.in_vec(vec![439, 440]))
         .execute(&conn)
         .await;
     println!("{:?}", results);
@@ -63,7 +64,7 @@ async fn test_in() {
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem14::query()
-        .condition(TestItem14Column::NUMBER.not_in_vec(vec![&439, &440]))
+        .condition(TestItem14Column::NUMBER.not_in_vec(vec![439, 440]))
         .execute(&conn)
         .await;
     assert!(results.is_ok());
@@ -72,7 +73,7 @@ async fn test_in() {
     let results = TestItem14::query()
         .condition(
             TestItem14Column::NAME1
-                .in_vec(vec![&String::from("test12"), &String::from("test1234")]),
+                .in_vec(vec![String::from("test12"), String::from("test1234")]),
         )
         .execute(&conn)
         .await;

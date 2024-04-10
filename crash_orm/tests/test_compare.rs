@@ -1,6 +1,7 @@
-use crash_orm::{CompareQueryColumn, CrashOrmDatabaseConnection, Entity, EntityVec, Schema};
 use crash_orm_derive::{Entity, Schema};
 use tokio_postgres::NoTls;
+
+use crash_orm::{CompareQueryColumn, CrashOrmDatabaseConnection, Entity, EntityVec, Schema};
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
     CrashOrmDatabaseConnection::new(
@@ -55,42 +56,42 @@ async fn test_compare() {
         .unwrap();
 
     let results = TestItem12::query()
-        .condition(TestItem12Column::NUMBER.greater_than(&440))
+        .condition(TestItem12Column::NUMBER.greater_than(440))
         .execute(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem12::query()
-        .condition(TestItem12Column::NUMBER.greater_equal(&440))
+        .condition(TestItem12Column::NUMBER.greater_equal(440))
         .execute(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
     let results = TestItem12::query()
-        .condition(TestItem12Column::NUMBER.less_than(&441))
+        .condition(TestItem12Column::NUMBER.less_than(441))
         .execute(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem12::query()
-        .condition(TestItem12Column::NUMBER.less_equal(&441))
+        .condition(TestItem12Column::NUMBER.less_equal(441))
         .execute(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
     let results = TestItem12::query()
-        .condition(TestItem12Column::NUMBER.between(&0, &440))
+        .condition(TestItem12Column::NUMBER.between(0, 440))
         .execute(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem12::query()
-        .condition(TestItem12Column::NUMBER.not_between(&0, &440))
+        .condition(TestItem12Column::NUMBER.not_between(0, 440))
         .execute(&conn)
         .await;
     assert!(results.is_ok());

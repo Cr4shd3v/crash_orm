@@ -1,7 +1,8 @@
-use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, LikeQueryColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
 use rust_decimal::Decimal;
 use tokio_postgres::NoTls;
+
+use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, LikeQueryColumn, Schema};
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
     CrashOrmDatabaseConnection::new(
@@ -56,14 +57,14 @@ async fn test_like() {
         .unwrap();
 
     let results = TestItem11::query()
-        .condition(TestItem11Column::NAME1.like(&String::from("test123%")))
+        .condition(TestItem11Column::NAME1.like(String::from("test123%")))
         .execute(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
     let results = TestItem11::query()
-        .condition(TestItem11Column::NAME1.not_like(&String::from("test1234%")))
+        .condition(TestItem11Column::NAME1.not_like(String::from("test1234%")))
         .execute(&conn)
         .await;
     assert!(results.is_ok());

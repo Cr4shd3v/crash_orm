@@ -1,25 +1,26 @@
-use crate::{Column, Entity, QueryCondition, TypedColumnValue};
 use tokio_postgres::types::ToSql;
+
+use crate::{Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing equals operators
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
-    fn equals(&self, other: &(dyn TypedColumnValue<T>)) -> QueryCondition<U>;
+    fn equals(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
-    fn not_equals(&self, other: &(dyn TypedColumnValue<T>)) -> QueryCondition<U>;
+    fn not_equals(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 }
 
 macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
         impl<T: Entity<T>, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
-            fn equals(&self, other: &(dyn TypedColumnValue<$column_type>)) -> QueryCondition<T> {
-                QueryCondition::Equals(self.get_sql(), other.get_sql())
+            fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T> {
+                QueryCondition::Equals(self.get_sql(), other.into_typed_value().get_sql())
             }
 
             fn not_equals(
                 &self,
-                other: &(dyn TypedColumnValue<$column_type>),
+                other: impl IntoSql<$column_type>,
             ) -> QueryCondition<T> {
-                QueryCondition::NotEquals(self.get_sql(), other.get_sql())
+                QueryCondition::NotEquals(self.get_sql(), other.into_typed_value().get_sql())
             }
         }
     };
