@@ -23,8 +23,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut insert_field_self_values_format = String::new();
     let mut update_fields = String::new();
     let mut column_consts = quote!();
-    let mut trait_signatures = quote!();
-    let mut trait_functions = quote!();
+    let mut functions = quote!();
 
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
@@ -67,11 +66,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     entity_table_name, mapped_by
                 );
 
-                trait_signatures.extend(quote! {
-                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>>;
-                });
-
-                trait_functions.extend(quote! {
+                functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
                         let rows = connection.query_many(#query, &[&self.id]).await?;
                         Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
@@ -81,13 +76,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 continue;
             } else if field_type_name == "ManyToOne" {
                 if is_option {
-                    trait_signatures.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()>;
-
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>>;
-                    });
-
-                    trait_functions.extend(quote! {
+                    functions.extend(quote! {
                         fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::ManyToOne::from(#field_ident.unwrap())?)
@@ -107,13 +96,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         }
                     });
                 } else {
-                    trait_signatures.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()>;
-
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
-                    });
-
-                    trait_functions.extend(quote! {
+                    functions.extend(quote! {
                         fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::ManyToOne::from(#field_ident)?;
 
@@ -127,13 +110,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
             } else if field_type_name == "OneToOne" {
                 if is_option {
-                    trait_signatures.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()>;
-
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>>;
-                    });
-
-                    trait_functions.extend(quote! {
+                    functions.extend(quote! {
                         fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::OneToOne::from(#field_ident.unwrap())?)
@@ -153,13 +130,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         }
                     });
                 } else {
-                    trait_signatures.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()>;
-
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
-                    });
-
-                    trait_functions.extend(quote! {
+                    functions.extend(quote! {
                         fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::OneToOne::from(#field_ident)?;
 
@@ -188,11 +159,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     entity_table_name, mapped_by
                 );
 
-                trait_signatures.extend(quote! {
-                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type>;
-                });
-
-                trait_functions.extend(quote! {
+                functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
                         let row = connection.query_single(#query, &[&self.id]).await?;
                         Ok(#entity_type::load_from_row(&row))
@@ -211,7 +178,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         if field_ident_str != "id" {
             column_consts.extend(quote! {
-                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident> = crash_orm::EntityColumn::<#field_type, #ident>::new(#field_ident_str);
+                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, PRIMARY> = crash_orm::EntityColumn::<#field_type, #ident, PRIMARY>::new(#field_ident_str);
             });
 
             if is_relation_value_holder(&field_type) {
@@ -220,7 +187,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     field_ident.span(),
                 );
                 column_consts.extend(quote! {
-                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new(#field_ident_str);
+                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<u32, #ident, PRIMARY> = crash_orm::EntityColumn::<u32, #ident, PRIMARY>::new(#field_ident_str);
                 });
             }
 
@@ -265,21 +232,21 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut output = quote! {
         #vis struct #ident_column;
 
-        impl #ident_column {
-            pub const ID: crash_orm::EntityColumn::<u32, #ident> = crash_orm::EntityColumn::<u32, #ident>::new("id");
+        impl<PRIMARY: crash_orm::PrimaryKey<'static>> #ident_column {
+            pub const ID: crash_orm::EntityColumn::<u32, #ident, PRIMARY> = crash_orm::EntityColumn::<u32, #ident, PRIMARY>::new("id");
 
             #column_consts
         }
 
-        impl crash_orm::BaseColumn<#ident> for #ident_column {}
+        impl<PRIMARY: crash_orm::PrimaryKey<'static>> crash_orm::BaseColumn<#ident, PRIMARY> for #ident_column {}
 
         #[crash_orm::async_trait::async_trait]
-        impl crash_orm::Entity<#ident> for #ident {
+        impl<PRIMARY: crash_orm::PrimaryKey<'static>> crash_orm::Entity<#ident, PRIMARY> for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
             type ColumnType = #ident_column;
 
-            fn get_id(&self) -> Option<u32> {
+            fn get_id(&self) -> Option<PRIMARY> {
                 self.id
             }
 
@@ -289,7 +256,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
             }
 
-            async fn get_by_id(connection: &impl crash_orm::DatabaseConnection, id: u32) -> crash_orm::Result<#ident> {
+            async fn get_by_id(connection: &impl crash_orm::DatabaseConnection, id: PRIMARY) -> crash_orm::Result<#ident> {
                 let row = connection.query_single(#select_by_id_string, &[&id]).await?;
                 Ok(Self::load_from_row(&row))
             }
@@ -304,7 +271,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 Ok(row.get(0))
             }
 
-            async fn insert_get_id(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<u32> {
+            async fn insert_get_id(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<PRIMARY> {
                 let rows = connection.query_many(#insert_string,&[#insert_field_self_values]).await?;
                 Ok(rows.get(0).unwrap().get(0))
             }
@@ -345,17 +312,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         }
     };
 
-    if !trait_signatures.is_empty() {
-        let ident_trait = Ident::new(&*format!("{}Trait", ident.to_string()), ident.span());
+    if !functions.is_empty() {
         output.extend(quote! {
-            #[crash_orm::async_trait::async_trait]
-            #vis trait #ident_trait {
-                #trait_signatures
-            }
-
-            #[crash_orm::async_trait::async_trait]
-            impl #ident_trait for #ident {
-                #trait_functions
+            impl<PRIMARY: crash_orm::PrimaryKey> #ident {
+                #functions
             }
         });
     }

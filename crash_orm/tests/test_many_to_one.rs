@@ -16,7 +16,7 @@ pub struct TestItem21 {
     pub id: Option<u32>,
     pub name1: Option<String>,
     pub active: bool,
-    pub other: Option<ManyToOne<TestItem22>>,
+    pub other: Option<ManyToOne<TestItem22, u32>>,
 }
 
 #[derive(Entity, Debug, Schema)]
@@ -25,7 +25,7 @@ pub struct TestItem22 {
     pub name1: Option<String>,
     pub active: bool,
     #[mapped_by("other")]
-    pub test_items_21: OneToMany<TestItem21>,
+    pub test_items_21: OneToMany<TestItem21, u32>,
 }
 
 impl TestItem21 {
