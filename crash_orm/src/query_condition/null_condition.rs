@@ -1,19 +1,20 @@
 use crate::{Column, Entity, QueryCondition};
 use tokio_postgres::types::ToSql;
+use crate::primary::PrimaryKey;
 
 /// Trait implementing null checks
-pub trait NullQueryColumn<T: ToSql, U: Entity<U>> {
-    fn is_null(&self) -> QueryCondition<U>;
+pub trait NullQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+    fn is_null(&self) -> QueryCondition<U, PRIMARY>;
 
-    fn is_not_null(&self) -> QueryCondition<U>;
+    fn is_not_null(&self) -> QueryCondition<U, PRIMARY>;
 }
 
-impl<T: ToSql, U: Entity<U>, C: Column<Option<T>, U>> NullQueryColumn<T, U> for C {
-    fn is_null(&self) -> QueryCondition<U> {
+impl<T: ToSql, U: Entity<U, PRIMARY>, C: Column<Option<T>, U, PRIMARY>, PRIMARY: PrimaryKey<'static>> NullQueryColumn<T, U, PRIMARY> for C {
+    fn is_null(&self) -> QueryCondition<U, PRIMARY> {
         QueryCondition::IsNull(self.get_sql())
     }
 
-    fn is_not_null(&self) -> QueryCondition<U> {
+    fn is_not_null(&self) -> QueryCondition<U, PRIMARY> {
         QueryCondition::IsNotNull(self.get_sql())
     }
 }

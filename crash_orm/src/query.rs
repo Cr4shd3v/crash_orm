@@ -1,6 +1,6 @@
 use std::fmt::Display;
 use crate::entity::slice_query_value_iter;
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, QueryCondition, UntypedColumn};
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
 use std::sync::Arc;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::Row;
@@ -25,7 +25,7 @@ impl Display for OrderDirection {
 macro_rules! base_query_functions {
     ($base:ident) => {
         /// Create a new query from a [BoxedColumnValue]
-        pub(crate) fn new(base_query: BoxedColumnValue) -> $base<T> {
+        pub(crate) fn new(base_query: BoxedColumnValue) -> $base<T, PRIMARY> {
             Self {
                 base_query,
                 condition: None,
@@ -34,7 +34,7 @@ macro_rules! base_query_functions {
         }
 
         /// Set the condition for this query.
-        pub fn condition(mut self, condition: QueryCondition<T>) -> $base<T> {
+        pub fn condition(mut self, condition: QueryCondition<T, PRIMARY>) -> $base<T, PRIMARY> {
             self.condition = Some(condition);
             self
         }
@@ -42,9 +42,9 @@ macro_rules! base_query_functions {
         /// Add an order to this query.
         pub fn add_order(
             mut self,
-            order: &(dyn UntypedColumn<T>),
+            order: &(dyn UntypedColumn<T, PRIMARY>),
             order_direction: OrderDirection,
-        ) -> $base<T> {
+        ) -> $base<T, PRIMARY> {
             self.order.push((order.get_sql(), order_direction));
             self
         }
@@ -54,9 +54,9 @@ macro_rules! base_query_functions {
         /// This will OVERRIDE all previous orders.
         pub fn order(
             mut self,
-            order: &(dyn UntypedColumn<T>),
+            order: &(dyn UntypedColumn<T, PRIMARY>),
             order_direction: OrderDirection,
-        ) -> $base<T> {
+        ) -> $base<T, PRIMARY> {
             self.order.clear();
             self.order.push((order.get_sql(), order_direction));
             self
@@ -92,13 +92,13 @@ macro_rules! base_query_functions {
     };
 }
 
-pub struct Query<T: Entity<T>> {
+pub struct Query<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     base_query: BoxedColumnValue,
-    condition: Option<QueryCondition<T>>,
+    condition: Option<QueryCondition<T, PRIMARY>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T>> Query<T> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> Query<T, PRIMARY> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities of type [T].
@@ -118,13 +118,13 @@ impl<T: Entity<T>> Query<T> {
     }
 }
 
-pub struct SelectQuery<T: Entity<T>> {
+pub struct SelectQuery<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     base_query: BoxedColumnValue,
-    condition: Option<QueryCondition<T>>,
+    condition: Option<QueryCondition<T, PRIMARY>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T>> SelectQuery<T> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> SelectQuery<T, PRIMARY> {
     base_query_functions!(SelectQuery);
 
     /// Execute this query and returns the result as a vector of [Row].

@@ -1,7 +1,4 @@
-use crate::{
-    BaseColumn, BoxedColumnValue, DatabaseConnection, Query, QueryCondition, SelectQuery,
-    UntypedColumn,
-};
+use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, PrimaryKey, Query, QueryCondition, SelectQuery, UntypedColumn};
 use async_trait::async_trait;
 use std::fmt::Debug;
 use std::sync::Arc;
@@ -9,19 +6,19 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::Row;
 
 #[async_trait]
-pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
+pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
-    type ColumnType: BaseColumn<T>;
+    type ColumnType: BaseColumn<T, PRIMARY>;
 
-    fn get_id(&self) -> Option<u32>;
+    fn get_id(&self) -> Option<PRIMARY>;
 
     /// Parses a [`Row`] into [`T`]
     fn load_from_row(row: &Row) -> T;
 
     /// Retrieves an entity by its id
-    async fn get_by_id(connection: &impl DatabaseConnection, id: u32) -> crate::Result<T>;
+    async fn get_by_id(connection: &impl DatabaseConnection, id: PRIMARY) -> crate::Result<T>;
 
     /// Retrieves all entities
     async fn get_all(connection: &impl DatabaseConnection) -> crate::Result<Vec<T>>;
@@ -32,7 +29,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Insert and returns the id
     ///
     /// This DOES NOT set the id in the entity
-    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> crate::Result<u32>;
+    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> crate::Result<PRIMARY>;
 
     /// Insert and set id
     ///
@@ -54,7 +51,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Creates a [Query] for this Entity.
     ///
     /// See [Query] for more details on how to build a query.
-    fn query() -> Query<T> {
+    fn query() -> Query<T, PRIMARY> {
         Query::new(BoxedColumnValue::new(
             format!("SELECT * FROM {}", Self::TABLE_NAME),
             vec![],
@@ -64,7 +61,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Count the entries based on a [QueryCondition].
     async fn count_query(
         connection: &impl DatabaseConnection,
-        condition: QueryCondition<T>,
+        condition: QueryCondition<T, PRIMARY>,
     ) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
@@ -83,7 +80,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Select specific columns ([crate::EntityColumn] or [crate::VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query(columns: &[&(dyn UntypedColumn<T>)]) -> SelectQuery<T> {
+    fn select_query(columns: &[&(dyn UntypedColumn<T, PRIMARY>)]) -> SelectQuery<T, PRIMARY> {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())

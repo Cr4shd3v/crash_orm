@@ -1,25 +1,23 @@
-use crate::{
-    BoxedColumnValue, Column, Entity, TypedColumnValue, UntypedColumnValue, VirtualColumn,
-};
+use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, TypedColumnValue, UntypedColumnValue, VirtualColumn};
 
-pub trait StringVirtualColumn<U: Entity<U>> {
-    fn lowercase(&self) -> VirtualColumn<String, U>;
+pub trait StringVirtualColumn<U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+    fn lowercase(&self) -> VirtualColumn<String, U, PRIMARY>;
 
-    fn uppercase(&self) -> VirtualColumn<String, U>;
+    fn uppercase(&self) -> VirtualColumn<String, U, PRIMARY>;
 
-    fn reverse(&self) -> VirtualColumn<String, U>;
+    fn reverse(&self) -> VirtualColumn<String, U, PRIMARY>;
 
-    fn length(&self) -> VirtualColumn<i32, U>;
+    fn length(&self) -> VirtualColumn<i32, U, PRIMARY>;
 
-    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U>;
+    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U, PRIMARY>;
 
-    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U>;
+    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U, PRIMARY>;
 
-    fn md5(&self) -> VirtualColumn<String, U>;
+    fn md5(&self) -> VirtualColumn<String, U, PRIMARY>;
 }
 
-impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
-    fn lowercase(&self) -> VirtualColumn<String, U> {
+impl<U: Entity<U, PRIMARY>, R: Column<String, U, PRIMARY>, PRIMARY: PrimaryKey<'static>> StringVirtualColumn<U, PRIMARY> for R {
+    fn lowercase(&self) -> VirtualColumn<String, U, PRIMARY> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedColumnValue::new(
             format!("LOWER({})", sql.sql),
@@ -27,7 +25,7 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         ))
     }
 
-    fn uppercase(&self) -> VirtualColumn<String, U> {
+    fn uppercase(&self) -> VirtualColumn<String, U, PRIMARY> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedColumnValue::new(
             format!("UPPER({})", sql.sql),
@@ -35,7 +33,7 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         ))
     }
 
-    fn reverse(&self) -> VirtualColumn<String, U> {
+    fn reverse(&self) -> VirtualColumn<String, U, PRIMARY> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedColumnValue::new(
             format!("REVERSE({})", sql.sql),
@@ -43,7 +41,7 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         ))
     }
 
-    fn length(&self) -> VirtualColumn<i32, U> {
+    fn length(&self) -> VirtualColumn<i32, U, PRIMARY> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedColumnValue::new(
             format!("LENGTH({})", sql.sql),
@@ -51,7 +49,7 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         ))
     }
 
-    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U> {
+    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U, PRIMARY> {
         let sql = self.get_sql();
         let repetition_sql = repetition.get_sql();
         let mut values = sql.value;
@@ -62,7 +60,7 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         ))
     }
 
-    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U> {
+    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U, PRIMARY> {
         let mut sql = self.get_sql();
         for value in other {
             let value_sql = value.get_sql();
@@ -74,7 +72,7 @@ impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
         VirtualColumn::new(sql)
     }
 
-    fn md5(&self) -> VirtualColumn<String, U> {
+    fn md5(&self) -> VirtualColumn<String, U, PRIMARY> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedColumnValue::new(
             format!("MD5({})", sql.sql),

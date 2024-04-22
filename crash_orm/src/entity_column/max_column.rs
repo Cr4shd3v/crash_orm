@@ -1,11 +1,11 @@
 use crate::entity::slice_query_value_iter;
-use crate::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
+use crate::{DatabaseConnection, Entity, EntityColumn, PrimaryKey, QueryCondition};
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
 
 /// Trait implementing the max functions for columns
 #[async_trait]
-pub trait MaxColumn<T: ToSql, U: Entity<U>> {
+pub trait MaxColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     /// Return the maximum value of this column
     async fn max(&self, connection: &impl DatabaseConnection) -> crate::Result<T>;
 
@@ -13,14 +13,14 @@ pub trait MaxColumn<T: ToSql, U: Entity<U>> {
     async fn max_query(
         &self,
         connection: &impl DatabaseConnection,
-        condition: QueryCondition<U>,
+        condition: QueryCondition<U, PRIMARY>,
     ) -> crate::Result<T>;
 }
 
 macro_rules! impl_max_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U> + Sync> MaxColumn<$column_type, U> for EntityColumn<$column_type, U> {
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MaxColumn<$column_type, U, PRIMARY> for EntityColumn<$column_type, U, PRIMARY> {
             async fn max(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -42,7 +42,7 @@ macro_rules! impl_max_column {
             async fn max_query(
                 &self,
                 connection: &impl DatabaseConnection,
-                condition: QueryCondition<U>,
+                condition: QueryCondition<U, PRIMARY>,
             ) -> crate::Result<$column_type> {
                 let (query, mut values, index) = self.get_sql().resolve(1);
                 let (con_query, con_values, _) = condition.resolve(index);
@@ -67,8 +67,8 @@ macro_rules! impl_max_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U> + Sync> MaxColumn<Option<$column_type>, U>
-            for EntityColumn<Option<$column_type>, U>
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MaxColumn<Option<$column_type>, U, PRIMARY>
+            for EntityColumn<Option<$column_type>, U, PRIMARY>
         {
             async fn max(
                 &self,
@@ -91,7 +91,7 @@ macro_rules! impl_max_column {
             async fn max_query(
                 &self,
                 connection: &impl DatabaseConnection,
-                condition: QueryCondition<U>,
+                condition: QueryCondition<U, PRIMARY>,
             ) -> crate::Result<Option<$column_type>> {
                 let (query, mut values, index) = self.get_sql().resolve(1);
                 let (con_query, con_values, _) = condition.resolve(index);

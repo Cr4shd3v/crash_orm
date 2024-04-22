@@ -1,20 +1,20 @@
-use crate::{BoxedColumnValue, Column, Entity, VirtualColumn};
+use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 use tokio_postgres::types::ToSql;
 
-pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U>> {
-    fn ceil(&self) -> VirtualColumn<R, U>;
+pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+    fn ceil(&self) -> VirtualColumn<R, U, PRIMARY>;
 
-    fn floor(&self) -> VirtualColumn<R, U>;
+    fn floor(&self) -> VirtualColumn<R, U, PRIMARY>;
 
-    fn round(&self) -> VirtualColumn<R, U>;
+    fn round(&self) -> VirtualColumn<R, U, PRIMARY>;
 }
 
 macro_rules! impl_round_virtual_column {
     ($column_type:ty, $out_type:ty) => {
-        impl<U: Entity<U>, R: Column<$column_type, U>>
-            RoundVirtualColumn<$column_type, $out_type, U> for R
+        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey<'static>>
+            RoundVirtualColumn<$column_type, $out_type, U, PRIMARY> for R
         {
-            fn ceil(&self) -> VirtualColumn<$out_type, U> {
+            fn ceil(&self) -> VirtualColumn<$out_type, U, PRIMARY> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedColumnValue::new(
                     format!("CEIL({})", sql.sql),
@@ -22,7 +22,7 @@ macro_rules! impl_round_virtual_column {
                 ))
             }
 
-            fn floor(&self) -> VirtualColumn<$out_type, U> {
+            fn floor(&self) -> VirtualColumn<$out_type, U, PRIMARY> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedColumnValue::new(
                     format!("FLOOR({})", sql.sql),
@@ -30,7 +30,7 @@ macro_rules! impl_round_virtual_column {
                 ))
             }
 
-            fn round(&self) -> VirtualColumn<$out_type, U> {
+            fn round(&self) -> VirtualColumn<$out_type, U, PRIMARY> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedColumnValue::new(
                     format!("ROUND({})", sql.sql),

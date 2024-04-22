@@ -1,11 +1,11 @@
-use crate::{slice_query_value_iter, EntityColumn};
+use crate::{slice_query_value_iter, EntityColumn, PrimaryKey};
 use crate::{DatabaseConnection, Entity, QueryCondition};
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
 
 /// Trait implementing the sum functions for columns
 #[async_trait]
-pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U>> {
+pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     /// Return the sum of this column
     async fn sum(&self, connection: &impl DatabaseConnection, distinct: bool) -> crate::Result<R>;
 
@@ -14,14 +14,14 @@ pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U>> {
         &self,
         connection: &impl DatabaseConnection,
         distinct: bool,
-        condition: QueryCondition<U>,
+        condition: QueryCondition<U, PRIMARY>,
     ) -> crate::Result<R>;
 }
 
 macro_rules! impl_sum_column {
     ($in_type:ty, $out_type:ty) => {
         #[async_trait]
-        impl<T: Entity<T> + Sync> SumColumn<$in_type, $out_type, T> for EntityColumn<$in_type, T> {
+        impl<T: Entity<T, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> SumColumn<$in_type, $out_type, T, PRIMARY> for EntityColumn<$in_type, T, PRIMARY> {
             async fn sum(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -50,7 +50,7 @@ macro_rules! impl_sum_column {
                 &self,
                 connection: &impl DatabaseConnection,
                 distinct: bool,
-                condition: QueryCondition<T>,
+                condition: QueryCondition<T, PRIMARY>,
             ) -> crate::Result<$out_type> {
                 let (query, mut values, index) = self.get_sql().resolve(1);
                 let (con_query, con_values, _) = condition.resolve(index);
@@ -76,8 +76,8 @@ macro_rules! impl_sum_column {
         }
 
         #[async_trait]
-        impl<T: Entity<T> + Sync> SumColumn<$in_type, $out_type, T>
-            for EntityColumn<Option<$in_type>, T>
+        impl<T: Entity<T, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> SumColumn<$in_type, $out_type, T, PRIMARY>
+            for EntityColumn<Option<$in_type>, T, PRIMARY>
         {
             async fn sum(
                 &self,
@@ -107,7 +107,7 @@ macro_rules! impl_sum_column {
                 &self,
                 connection: &impl DatabaseConnection,
                 distinct: bool,
-                condition: QueryCondition<T>,
+                condition: QueryCondition<T, PRIMARY>,
             ) -> crate::Result<$out_type> {
                 let (query, mut values, index) = self.get_sql().resolve(1);
                 let (con_query, con_values, _) = condition.resolve(index);

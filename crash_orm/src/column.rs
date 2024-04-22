@@ -1,35 +1,36 @@
 use crate::{BoxedColumnValue, Entity, EntityColumn, VirtualColumn};
 use tokio_postgres::types::ToSql;
+use crate::primary::PrimaryKey;
 
-pub trait BaseColumn<U: Entity<U>> {
-    const ID: EntityColumn<Option<u32>, U> = EntityColumn::<Option<u32>, U>::new("id");
+pub trait BaseColumn<U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+    const ID: EntityColumn<Option<u32>, U, PRIMARY> = EntityColumn::<Option<u32>, U, PRIMARY>::new("id");
 }
 
 /// Trait implemented on all Columns
 ///
 /// This column trait is typed. For untyped columns use [`UntypedColumn`].
-pub trait Column<T: ToSql, U: Entity<U>>: UntypedColumn<U> {}
+pub trait Column<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>>: UntypedColumn<U, PRIMARY> {}
 
-impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for VirtualColumn<T, U> {}
-impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for VirtualColumn<Option<T>, U> {}
-impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for EntityColumn<T, U> {}
-impl<T: ToSql + Sync, U: Entity<U> + Sync> Column<T, U> for EntityColumn<Option<T>, U> {}
+impl<T: ToSql + Sync, U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> Column<T, U, PRIMARY> for VirtualColumn<T, U, PRIMARY> {}
+impl<T: ToSql + Sync, U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> Column<T, U, PRIMARY> for VirtualColumn<Option<T>, U, PRIMARY> {}
+impl<T: ToSql + Sync, U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> Column<T, U, PRIMARY> for EntityColumn<T, U, PRIMARY> {}
+impl<T: ToSql + Sync, U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> Column<T, U, PRIMARY> for EntityColumn<Option<T>, U, PRIMARY> {}
 
 /// Trait implemented on all Columns
 ///
 /// This column trait is untyped. For typed columns use [`Column`].
-pub trait UntypedColumn<U: Entity<U>>: Sync {
+pub trait UntypedColumn<U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>>: Sync {
     /// Internal function to get a sql representation of the column
     fn get_sql(&self) -> BoxedColumnValue;
 }
 
-impl<T: ToSql + Sync, U: Entity<U> + Sync> UntypedColumn<U> for EntityColumn<T, U> {
+impl<T: ToSql + Sync, U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> UntypedColumn<U, PRIMARY> for EntityColumn<T, U, PRIMARY> {
     fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }
 }
 
-impl<T: ToSql + Sync, U: Entity<U> + Sync> UntypedColumn<U> for VirtualColumn<T, U> {
+impl<T: ToSql + Sync, U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> UntypedColumn<U, PRIMARY> for VirtualColumn<T, U, PRIMARY> {
     fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }

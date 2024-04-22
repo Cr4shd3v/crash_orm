@@ -1,5 +1,5 @@
 use crate::entity::slice_query_value_iter;
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, QueryCondition};
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition};
 use std::marker::PhantomData;
 use tokio_postgres::types::ToSql;
 
@@ -15,19 +15,21 @@ pub use max_column::*;
 mod avg_column;
 pub use avg_column::*;
 
-pub struct EntityColumn<T: ToSql, U: Entity<U>> {
+pub struct EntityColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     name: &'static str,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
+    phantom_3: PhantomData<PRIMARY>,
 }
 
-impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
+impl<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> EntityColumn<T, U, PRIMARY> {
     /// DO NOT USE THIS IN YOUR CODE, INTERNAL USE ONLY
-    pub const fn new(name: &'static str) -> EntityColumn<T, U> {
+    pub const fn new(name: &'static str) -> EntityColumn<T, U, PRIMARY> {
         Self {
             name,
             phantom_1: PhantomData,
             phantom_2: PhantomData,
+            phantom_3: PhantomData,
         }
     }
 
@@ -66,7 +68,7 @@ impl<T: ToSql, U: Entity<U>> EntityColumn<T, U> {
         &self,
         connection: &impl DatabaseConnection,
         distinct: bool,
-        condition: QueryCondition<U>,
+        condition: QueryCondition<U, PRIMARY>,
     ) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 

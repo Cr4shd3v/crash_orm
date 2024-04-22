@@ -1,11 +1,11 @@
 use crate::entity::slice_query_value_iter;
-use crate::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
+use crate::{DatabaseConnection, Entity, EntityColumn, PrimaryKey, QueryCondition};
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
 
 /// Trait implementing the min functions for columns
 #[async_trait]
-pub trait MinColumn<T: ToSql, U: Entity<U> + Send + 'static> {
+pub trait MinColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     /// Return the minimum value of this column
     async fn min(&self, connection: &impl DatabaseConnection) -> crate::Result<T>;
 
@@ -13,14 +13,14 @@ pub trait MinColumn<T: ToSql, U: Entity<U> + Send + 'static> {
     async fn min_query(
         &self,
         connection: &impl DatabaseConnection,
-        condition: QueryCondition<U>,
+        condition: QueryCondition<U, PRIMARY>,
     ) -> crate::Result<T>;
 }
 
 macro_rules! impl_min_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U> + Sync> MinColumn<$column_type, U> for EntityColumn<$column_type, U> {
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MinColumn<$column_type, U, PRIMARY> for EntityColumn<$column_type, U, PRIMARY> {
             async fn min(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -42,7 +42,7 @@ macro_rules! impl_min_column {
             async fn min_query(
                 &self,
                 connection: &impl DatabaseConnection,
-                condition: QueryCondition<U>,
+                condition: QueryCondition<U, PRIMARY>,
             ) -> crate::Result<$column_type> {
                 let (query, mut values, index) = self.get_sql().resolve(1);
                 let (con_query, con_values, _) = condition.resolve(index);
@@ -67,8 +67,8 @@ macro_rules! impl_min_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U> + Sync> MinColumn<Option<$column_type>, U>
-            for EntityColumn<Option<$column_type>, U>
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MinColumn<Option<$column_type>, U, PRIMARY>
+            for EntityColumn<Option<$column_type>, U, PRIMARY>
         {
             async fn min(
                 &self,
@@ -91,7 +91,7 @@ macro_rules! impl_min_column {
             async fn min_query(
                 &self,
                 connection: &impl DatabaseConnection,
-                condition: QueryCondition<U>,
+                condition: QueryCondition<U, PRIMARY>,
             ) -> crate::Result<Option<$column_type>> {
                 let (query, mut values, index) = self.get_sql().resolve(1);
                 let (con_query, con_values, _) = condition.resolve(index);
