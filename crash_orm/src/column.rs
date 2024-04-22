@@ -1,9 +1,10 @@
-use crate::{BoxedColumnValue, Entity, EntityColumn, VirtualColumn};
 use tokio_postgres::types::ToSql;
+
+use crate::{BoxedColumnValue, Entity, EntityColumn, VirtualColumn};
 use crate::primary::PrimaryKey;
 
 pub trait BaseColumn<U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
-    const ID: EntityColumn<Option<u32>, U, PRIMARY> = EntityColumn::<Option<u32>, U, PRIMARY>::new("id");
+    const ID: EntityColumn<PRIMARY, U, PRIMARY> = EntityColumn::<PRIMARY, U, PRIMARY>::new("id");
 }
 
 /// Trait implemented on all Columns

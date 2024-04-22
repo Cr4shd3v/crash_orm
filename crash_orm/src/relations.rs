@@ -1,16 +1,17 @@
-use crate::{Entity, PrimaryKey};
 use std::error::Error;
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use tokio_postgres::types::private::BytesMut;
+
 use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
+use tokio_postgres::types::private::BytesMut;
+
+use crate::{Entity, PrimaryKey};
 
 macro_rules! default_relation_function {
     ($rel_type:tt) => {
         pub const fn new(target_id: PRIMARY) -> $rel_type<T, PRIMARY> {
             Self {
                 _p: PhantomData,
-                _p1: PhantomData,
                 target_id,
             }
         }
@@ -25,7 +26,6 @@ macro_rules! default_relation_function {
 
             Ok(Self {
                 _p: PhantomData,
-                _p1: PhantomData,
                 target_id: id.unwrap(),
             })
         }
@@ -77,7 +77,6 @@ macro_rules! sql_impl_for_relation {
 #[derive(Debug)]
 pub struct OneToOne<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     _p: PhantomData<T>,
-    _p1: PhantomData<PRIMARY>,
     pub target_id: PRIMARY,
 }
 
@@ -102,7 +101,6 @@ impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> OneToOneRef<T, PRIMARY
 #[derive(Debug)]
 pub struct ManyToOne<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     _p: PhantomData<T>,
-    _p1: PhantomData<PRIMARY>,
     pub target_id: PRIMARY,
 }
 

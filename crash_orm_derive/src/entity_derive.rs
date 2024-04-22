@@ -1,10 +1,12 @@
+use proc_macro::TokenStream;
+
+use quote::{quote, ToTokens};
+use syn::{Attribute, Data, DeriveInput, Field, Ident, parse_macro_input};
+
 use crate::util::{
     extract_generic_type, extract_generic_type_ignore_option, get_type_string, ident_to_table_name,
     is_relation, is_relation_value_holder, string_to_table_name,
 };
-use proc_macro::TokenStream;
-use quote::{quote, ToTokens};
-use syn::{parse_macro_input, Attribute, Data, DeriveInput, Field, Ident};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -27,6 +29,25 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
+
+    let mut primary_type = None;
+
+    for field in &struct_data.fields {
+        let field_ident = field.ident.as_ref().unwrap();
+        let field_ident_str = field_ident.to_string();
+        if field_ident_str == "id" {
+            primary_type = Some(field.ty.clone());
+        }
+    }
+
+    let Some(primary_type) = primary_type else {
+        panic!("The entity {} has no primary key", ident_str);
+    };
+
+    let Some(primary_type) = extract_generic_type(&primary_type) else {
+        panic!("The identifier for entity {} must be an option", ident_str);
+    };
+
     for field in struct_data.fields {
         let field_ident = field.ident.as_ref().unwrap();
         let field_ident_str = field_ident.to_string();
@@ -178,7 +199,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         if field_ident_str != "id" {
             column_consts.extend(quote! {
-                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, PRIMARY> = crash_orm::EntityColumn::<#field_type, #ident, PRIMARY>::new(#field_ident_str);
+                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::EntityColumn::<#field_type, #ident, #primary_type>::new(#field_ident_str);
             });
 
             if is_relation_value_holder(&field_type) {
@@ -187,7 +208,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     field_ident.span(),
                 );
                 column_consts.extend(quote! {
-                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<u32, #ident, PRIMARY> = crash_orm::EntityColumn::<u32, #ident, PRIMARY>::new(#field_ident_str);
+                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<u32, #ident, #primary_type> = crash_orm::EntityColumn::<u32, #ident, #primary_type>::new(#field_ident_str);
                 });
             }
 
@@ -232,21 +253,19 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut output = quote! {
         #vis struct #ident_column;
 
-        impl<PRIMARY: crash_orm::PrimaryKey<'static>> #ident_column {
-            pub const ID: crash_orm::EntityColumn::<u32, #ident, PRIMARY> = crash_orm::EntityColumn::<u32, #ident, PRIMARY>::new("id");
-
+        impl #ident_column {
             #column_consts
         }
 
-        impl<PRIMARY: crash_orm::PrimaryKey<'static>> crash_orm::BaseColumn<#ident, PRIMARY> for #ident_column {}
+        impl crash_orm::BaseColumn<#ident, #primary_type> for #ident_column {}
 
         #[crash_orm::async_trait::async_trait]
-        impl<PRIMARY: crash_orm::PrimaryKey<'static>> crash_orm::Entity<#ident, PRIMARY> for #ident {
+        impl crash_orm::Entity<#ident, #primary_type> for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
             type ColumnType = #ident_column;
 
-            fn get_id(&self) -> Option<PRIMARY> {
+            fn get_id(&self) -> Option<#primary_type> {
                 self.id
             }
 
@@ -256,7 +275,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
             }
 
-            async fn get_by_id(connection: &impl crash_orm::DatabaseConnection, id: PRIMARY) -> crash_orm::Result<#ident> {
+            async fn get_by_id(connection: &impl crash_orm::DatabaseConnection, id: #primary_type) -> crash_orm::Result<#ident> {
                 let row = connection.query_single(#select_by_id_string, &[&id]).await?;
                 Ok(Self::load_from_row(&row))
             }
@@ -271,7 +290,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 Ok(row.get(0))
             }
 
-            async fn insert_get_id(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<PRIMARY> {
+            async fn insert_get_id(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#primary_type> {
                 let rows = connection.query_many(#insert_string,&[#insert_field_self_values]).await?;
                 Ok(rows.get(0).unwrap().get(0))
             }
@@ -314,7 +333,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     if !functions.is_empty() {
         output.extend(quote! {
-            impl<PRIMARY: crash_orm::PrimaryKey> #ident {
+            impl #ident {
                 #functions
             }
         });
