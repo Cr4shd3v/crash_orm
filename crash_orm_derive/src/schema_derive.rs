@@ -1,7 +1,9 @@
-use crate::util::{ident_to_table_name, rust_to_postgres_type};
 use proc_macro::TokenStream;
+
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput};
+use syn::{Data, DeriveInput, parse_macro_input};
+
+use crate::util::{ident_to_table_name, rust_to_postgres_type};
 
 pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -48,7 +50,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         ident_str, create_fields_string
     );
 
-    let sequence_create_quote = if id_is_uuid {
+    let sequence_create_quote = if !id_is_uuid {
         let sequence_create = format!("CREATE SEQUENCE {}_id_seq", ident_str);
         quote! {
             connection.execute_query(#sequence_create, &[]).await?;
@@ -56,7 +58,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     } else {
         quote!()
     };
-    let sequence_created_alter_quote = if id_is_uuid {
+    let sequence_created_alter_quote = if !id_is_uuid {
         let sequence_created_alter = format!("ALTER SEQUENCE {0}_id_seq OWNED BY \"{0}\".id", ident_str);
         quote! {
             connection.execute_query(#sequence_created_alter, &[]).await?;
