@@ -98,7 +98,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "ManyToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type, #primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::ManyToOne::from(#field_ident.unwrap())?)
                             } else {
@@ -118,7 +118,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type, #primary_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::ManyToOne::from(#field_ident)?;
 
                             Ok(())
@@ -132,7 +132,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "OneToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type, #primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::OneToOne::from(#field_ident.unwrap())?)
                             } else {
@@ -152,7 +152,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type, #primary_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::OneToOne::from(#field_ident)?;
 
                             Ok(())
