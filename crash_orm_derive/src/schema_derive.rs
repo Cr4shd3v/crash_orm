@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, parse_macro_input};
 
-use crate::util::{ident_to_table_name, rust_to_postgres_type};
+use crate::util::{extract_generic_type, get_type_string, ident_to_table_name, rust_to_postgres_type};
 
 pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -29,7 +29,11 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         create_fields_string.push_str(&*format!("{} {}", field_name, column_type));
 
         if &*field_name == "id" {
-            if column_type == "Uuid" {
+            let Some(field_type) = extract_generic_type(&field.ty) else {
+                panic!("The identifier for entity {} must be an option", ident.to_string());
+            };
+            let field_type_str = get_type_string(&field_type);
+            if field_type_str == "Uuid" {
                 create_fields_string.push_str(" DEFAULT gen_random_uuid()");
                 id_is_uuid = true;
             } else {
