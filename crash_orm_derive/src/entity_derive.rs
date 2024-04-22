@@ -29,6 +29,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
+    let mut update_index = 0usize;
 
     let mut primary_type = None;
 
@@ -47,6 +48,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let Some(primary_type) = extract_generic_type(&primary_type) else {
         panic!("The identifier for entity {} must be an option", ident_str);
     };
+
+    let primary_type_str = get_type_string(&primary_type);
 
     for field in struct_data.fields {
         let field_ident = field.ident.as_ref().unwrap();
@@ -220,9 +223,22 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 &self.#field_ident,
             });
 
+            update_index += 1;
+            update_fields.push_str(&*format!("{} = ${}", field_ident_str, update_index));
+
+            insert_index += 1;
+            insert_field_self_values_format.push_str(&*format!("${},", insert_index));
+        } else if primary_type_str == "Uuid" {
+            insert_field_names.extend(quote! {
+                #field_ident_str,
+            });
+
+            insert_field_self_values.extend(quote! {
+                &self.#field_ident,
+            });
+
             insert_index += 1;
 
-            update_fields.push_str(&*format!("{} = ${}", field_ident_str, insert_index));
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
         }
 
