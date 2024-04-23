@@ -2,20 +2,20 @@ use convert_case::{Case, Casing};
 use quote::ToTokens;
 use syn::{GenericArgument, Ident, PathArguments, Type};
 
-pub(crate) fn extract_generic_type_ignore_option(ty: &Type) -> Option<Type> {
+pub(crate) fn extract_generic_type_ignore_option(ty: &Type, number: usize) -> Option<Type> {
     if get_type_string(ty) == "Option" {
-        extract_generic_type(&extract_generic_type(ty).unwrap())
+        extract_generic_type(&extract_generic_type(ty, 1).unwrap(), number)
     } else {
-        extract_generic_type(ty)
+        extract_generic_type(ty, number)
     }
 }
 
-pub(crate) fn extract_generic_type(ty: &Type) -> Option<Type> {
+pub(crate) fn extract_generic_type(ty: &Type, number: usize) -> Option<Type> {
     Some(match ty {
         Type::Path(type_path) if type_path.qself.is_none() => {
             let type_params = type_path.path.segments.first().unwrap().clone().arguments;
             let generic_arg = match type_params {
-                PathArguments::AngleBracketed(params) => params.args.first().unwrap().clone(),
+                PathArguments::AngleBracketed(params) => params.args[number - 1].clone(),
                 _ => return None,
             };
             match generic_arg {
@@ -41,7 +41,7 @@ pub(crate) fn is_relation_value_holder(field_type: &Type) -> bool {
     match &*path {
         "OneToOne" => true,
         "ManyToOne" => true,
-        "Option" => is_relation_value_holder(&extract_generic_type(field_type).unwrap()),
+        "Option" => is_relation_value_holder(&extract_generic_type(field_type, 1).unwrap()),
         _ => false,
     }
 }
@@ -54,7 +54,7 @@ pub(crate) fn is_relation(field_type: &Type) -> bool {
         "OneToOne" => true,
         "OneToMany" => true,
         "ManyToOne" => true,
-        "Option" => is_relation(&extract_generic_type(field_type).unwrap()),
+        "Option" => is_relation(&extract_generic_type(field_type, 1).unwrap()),
         _ => false,
     }
 }
@@ -84,7 +84,7 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "String" => "text",
         "Decimal" => "numeric",
         "OneToOne" => {
-            let target_entity = extract_generic_type(field_type).unwrap();
+            let target_entity = extract_generic_type(field_type, 1).unwrap();
             return Some((
                 format!(
                     "oid REFERENCES {}(id)",
@@ -94,7 +94,7 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
             ));
         }
         "ManyToOne" => {
-            let target_entity = extract_generic_type(field_type).unwrap();
+            let target_entity = extract_generic_type(field_type, 1).unwrap();
             return Some((
                 format!(
                     "oid REFERENCES {}(id)",
@@ -110,7 +110,7 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
             return None;
         }
         "Option" => {
-            let (res, _) = _rust_to_postgres_type(&extract_generic_type(field_type).unwrap())?;
+            let (res, _) = _rust_to_postgres_type(&extract_generic_type(field_type, 1).unwrap())?;
             return Some((res, true));
         }
         "DateTime" => "timestamp with time zone",

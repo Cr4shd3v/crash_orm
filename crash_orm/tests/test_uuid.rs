@@ -1,7 +1,7 @@
 use tokio_postgres::NoTls;
 use uuid::Uuid;
 
-use crash_orm::{BaseColumn, CrashOrmDatabaseConnection, Entity, EqualQueryColumn, Schema};
+use crash_orm::{BaseColumn, CrashOrmDatabaseConnection, Entity, EqualQueryColumn, OneToOne, Schema};
 use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
@@ -17,6 +17,13 @@ pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
 pub struct TestItemUuid {
     pub id: Option<Uuid>,
     pub test: u32,
+}
+
+#[derive(Entity, Debug, Schema)]
+pub struct TestItemI32 {
+    pub id: Option<Uuid>,
+    pub t: u32,
+    pub test_item_uuid: OneToOne<TestItemUuid, Uuid>,
 }
 
 #[tokio::test]

@@ -29,7 +29,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         create_fields_string.push_str(&*format!("{} {}", field_name, column_type));
 
         if &*field_name == "id" {
-            let Some(field_type) = extract_generic_type(&field.ty) else {
+            let Some(field_type) = extract_generic_type(&field.ty, 1) else {
                 panic!("The identifier for entity {} must be an option", ident.to_string());
             };
             let field_type_str = get_type_string(&field_type);

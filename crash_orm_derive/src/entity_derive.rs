@@ -45,7 +45,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         panic!("The entity {} has no primary key", ident_str);
     };
 
-    let Some(primary_type) = extract_generic_type(&primary_type) else {
+    let Some(primary_type) = extract_generic_type(&primary_type, 1) else {
         panic!("The identifier for entity {} must be an option", ident_str);
     };
 
@@ -61,13 +61,13 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             let field_type_name = get_type_string(field_type);
             let (field_type_name, is_option) = if field_type_name == "Option" {
                 (
-                    get_type_string(&extract_generic_type(field_type).unwrap()),
+                    get_type_string(&extract_generic_type(field_type, 1).unwrap()),
                     true,
                 )
             } else {
                 (field_type_name, false)
             };
-            let entity_type = extract_generic_type_ignore_option(field_type).unwrap();
+            let entity_type = extract_generic_type_ignore_option(field_type, 1).unwrap();
             let entity_table_name = string_to_table_name(get_type_string(&entity_type));
             let set_function_ident = Ident::new(&*format!("set_{}", field_ident_str), ident.span());
             let get_function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
@@ -162,7 +162,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         }
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
-                            #entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await
+                            #entity_type::get_by_id(connection, self.#field_ident.target_id).await
                         }
                     });
                 }
@@ -210,8 +210,11 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     &*format!("{}_ID", field_ident_str.to_uppercase()),
                     field_ident.span(),
                 );
+                let Some(target_entity_id_type) = extract_generic_type_ignore_option(field_type, 2) else {
+                    panic!("Missing generic parameter at {}", field_ident_str);
+                };
                 column_consts.extend(quote! {
-                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<u32, #ident, #primary_type> = crash_orm::EntityColumn::<u32, #ident, #primary_type>::new(#field_ident_str);
+                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<#target_entity_id_type, #ident, #primary_type> = crash_orm::EntityColumn::<#target_entity_id_type, #ident, #primary_type>::new(#field_ident_str);
                 });
             }
 
