@@ -1,6 +1,6 @@
-use tokio_postgres::types::{FromSql, ToSql};
+use tokio_postgres::types::ToSql;
 
-pub trait PrimaryKey: Sync + Send + ToSql + FromSql<'static> + 'static {}
+pub trait PrimaryKey: Sync + Send + ToSql + 'static {}
 
 impl PrimaryKey for u32 {}
 impl PrimaryKey for i32 {}

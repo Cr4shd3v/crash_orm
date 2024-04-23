@@ -62,9 +62,10 @@ macro_rules! sql_impl_for_relation {
             }
         }
 
-        impl<'a, T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> FromSql<'a> for $rel_type<T, PRIMARY> {
+        impl<'a, T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey + FromSql<'a>> FromSql<'a> for $rel_type<T, PRIMARY> {
             fn from_sql(ty: &Type, raw: &'a [u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
-                Ok($rel_type::<T, PRIMARY>::new(PRIMARY::from_sql(ty, raw)?))
+                let id = PRIMARY::from_sql(ty, raw)?;
+                Ok($rel_type::<T, PRIMARY>::new(id))
             }
 
             fn accepts(ty: &Type) -> bool {
