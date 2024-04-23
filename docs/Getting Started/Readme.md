@@ -36,8 +36,10 @@ The first thing you want to do is creating the CrashOrmDatabaseConnection.
 
 ```rust
 use crash_orm::CrashOrmDatabaseConnection;
+use crash_orm::postgres::NoTls;
 
-let conn = CrashOrmDatabaseConnection::new("postgresql://<user>:<password>@<netloc>/<dbname>").await?;
+let conn = CrashOrmDatabaseConnection::new("postgresql://<user>:<password>@<netloc>/<dbname>", NoTls).await
+     .expect("Failed to connect to database");
 ```
 
 This connection is mandatory for all functions on entities.
@@ -48,7 +50,7 @@ You should store this variable globally or in case of a web framework like actix
 You can now declare your first Entity.
 
 ```rust
-use crash_orm::crash_orm_derive::{Entity, Schema};
+use crash_orm::derive::{Entity, Schema};
 
 #[derive(Debug, Entity, Schema)]
 struct Person {

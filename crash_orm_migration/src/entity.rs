@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
-use crash_orm::crash_orm_derive::{Entity, Schema};
+
+use crash_orm::derive::{Entity, Schema};
 
 #[derive(Entity, Schema, Debug)]
 pub struct CrashOrmMigrationRecord {

@@ -33,4 +33,6 @@ serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "with-serde"] }
+tokio-test = { workspace = true }
+crash_orm_test = { path = "../crash_orm_test" }
 uuid = { workspace = true, features = ["v7"] }

@@ -1,17 +1,8 @@
 use rust_decimal::Decimal;
-use tokio_postgres::NoTls;
 
-use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, LikeQueryColumn, Schema};
+use crash_orm::{Entity, EntityVec, LikeQueryColumn, Schema};
 use crash_orm_derive::{Entity, Schema};
-
-pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new(
-        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
-        NoTls,
-    )
-    .await
-    .unwrap()
-}
+use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem11 {

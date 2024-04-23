@@ -288,7 +288,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 self.id
             }
 
-            fn load_from_row(row: &crash_orm::tokio_postgres::Row) -> #ident {
+            fn load_from_row(row: &crash_orm::postgres::Row) -> #ident {
                 #ident {
                     #select_fields
                 }

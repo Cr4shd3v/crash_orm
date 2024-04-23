@@ -1,17 +1,8 @@
-use tokio_postgres::NoTls;
 use uuid::Uuid;
 
-use crash_orm::{BaseColumn, CrashOrmDatabaseConnection, Entity, EqualQueryColumn, OneToOne, Schema};
+use crash_orm::{BaseColumn, Entity, EqualQueryColumn, OneToOne, Schema};
 use crash_orm_derive::{Entity, Schema};
-
-pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
-    CrashOrmDatabaseConnection::new(
-        "postgresql://crash_orm:postgres@localhost/crash_orm_test",
-        NoTls,
-    )
-        .await
-        .unwrap()
-}
+use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemUuid {
