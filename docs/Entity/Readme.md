@@ -46,6 +46,11 @@ let entity2 = TestItem { id: None };
 let id = entity.insert_get_id(&conn).await?;
 ```
 
+#### Exception: Uuid
+When inserting an entity with a uuid as primary key, **you** are responsible for generating the uuid.
+
+This is because there are many different versions of uuid, and you can choose which you want to use.
+
 ### Update Entity
 Updating an entity is way simpler, since there is only one function.
 
