@@ -7,13 +7,29 @@ use tokio_postgres::types::ToSql;
 
 use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, PrimaryKey, Query, QueryCondition, SelectQuery, UntypedColumn};
 
+/// Trait implemented for all database entities.
+///
+/// This trait can be derived, but the structs **have to** derive [Debug] as well.
+/// ```
+/// use crash_orm::derive::Entity;
+///
+/// #[derive(Entity, Debug)]
+/// struct TestEntity {
+///     id: Option<u32>,
+///     name: String,
+/// }
+/// ```
 #[async_trait]
 pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
+    /// This type references the column struct of this entity
     type ColumnType: BaseColumn<T, P>;
 
+    /// Returns the id of the entity.
+    ///
+    /// Used internally by the ORM
     fn get_id(&self) -> Option<P>;
 
     /// Parses a [`Row`] into [`T`]

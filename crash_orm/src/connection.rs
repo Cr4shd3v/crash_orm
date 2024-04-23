@@ -5,20 +5,30 @@ use tokio_postgres::{Client, Row, Socket};
 use tokio_postgres::tls::MakeTlsConnect;
 use tokio_postgres::types::ToSql;
 
+/// Trait required to be implemented for a connection to be used by the ORM.
+///
+/// The default implementation that should be used is [CrashOrmDatabaseConnection].
+///
+/// You can also just use the default tokio-postgres [Client], this trait is implemented for that as well.
 #[async_trait::async_trait]
 pub trait DatabaseConnection: Sync {
+    /// Method used to only retrieve a single row of a query result.
     async fn query_single(
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
     ) -> crate::Result<Row>;
 
+    /// Method used to retrieve all rows of a query result.
     async fn query_many(
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
     ) -> crate::Result<Vec<Row>>;
 
+    /// Method used to execute a query without returning a row.
+    ///
+    /// However, this function returns the count of modified rows in the database.
     async fn execute_query(
         &self,
         statement: &str,
@@ -26,6 +36,7 @@ pub trait DatabaseConnection: Sync {
     ) -> crate::Result<u64>;
 }
 
+/// The default, simple implementation of the [DatabaseConnection] trait.
 pub struct CrashOrmDatabaseConnection {
     client: Client,
 }
@@ -49,6 +60,7 @@ impl CrashOrmDatabaseConnection {
     }
 
     #[cfg(test)]
+    /// Internal testing only
     pub async fn test() -> crate::Result<Self> {
         Self::new(
             "postgresql://crash_orm:postgres@localhost/crash_orm_test",

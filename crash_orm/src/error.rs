@@ -1,14 +1,22 @@
 use std::fmt::{Debug, Display, Formatter};
 
+/// Type alias for Result with the custom [Error]
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// Error enum holding all possible errors that can be thrown by the ORM.
+///
+/// This does implement [Error](std::error::Error) and contains tokio-postgres [Error](tokio_postgres::Error) if any occur.
 #[derive(Debug)]
 pub enum Error {
+    /// Variant for [tokio_postgres::Error]
     Postgres(tokio_postgres::Error),
+    /// Variant for custom error message
     String(String),
 }
 
 impl Error {
+    /// Shortcut method to create an error with custom error message.
+    #[doc(hidden)]
     pub fn from_str(error: &str) -> Self {
         Self::String(String::from(error))
     }

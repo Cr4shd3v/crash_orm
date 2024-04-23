@@ -1,0 +1,9 @@
+[package]
+name = "crash_orm_test"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+crash_orm = { path = "../crash_orm" }
