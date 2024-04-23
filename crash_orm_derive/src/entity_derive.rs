@@ -202,7 +202,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         if field_ident_str != "id" {
             column_consts.extend(quote! {
-                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::EntityColumn::<#field_type, #ident, #primary_type>::new(#field_ident_str);
+                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
             });
 
             if is_relation_value_holder(&field_type) {
@@ -214,7 +214,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     panic!("Missing generic parameter at {}", field_ident_str);
                 };
                 column_consts.extend(quote! {
-                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<#target_entity_id_type, #ident, #primary_type> = crash_orm::EntityColumn::<#target_entity_id_type, #ident, #primary_type>::new(#field_ident_str);
+                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<#target_entity_id_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
                 });
             }
 
