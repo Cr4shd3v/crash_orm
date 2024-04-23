@@ -14,14 +14,14 @@ use tokio_postgres::types::ToSql;
 mod text_cast_column;
 pub use text_cast_column::*;
 
-pub struct VirtualColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct VirtualColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     sql: BoxedColumnValue,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
     phantom_3: PhantomData<PRIMARY>,
 }
 
-impl<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> VirtualColumn<T, U, PRIMARY> {
+impl<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> VirtualColumn<T, U, PRIMARY> {
     pub(crate) fn new(sql: BoxedColumnValue) -> VirtualColumn<T, U, PRIMARY> {
         VirtualColumn {
             sql,

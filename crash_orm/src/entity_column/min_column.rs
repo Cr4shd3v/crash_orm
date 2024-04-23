@@ -5,7 +5,7 @@ use tokio_postgres::types::ToSql;
 
 /// Trait implementing the min functions for columns
 #[async_trait]
-pub trait MinColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub trait MinColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     /// Return the minimum value of this column
     async fn min(&self, connection: &impl DatabaseConnection) -> crate::Result<T>;
 
@@ -20,7 +20,7 @@ pub trait MinColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static
 macro_rules! impl_min_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MinColumn<$column_type, U, PRIMARY> for EntityColumn<$column_type, U, PRIMARY> {
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey> MinColumn<$column_type, U, PRIMARY> for EntityColumn<$column_type, U, PRIMARY> {
             async fn min(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -67,7 +67,7 @@ macro_rules! impl_min_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MinColumn<Option<$column_type>, U, PRIMARY>
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey> MinColumn<Option<$column_type>, U, PRIMARY>
             for EntityColumn<Option<$column_type>, U, PRIMARY>
         {
             async fn min(

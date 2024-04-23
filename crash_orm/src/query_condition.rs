@@ -22,7 +22,7 @@ mod in_condition;
 pub use in_condition::*;
 
 /// Query condition for entity [T]
-pub enum QueryCondition<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub enum QueryCondition<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     /// SQL: v1 = v2
     Equals(BoxedColumnValue, BoxedColumnValue),
     /// SQL: v1 <> v2
@@ -67,7 +67,7 @@ pub enum QueryCondition<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
     __(PhantomData<T>, PhantomData<PRIMARY>),
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> QueryCondition<T, PRIMARY> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> QueryCondition<T, PRIMARY> {
     pub(crate) fn resolve(
         self,
         index: usize,

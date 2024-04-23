@@ -6,7 +6,7 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::Row;
 
 #[async_trait]
-pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>>: Send + Debug + 'static {
+pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 

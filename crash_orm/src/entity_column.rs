@@ -15,14 +15,14 @@ pub use max_column::*;
 mod avg_column;
 pub use avg_column::*;
 
-pub struct EntityColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct EntityColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     name: &'static str,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
     phantom_3: PhantomData<PRIMARY>,
 }
 
-impl<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> EntityColumn<T, U, PRIMARY> {
+impl<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> EntityColumn<T, U, PRIMARY> {
     /// DO NOT USE THIS IN YOUR CODE, INTERNAL USE ONLY
     pub const fn new(name: &'static str) -> EntityColumn<T, U, PRIMARY> {
         Self {

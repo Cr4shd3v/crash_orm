@@ -1,10 +1,10 @@
 use tokio_postgres::types::{FromSql, ToSql};
 
-pub trait PrimaryKey<'a>: Sync + Send + ToSql + FromSql<'a> + 'static {}
+pub trait PrimaryKey: Sync + Send + ToSql + FromSql<'static> + 'static {}
 
-impl<'a> PrimaryKey<'a> for u32 {}
-impl<'a> PrimaryKey<'a> for i32 {}
-impl<'a> PrimaryKey<'a> for i64 {}
+impl PrimaryKey for u32 {}
+impl PrimaryKey for i32 {}
+impl PrimaryKey for i64 {}
 
 #[cfg(feature = "uuid")]
-impl<'a> PrimaryKey<'a> for uuid::Uuid {}
+impl PrimaryKey for uuid::Uuid {}

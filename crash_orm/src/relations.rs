@@ -34,7 +34,7 @@ macro_rules! default_relation_function {
 
 macro_rules! sql_impl_for_relation {
     ($rel_type:tt) => {
-        impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> ToSql for $rel_type<T, PRIMARY> {
+        impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> ToSql for $rel_type<T, PRIMARY> {
             fn to_sql(
                 &self,
                 ty: &Type,
@@ -62,61 +62,61 @@ macro_rules! sql_impl_for_relation {
             }
         }
 
-        impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> FromSql<'static> for $rel_type<T, PRIMARY> {
-            fn from_sql(ty: &Type, raw: &'static [u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
+        impl<'a, T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> FromSql<'a> for $rel_type<T, PRIMARY> {
+            fn from_sql(ty: &Type, raw: &'a [u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
                 Ok($rel_type::<T, PRIMARY>::new(PRIMARY::from_sql(ty, raw)?))
             }
 
             fn accepts(ty: &Type) -> bool {
-                <u32 as FromSql>::accepts(ty)
+                <PRIMARY as FromSql>::accepts(ty)
             }
         }
     };
 }
 
 #[derive(Debug)]
-pub struct OneToOne<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct OneToOne<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     _p: PhantomData<T>,
     pub target_id: PRIMARY,
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> OneToOne<T, PRIMARY> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> OneToOne<T, PRIMARY> {
     default_relation_function!(OneToOne);
 }
 
 sql_impl_for_relation!(OneToOne);
 
 #[derive(Debug)]
-pub struct OneToOneRef<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct OneToOneRef<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     _p: PhantomData<T>,
     _p1: PhantomData<PRIMARY>,
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> OneToOneRef<T, PRIMARY> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> OneToOneRef<T, PRIMARY> {
     pub fn new() -> OneToOneRef<T, PRIMARY> {
         OneToOneRef { _p: PhantomData, _p1: PhantomData }
     }
 }
 
 #[derive(Debug)]
-pub struct ManyToOne<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct ManyToOne<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     _p: PhantomData<T>,
     pub target_id: PRIMARY,
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> ManyToOne<T, PRIMARY> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> ManyToOne<T, PRIMARY> {
     default_relation_function!(ManyToOne);
 }
 
 sql_impl_for_relation!(ManyToOne);
 
 #[derive(Debug)]
-pub struct OneToMany<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct OneToMany<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     _p: PhantomData<T>,
     _p1: PhantomData<PRIMARY>,
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> OneToMany<T, PRIMARY> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> OneToMany<T, PRIMARY> {
     pub fn new() -> OneToMany<T, PRIMARY> {
         OneToMany { _p: PhantomData, _p1: PhantomData }
     }

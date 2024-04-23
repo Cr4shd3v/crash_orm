@@ -5,7 +5,7 @@ use tokio_postgres::types::ToSql;
 
 /// Trait implementing the max functions for columns
 #[async_trait]
-pub trait MaxColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub trait MaxColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     /// Return the maximum value of this column
     async fn max(&self, connection: &impl DatabaseConnection) -> crate::Result<T>;
 
@@ -20,7 +20,7 @@ pub trait MaxColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static
 macro_rules! impl_max_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MaxColumn<$column_type, U, PRIMARY> for EntityColumn<$column_type, U, PRIMARY> {
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey> MaxColumn<$column_type, U, PRIMARY> for EntityColumn<$column_type, U, PRIMARY> {
             async fn max(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -67,7 +67,7 @@ macro_rules! impl_max_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> MaxColumn<Option<$column_type>, U, PRIMARY>
+        impl<U: Entity<U, PRIMARY> + Sync, PRIMARY: PrimaryKey> MaxColumn<Option<$column_type>, U, PRIMARY>
             for EntityColumn<Option<$column_type>, U, PRIMARY>
         {
             async fn max(

@@ -5,7 +5,7 @@ use tokio_postgres::types::ToSql;
 
 /// Trait implementing the sum functions for columns
 #[async_trait]
-pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     /// Return the sum of this column
     async fn sum(&self, connection: &impl DatabaseConnection, distinct: bool) -> crate::Result<R>;
 
@@ -21,7 +21,7 @@ pub trait SumColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryK
 macro_rules! impl_sum_column {
     ($in_type:ty, $out_type:ty) => {
         #[async_trait]
-        impl<T: Entity<T, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> SumColumn<$in_type, $out_type, T, PRIMARY> for EntityColumn<$in_type, T, PRIMARY> {
+        impl<T: Entity<T, PRIMARY> + Sync, PRIMARY: PrimaryKey> SumColumn<$in_type, $out_type, T, PRIMARY> for EntityColumn<$in_type, T, PRIMARY> {
             async fn sum(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -76,7 +76,7 @@ macro_rules! impl_sum_column {
         }
 
         #[async_trait]
-        impl<T: Entity<T, PRIMARY> + Sync, PRIMARY: PrimaryKey<'static>> SumColumn<$in_type, $out_type, T, PRIMARY>
+        impl<T: Entity<T, PRIMARY> + Sync, PRIMARY: PrimaryKey> SumColumn<$in_type, $out_type, T, PRIMARY>
             for EntityColumn<Option<$in_type>, T, PRIMARY>
         {
             async fn sum(

@@ -1,6 +1,6 @@
 use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, TypedColumnValue, UntypedColumnValue, VirtualColumn};
 
-pub trait StringVirtualColumn<U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub trait StringVirtualColumn<U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     fn lowercase(&self) -> VirtualColumn<String, U, PRIMARY>;
 
     fn uppercase(&self) -> VirtualColumn<String, U, PRIMARY>;
@@ -16,7 +16,7 @@ pub trait StringVirtualColumn<U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static
     fn md5(&self) -> VirtualColumn<String, U, PRIMARY>;
 }
 
-impl<U: Entity<U, PRIMARY>, R: Column<String, U, PRIMARY>, PRIMARY: PrimaryKey<'static>> StringVirtualColumn<U, PRIMARY> for R {
+impl<U: Entity<U, PRIMARY>, R: Column<String, U, PRIMARY>, PRIMARY: PrimaryKey> StringVirtualColumn<U, PRIMARY> for R {
     fn lowercase(&self) -> VirtualColumn<String, U, PRIMARY> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedColumnValue::new(

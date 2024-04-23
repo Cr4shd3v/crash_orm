@@ -3,13 +3,13 @@ use tokio_postgres::types::ToSql;
 use crate::primary::PrimaryKey;
 
 /// Trait implementing null checks
-pub trait NullQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub trait NullQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     fn is_null(&self) -> QueryCondition<U, PRIMARY>;
 
     fn is_not_null(&self) -> QueryCondition<U, PRIMARY>;
 }
 
-impl<T: ToSql, U: Entity<U, PRIMARY>, C: Column<Option<T>, U, PRIMARY>, PRIMARY: PrimaryKey<'static>> NullQueryColumn<T, U, PRIMARY> for C {
+impl<T: ToSql, U: Entity<U, PRIMARY>, C: Column<Option<T>, U, PRIMARY>, PRIMARY: PrimaryKey> NullQueryColumn<T, U, PRIMARY> for C {
     fn is_null(&self) -> QueryCondition<U, PRIMARY> {
         QueryCondition::IsNull(self.get_sql())
     }

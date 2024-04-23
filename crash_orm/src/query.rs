@@ -92,13 +92,13 @@ macro_rules! base_query_functions {
     };
 }
 
-pub struct Query<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct Query<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, PRIMARY>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> Query<T, PRIMARY> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> Query<T, PRIMARY> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities of type [T].
@@ -118,13 +118,13 @@ impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> Query<T, PRIMARY> {
     }
 }
 
-pub struct SelectQuery<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub struct SelectQuery<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, PRIMARY>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey<'static>> SelectQuery<T, PRIMARY> {
+impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> SelectQuery<T, PRIMARY> {
     base_query_functions!(SelectQuery);
 
     /// Execute this query and returns the result as a vector of [Row].

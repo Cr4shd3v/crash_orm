@@ -3,7 +3,7 @@ use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
 /// Trait implementing IN operators
-pub trait InQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub trait InQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     fn in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U, PRIMARY>;
 
     fn not_in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U, PRIMARY>;
@@ -11,7 +11,7 @@ pub trait InQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'st
 
 macro_rules! impl_in_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey<'static>> InQueryColumn<$column_type, U, PRIMARY> for R {
+        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey> InQueryColumn<$column_type, U, PRIMARY> for R {
             fn in_vec(
                 &self,
                 other: Vec<impl IntoSql<$column_type>>,

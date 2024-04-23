@@ -1,7 +1,7 @@
 use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 use tokio_postgres::types::ToSql;
 
-pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey<'static>> {
+pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
     fn ceil(&self) -> VirtualColumn<R, U, PRIMARY>;
 
     fn floor(&self) -> VirtualColumn<R, U, PRIMARY>;
@@ -11,7 +11,7 @@ pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, PRIMARY>, PRIMARY:
 
 macro_rules! impl_round_virtual_column {
     ($column_type:ty, $out_type:ty) => {
-        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey<'static>>
+        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey>
             RoundVirtualColumn<$column_type, $out_type, U, PRIMARY> for R
         {
             fn ceil(&self) -> VirtualColumn<$out_type, U, PRIMARY> {
