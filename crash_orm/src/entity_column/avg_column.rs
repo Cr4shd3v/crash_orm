@@ -1,6 +1,7 @@
-use crate::{slice_query_value_iter, DatabaseConnection, Entity, EntityColumn, QueryCondition, PrimaryKey};
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
+
+use crate::{DatabaseConnection, Entity, EntityColumn, PrimaryKey, QueryCondition, slice_query_value_iter};
 
 /// Trait implementing the avg functions for columns
 #[async_trait]

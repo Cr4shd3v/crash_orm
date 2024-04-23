@@ -1,8 +1,9 @@
 use std::ops::Deref;
 use std::sync::Arc;
+
+use tokio_postgres::{Client, Row, Socket};
 use tokio_postgres::tls::MakeTlsConnect;
 use tokio_postgres::types::ToSql;
-use tokio_postgres::{Client, Row, Socket};
 
 #[async_trait::async_trait]
 pub trait DatabaseConnection: Sync {

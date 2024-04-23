@@ -1,9 +1,11 @@
 use std::fmt::Display;
-use crate::entity::slice_query_value_iter;
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
 use std::sync::Arc;
-use tokio_postgres::types::ToSql;
+
 use tokio_postgres::Row;
+use tokio_postgres::types::ToSql;
+
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
+use crate::entity::slice_query_value_iter;
 
 /// Direction of the Order
 #[derive(Debug)]

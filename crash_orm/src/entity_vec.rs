@@ -1,5 +1,6 @@
-use crate::{DatabaseConnection, Entity, PrimaryKey};
 use async_trait::async_trait;
+
+use crate::{DatabaseConnection, Entity, PrimaryKey};
 
 #[async_trait]
 pub trait EntityVec<P> {

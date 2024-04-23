@@ -1,5 +1,6 @@
-use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 use tokio_postgres::types::ToSql;
+
+use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 
 pub trait SqrtVirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
     fn sqrt(&self) -> VirtualColumn<T, U, P>;

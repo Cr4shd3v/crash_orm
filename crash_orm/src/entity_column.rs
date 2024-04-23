@@ -1,19 +1,19 @@
-use crate::entity::slice_query_value_iter;
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition};
 use std::marker::PhantomData;
+
 use tokio_postgres::types::ToSql;
 
-pub mod sum_column;
+pub use avg_column::*;
+pub use max_column::*;
+pub use min_column::*;
 pub use sum_column::*;
 
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition};
+use crate::entity::slice_query_value_iter;
+
+pub mod sum_column;
 mod min_column;
-pub use min_column::*;
-
 mod max_column;
-pub use max_column::*;
-
 mod avg_column;
-pub use avg_column::*;
 
 pub struct EntityColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
     name: &'static str,

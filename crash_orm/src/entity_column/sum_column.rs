@@ -1,7 +1,8 @@
-use crate::{slice_query_value_iter, EntityColumn, PrimaryKey};
-use crate::{DatabaseConnection, Entity, QueryCondition};
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
+
+use crate::{EntityColumn, PrimaryKey, slice_query_value_iter};
+use crate::{DatabaseConnection, Entity, QueryCondition};
 
 /// Trait implementing the sum functions for columns
 #[async_trait]

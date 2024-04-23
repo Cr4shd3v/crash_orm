@@ -1,7 +1,8 @@
-use crate::entity::slice_query_value_iter;
-use crate::{DatabaseConnection, Entity, EntityColumn, PrimaryKey, QueryCondition};
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
+
+use crate::{DatabaseConnection, Entity, EntityColumn, PrimaryKey, QueryCondition};
+use crate::entity::slice_query_value_iter;
 
 /// Trait implementing the max functions for columns
 #[async_trait]

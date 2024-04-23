@@ -1,5 +1,6 @@
-use crate::{Column, Entity, QueryCondition};
 use tokio_postgres::types::ToSql;
+
+use crate::{Column, Entity, QueryCondition};
 use crate::primary::PrimaryKey;
 
 /// Trait implementing null checks

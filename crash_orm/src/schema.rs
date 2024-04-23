@@ -1,5 +1,6 @@
-use crate::DatabaseConnection;
 use async_trait::async_trait;
+
+use crate::DatabaseConnection;
 
 #[async_trait]
 pub trait Schema {

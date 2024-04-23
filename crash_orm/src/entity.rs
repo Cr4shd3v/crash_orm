@@ -1,9 +1,11 @@
-use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, PrimaryKey, Query, QueryCondition, SelectQuery, UntypedColumn};
-use async_trait::async_trait;
 use std::fmt::Debug;
 use std::sync::Arc;
-use tokio_postgres::types::ToSql;
+
+use async_trait::async_trait;
 use tokio_postgres::Row;
+use tokio_postgres::types::ToSql;
+
+use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, PrimaryKey, Query, QueryCondition, SelectQuery, UntypedColumn};
 
 #[async_trait]
 pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {

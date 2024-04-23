@@ -1,7 +1,7 @@
-use crash_orm_derive::{Entity, Schema};
 use tokio_postgres::NoTls;
 
 use crash_orm::{CrashOrmDatabaseConnection, Entity, EntityVec, InQueryColumn, Schema};
+use crash_orm_derive::{Entity, Schema};
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
     CrashOrmDatabaseConnection::new(
