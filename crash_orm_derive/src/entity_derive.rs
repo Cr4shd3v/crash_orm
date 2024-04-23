@@ -128,7 +128,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         }
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
-                            #entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await
+                            #entity_type::get_by_id(connection, self.#field_ident.target_id).await
                         }
                     });
                 }

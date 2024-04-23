@@ -2,10 +2,12 @@ use tokio_postgres::types::ToSql;
 
 use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
-/// Trait implementing equals operators
+/// Trait implementing equals operator [QueryCondition]
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+    /// Creates [QueryCondition::Equals] from self and other
     fn equals(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
 
+    /// Creates [QueryCondition::NotEquals] from self and other
     fn not_equals(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
 }
 

@@ -2,17 +2,28 @@ use tokio_postgres::types::ToSql;
 
 use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
-/// Trait implementing comparison operators
+/// Trait implementing comparison operator [QueryCondition]
 pub trait CompareQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+    /// Creates [QueryCondition::GreaterThan] from self and other
     fn greater_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+
+    /// Creates [QueryCondition::GreaterEqual] from self and other
     fn greater_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+
+    /// Creates [QueryCondition::LessThan] from self and other
     fn less_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+
+    /// Creates [QueryCondition::LessEqual] from self and other
     fn less_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+
+    /// Creates [QueryCondition::Between] from self and from - to
     fn between(
         &self,
         from: impl IntoSql<T>,
         to: impl IntoSql<T>,
     ) -> QueryCondition<U, P>;
+
+    /// Creates [QueryCondition::NotBetween] from self and from - to
     fn not_between(
         &self,
         from: impl IntoSql<T>,

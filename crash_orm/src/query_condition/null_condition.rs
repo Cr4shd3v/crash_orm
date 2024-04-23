@@ -3,10 +3,12 @@ use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, QueryCondition};
 use crate::primary::PrimaryKey;
 
-/// Trait implementing null checks
+/// Trait implementing null check [QueryCondition].
 pub trait NullQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+    /// Creates [QueryCondition::IsNull] for self
     fn is_null(&self) -> QueryCondition<U, P>;
 
+    /// Creates [QueryCondition::IsNotNull] for self
     fn is_not_null(&self) -> QueryCondition<U, P>;
 }
 

@@ -3,7 +3,9 @@ use tokio_postgres::types::ToSql;
 use crate::{BoxedColumnValue, Entity, EntityColumn, VirtualColumn};
 use crate::primary::PrimaryKey;
 
+/// Trait implemented on all column structs of an entity containing the id.
 pub trait BaseColumn<U: Entity<U, P>, P: PrimaryKey> {
+    /// [EntityColumn] for the id of the entity.
     const ID: EntityColumn<P, U, P> = EntityColumn::<P, U, P>::new("id");
 }
 

@@ -4,10 +4,11 @@ use tokio_postgres::types::ToSql;
 
 use crate::{Entity, EntityColumn, PrimaryKey, VirtualColumn};
 
+/// Struct containing a part of a query with raw sql and values prepared for tokio-postgres.
 #[derive(Clone)]
 pub struct BoxedColumnValue {
-    pub sql: String,
-    pub value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>,
+    pub(crate) sql: String,
+    pub(crate) value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>,
 }
 
 impl BoxedColumnValue {
@@ -112,8 +113,10 @@ impl<T: UntypedColumnValue> UntypedColumnValue for Option<T> {
     }
 }
 
+/// Trait for converting any type that implements [ToSql] and [UntypedColumnValue] into a [TypedColumnValue].
 #[allow(clippy::wrong_self_convention)]
 pub trait IntoSql<T> {
+    /// Convert self into a [TypedColumnValue]
     fn into_typed_value(&self) -> &(dyn TypedColumnValue<T>);
 }
 

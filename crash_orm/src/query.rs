@@ -10,7 +10,9 @@ use crate::entity::slice_query_value_iter;
 /// Direction of the Order
 #[derive(Debug)]
 pub enum OrderDirection {
+    /// ASC
     ASC,
+    /// DESC
     DESC,
 }
 
@@ -94,6 +96,7 @@ macro_rules! base_query_functions {
     };
 }
 
+/// Struct representing a database query created by [Entity::query].
 pub struct Query<T: Entity<T, P>, P: PrimaryKey> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, P>>,
@@ -120,6 +123,7 @@ impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
     }
 }
 
+/// Struct representing a special query created by [Entity::select_query].
 pub struct SelectQuery<T: Entity<T, P>, P: PrimaryKey> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, P>>,

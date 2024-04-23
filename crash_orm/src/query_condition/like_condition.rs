@@ -2,10 +2,12 @@ use tokio_postgres::types::ToSql;
 
 use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
-/// Trait implementing like operators
+/// Trait implementing like operator [QueryCondition]
 pub trait LikeQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+    /// Creates [QueryCondition::Like] from self and other
     fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P>;
 
+    /// Creates [QueryCondition::NotLike] from self and other
     fn not_like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P>;
 }
 

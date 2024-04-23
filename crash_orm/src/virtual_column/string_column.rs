@@ -1,18 +1,26 @@
 use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, TypedColumnValue, UntypedColumnValue, VirtualColumn};
 
+/// Trait implementing string database functions to create [VirtualColumn]s for string columns
 pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKey> {
+    /// Convert self to lowercase
     fn lowercase(&self) -> VirtualColumn<String, U, P>;
 
+    /// Convert self to uppercase
     fn uppercase(&self) -> VirtualColumn<String, U, P>;
 
+    /// Reverse self
     fn reverse(&self) -> VirtualColumn<String, U, P>;
 
+    /// Get the length of self
     fn length(&self) -> VirtualColumn<i32, U, P>;
 
+    /// Repeat self [repetition] times
     fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U, P>;
 
+    /// Concat self and other
     fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U, P>;
 
+    /// Creates the md5 hash of this string
     fn md5(&self) -> VirtualColumn<String, U, P>;
 }
 
