@@ -3,26 +3,26 @@ use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
 /// Trait implementing IN operators
-pub trait InQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
-    fn in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U, PRIMARY>;
+pub trait InQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+    fn in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U, P>;
 
-    fn not_in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U, PRIMARY>;
+    fn not_in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U, P>;
 }
 
 macro_rules! impl_in_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey> InQueryColumn<$column_type, U, PRIMARY> for R {
+        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey> InQueryColumn<$column_type, U, P> for R {
             fn in_vec(
                 &self,
                 other: Vec<impl IntoSql<$column_type>>,
-            ) -> QueryCondition<U, PRIMARY> {
+            ) -> QueryCondition<U, P> {
                 QueryCondition::In(self.get_sql(), other.iter().map(|i| i.into_typed_value().get_sql()).collect())
             }
 
             fn not_in_vec(
                 &self,
                 other: Vec<impl IntoSql<$column_type>>,
-            ) -> QueryCondition<U, PRIMARY> {
+            ) -> QueryCondition<U, P> {
                 QueryCondition::NotIn(self.get_sql(), other.iter().map(|i| i.into_typed_value().get_sql()).collect())
             }
         }

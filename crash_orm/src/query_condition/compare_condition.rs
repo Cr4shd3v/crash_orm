@@ -3,48 +3,48 @@ use tokio_postgres::types::ToSql;
 use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
 /// Trait implementing comparison operators
-pub trait CompareQueryColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
-    fn greater_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, PRIMARY>;
-    fn greater_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, PRIMARY>;
-    fn less_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, PRIMARY>;
-    fn less_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, PRIMARY>;
+pub trait CompareQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+    fn greater_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn greater_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn less_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn less_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
     fn between(
         &self,
         from: impl IntoSql<T>,
         to: impl IntoSql<T>,
-    ) -> QueryCondition<U, PRIMARY>;
+    ) -> QueryCondition<U, P>;
     fn not_between(
         &self,
         from: impl IntoSql<T>,
         to: impl IntoSql<T>,
-    ) -> QueryCondition<U, PRIMARY>;
+    ) -> QueryCondition<U, P>;
 }
 
 macro_rules! impl_compare_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey> CompareQueryColumn<$column_type, U, PRIMARY> for R {
+        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey> CompareQueryColumn<$column_type, U, P> for R {
             fn greater_than(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, PRIMARY> {
+            ) -> QueryCondition<U, P> {
                 QueryCondition::GreaterThan(self.get_sql(), other.into_typed_value().get_sql())
             }
 
             fn greater_equal(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, PRIMARY> {
+            ) -> QueryCondition<U, P> {
                 QueryCondition::GreaterEqual(self.get_sql(), other.into_typed_value().get_sql())
             }
 
-            fn less_than(&self, other: impl IntoSql<$column_type>) -> QueryCondition<U, PRIMARY> {
+            fn less_than(&self, other: impl IntoSql<$column_type>) -> QueryCondition<U, P> {
                 QueryCondition::LessThan(self.get_sql(), other.into_typed_value().get_sql())
             }
 
             fn less_equal(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, PRIMARY> {
+            ) -> QueryCondition<U, P> {
                 QueryCondition::LessEqual(self.get_sql(), other.into_typed_value().get_sql())
             }
 
@@ -52,7 +52,7 @@ macro_rules! impl_compare_entity_column {
                 &self,
                 from: impl IntoSql<$column_type>,
                 to: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, PRIMARY> {
+            ) -> QueryCondition<U, P> {
                 QueryCondition::Between(self.get_sql(), from.into_typed_value().get_sql(), to.into_typed_value().get_sql())
             }
 
@@ -60,7 +60,7 @@ macro_rules! impl_compare_entity_column {
                 &self,
                 from: impl IntoSql<$column_type>,
                 to: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, PRIMARY> {
+            ) -> QueryCondition<U, P> {
                 QueryCondition::NotBetween(self.get_sql(), from.into_typed_value().get_sql(), to.into_typed_value().get_sql())
             }
         }

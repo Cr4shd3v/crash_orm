@@ -6,19 +6,19 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::Row;
 
 #[async_trait]
-pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey>: Send + Debug + 'static {
+pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
-    type ColumnType: BaseColumn<T, PRIMARY>;
+    type ColumnType: BaseColumn<T, P>;
 
-    fn get_id(&self) -> Option<PRIMARY>;
+    fn get_id(&self) -> Option<P>;
 
     /// Parses a [`Row`] into [`T`]
     fn load_from_row(row: &Row) -> T;
 
     /// Retrieves an entity by its id
-    async fn get_by_id(connection: &impl DatabaseConnection, id: PRIMARY) -> crate::Result<T>;
+    async fn get_by_id(connection: &impl DatabaseConnection, id: P) -> crate::Result<T>;
 
     /// Retrieves all entities
     async fn get_all(connection: &impl DatabaseConnection) -> crate::Result<Vec<T>>;
@@ -29,7 +29,7 @@ pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey>: Send + Debug + 'st
     /// Insert and returns the id
     ///
     /// This DOES NOT set the id in the entity
-    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> crate::Result<PRIMARY>;
+    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> crate::Result<P>;
 
     /// Insert and set id
     ///
@@ -51,7 +51,7 @@ pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey>: Send + Debug + 'st
     /// Creates a [Query] for this Entity.
     ///
     /// See [Query] for more details on how to build a query.
-    fn query() -> Query<T, PRIMARY> {
+    fn query() -> Query<T, P> {
         Query::new(BoxedColumnValue::new(
             format!("SELECT * FROM {}", Self::TABLE_NAME),
             vec![],
@@ -61,7 +61,7 @@ pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey>: Send + Debug + 'st
     /// Count the entries based on a [QueryCondition].
     async fn count_query(
         connection: &impl DatabaseConnection,
-        condition: QueryCondition<T, PRIMARY>,
+        condition: QueryCondition<T, P>,
     ) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
@@ -80,7 +80,7 @@ pub trait Entity<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey>: Send + Debug + 'st
     /// Select specific columns ([crate::EntityColumn] or [crate::VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query(columns: &[&(dyn UntypedColumn<T, PRIMARY>)]) -> SelectQuery<T, PRIMARY> {
+    fn select_query(columns: &[&(dyn UntypedColumn<T, P>)]) -> SelectQuery<T, P> {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())

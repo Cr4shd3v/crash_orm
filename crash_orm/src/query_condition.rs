@@ -22,21 +22,21 @@ mod in_condition;
 pub use in_condition::*;
 
 /// Query condition for entity [T]
-pub enum QueryCondition<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
+pub enum QueryCondition<T: Entity<T, P>, P: PrimaryKey> {
     /// SQL: v1 = v2
     Equals(BoxedColumnValue, BoxedColumnValue),
     /// SQL: v1 <> v2
     NotEquals(BoxedColumnValue, BoxedColumnValue),
     /// SQL: (c1) AND (c2)
-    And(Box<QueryCondition<T, PRIMARY>>, Box<QueryCondition<T, PRIMARY>>),
+    And(Box<QueryCondition<T, P>>, Box<QueryCondition<T, P>>),
     /// SQL: (c1) OR (c2)
-    Or(Box<QueryCondition<T, PRIMARY>>, Box<QueryCondition<T, PRIMARY>>),
+    Or(Box<QueryCondition<T, P>>, Box<QueryCondition<T, P>>),
     /// SQL: v1 IS NULL
     IsNull(BoxedColumnValue),
     /// SQL: v1 IS NOT NULL
     IsNotNull(BoxedColumnValue),
     /// SQL: NOT (c1)
-    Not(Box<QueryCondition<T, PRIMARY>>),
+    Not(Box<QueryCondition<T, P>>),
     /// SQL: v1 LIKE v2
     Like(BoxedColumnValue, BoxedColumnValue),
     /// SQL: v1 NOT LIKE v2
@@ -64,10 +64,10 @@ pub enum QueryCondition<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> {
     /// INTERNAL
     #[allow(non_camel_case_types)]
     #[doc(hidden)]
-    __(PhantomData<T>, PhantomData<PRIMARY>),
+    __(PhantomData<T>, PhantomData<P>),
 }
 
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> QueryCondition<T, PRIMARY> {
+impl<T: Entity<T, P>, P: PrimaryKey> QueryCondition<T, P> {
     pub(crate) fn resolve(
         self,
         index: usize,
@@ -277,17 +277,17 @@ impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> QueryCondition<T, PRIMARY> {
     }
 
     /// Build [QueryCondition::And] from self and other
-    pub fn and(self, other: QueryCondition<T, PRIMARY>) -> QueryCondition<T, PRIMARY> {
+    pub fn and(self, other: QueryCondition<T, P>) -> QueryCondition<T, P> {
         QueryCondition::And(Box::new(self), Box::new(other))
     }
 
     /// Build [QueryCondition::Or] from self and other
-    pub fn or(self, other: QueryCondition<T, PRIMARY>) -> QueryCondition<T, PRIMARY> {
+    pub fn or(self, other: QueryCondition<T, P>) -> QueryCondition<T, P> {
         QueryCondition::Or(Box::new(self), Box::new(other))
     }
 
     /// Build [QueryCondition::Not] from self
-    pub fn not(self) -> QueryCondition<T, PRIMARY> {
+    pub fn not(self) -> QueryCondition<T, P> {
         QueryCondition::Not(Box::new(self))
     }
 }

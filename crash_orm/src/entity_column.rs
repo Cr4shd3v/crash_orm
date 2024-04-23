@@ -15,16 +15,16 @@ pub use max_column::*;
 mod avg_column;
 pub use avg_column::*;
 
-pub struct EntityColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
+pub struct EntityColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
     name: &'static str,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
-    phantom_3: PhantomData<PRIMARY>,
+    phantom_3: PhantomData<P>,
 }
 
-impl<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> EntityColumn<T, U, PRIMARY> {
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> EntityColumn<T, U, P> {
     /// DO NOT USE THIS IN YOUR CODE, INTERNAL USE ONLY
-    pub const fn new(name: &'static str) -> EntityColumn<T, U, PRIMARY> {
+    pub const fn new(name: &'static str) -> EntityColumn<T, U, P> {
         Self {
             name,
             phantom_1: PhantomData,
@@ -68,7 +68,7 @@ impl<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> EntityColumn<T, U, PR
         &self,
         connection: &impl DatabaseConnection,
         distinct: bool,
-        condition: QueryCondition<U, PRIMARY>,
+        condition: QueryCondition<U, P>,
     ) -> crate::Result<i64> {
         let (query, values, _) = condition.resolve(1);
 

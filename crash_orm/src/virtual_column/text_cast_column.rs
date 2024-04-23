@@ -1,16 +1,16 @@
 use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 use tokio_postgres::types::ToSql;
 
-pub trait TextCastVirtualColumn<T: ToSql, U: Entity<U, PRIMARY>, PRIMARY: PrimaryKey> {
-    fn cast_to_text(&self) -> VirtualColumn<String, U, PRIMARY>;
+pub trait TextCastVirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+    fn cast_to_text(&self) -> VirtualColumn<String, U, P>;
 }
 
 macro_rules! impl_text_cast_virtual_column {
     ($column_type:ty) => {
-        impl<U: Entity<U, PRIMARY>, R: Column<$column_type, U, PRIMARY>, PRIMARY: PrimaryKey> TextCastVirtualColumn<$column_type, U, PRIMARY>
+        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey> TextCastVirtualColumn<$column_type, U, P>
             for R
         {
-            fn cast_to_text(&self) -> VirtualColumn<String, U, PRIMARY> {
+            fn cast_to_text(&self) -> VirtualColumn<String, U, P> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedColumnValue::new(
                     format!("CAST({} AS TEXT)", sql.sql),

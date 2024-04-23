@@ -2,7 +2,7 @@ use crate::{DatabaseConnection, Entity, PrimaryKey};
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait EntityVec<PRIMARY> {
+pub trait EntityVec<P> {
     /// Shortcut function to call [Entity::persist] on every entity in this vector.
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
@@ -11,7 +11,7 @@ pub trait EntityVec<PRIMARY> {
 }
 
 #[async_trait]
-impl<T: Entity<T, PRIMARY>, PRIMARY: PrimaryKey> EntityVec<PRIMARY> for Vec<T> {
+impl<T: Entity<T, P>, P: PrimaryKey> EntityVec<P> for Vec<T> {
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         for entity in self {
             entity.persist(connection).await?;
