@@ -19,7 +19,7 @@ mod compare_condition;
 mod bool_condition;
 mod in_condition;
 
-/// Query condition for entity [T]
+/// Query condition for entity
 pub enum QueryCondition<T: Entity<T, P>, P: PrimaryKey> {
     /// SQL: v1 = v2
     Equals(BoxedColumnValue, BoxedColumnValue),

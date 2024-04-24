@@ -8,12 +8,12 @@ use crate::{DatabaseConnection, Entity, EntityColumn, PrimaryKey, QueryCondition
 pub trait AvgColumn<T: ToSql, R: ToSql, U: Entity<U, P>, P: PrimaryKey> {
     /// Return the average value of this column
     ///
-    /// [`distinct`]: Only unique entries. Duplicates are ignored.
+    /// `distinct`: Only unique entries. Duplicates are ignored.
     async fn avg(&self, connection: &impl DatabaseConnection, distinct: bool) -> crate::Result<R>;
 
     /// Return the average value of this column based on the condition
     ///
-    /// [`distinct`]: Only unique entries. Duplicates are ignored.
+    /// `distinct`: Only unique entries. Duplicates are ignored.
     async fn avg_query(
         &self,
         connection: &impl DatabaseConnection,

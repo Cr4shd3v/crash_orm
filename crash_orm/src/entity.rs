@@ -288,7 +288,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Used internally by the ORM
     fn get_id(&self) -> Option<P>;
 
-    /// Parses a [`Row`] into [`T`]
+    /// Parses a [`Row`] into self
     fn load_from_row(row: &Row) -> T;
 
     /// Retrieves an entity by its id

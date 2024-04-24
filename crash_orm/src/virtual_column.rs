@@ -42,7 +42,7 @@ impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> VirtualColumn<T, U, P> {
         self.sql.clone()
     }
 
-    /// Constant Column Pi ([`f64::PI`])
+    /// Constant Column Pi
     pub fn pi() -> VirtualColumn<f64, U, P> {
         VirtualColumn::new(BoxedColumnValue::new(String::from("PI()"), vec![]))
     }

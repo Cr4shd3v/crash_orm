@@ -14,7 +14,7 @@ pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKey> {
     /// Get the length of self
     fn length(&self) -> VirtualColumn<i32, U, P>;
 
-    /// Repeat self [repetition] times
+    /// Repeat self `repetition` times
     fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U, P>;
 
     /// Concat self and other

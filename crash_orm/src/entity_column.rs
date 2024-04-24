@@ -46,7 +46,7 @@ impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> EntityColumn<T, U, P> {
 
     /// Count entries in this column.
     ///
-    /// [`distinct`]: Only count unique entries. Duplicates are ignored.
+    /// `distinct`: Only count unique entries. Duplicates are ignored.
     pub async fn count(
         &self,
         connection: &impl DatabaseConnection,
@@ -69,7 +69,7 @@ impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> EntityColumn<T, U, P> {
 
     /// Count entries in this column based on a condition.
     ///
-    /// [`distinct`]: Only count unique entries. Duplicates are ignored.
+    /// `distinct`: Only count unique entries. Duplicates are ignored.
     pub async fn count_query(
         &self,
         connection: &impl DatabaseConnection,

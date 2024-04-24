@@ -106,7 +106,7 @@ pub struct Query<T: Entity<T, P>, P: PrimaryKey> {
 impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
     base_query_functions!(Query);
 
-    /// Execute this query and returns the result as a vector of entities of type [T].
+    /// Execute this query and returns the result as a vector of entities.
     pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<T>> {
         let (query, values) = self.get_raw_query();
 
