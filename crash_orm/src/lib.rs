@@ -5,12 +5,12 @@
 //! The ORM is still in heavy development and bugs might occur.
 //! There may also be breaking changes to the library in minor versions without further notice.
 //!
-//! # Table of Content
-//!- [Entity](Entity/Readme.md)
-//!  - [Property Types](Entity/Types.md)
-//!  - [Relations](Entity/Relations.md)
-//!- [Query](Query/Readme.md)
-//!- [Schema](Schema/Readme.md)
+//! # Documentation
+//!- [Entity](entity)
+//!  - [Property Types](column_value)
+//!  - [Relations](relations)
+//!- [Query](query)
+//!- [Schema](schema)
 //!
 //! # Request changes for documentation
 //! Please [open an issue](https://github.com/Cr4shd3v/crash_orm/issues/new/choose) with the "Documentation" Template.
