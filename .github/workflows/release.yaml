@@ -48,3 +48,7 @@ jobs:
           branch: master|v[0-9]+
           token: ${{ secrets.GITHUB_TOKEN }}
           changelog: CHANGELOG.md
+      - name: Publish crash_orm_derive to crates
+        run: cargo publish --no-verify -p crash_orm_derive --token $CRATES_TOKEN
+      - name: Publish crash_orm to crates
+        run: cargo publish --no-verify -p crash_orm --token $CRATES_TOKEN
