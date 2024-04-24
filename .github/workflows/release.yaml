@@ -37,6 +37,8 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost/crash_orm_test
   create-release:
     if: github.repository_owner == 'Cr4shd3v'
+    needs:
+      - test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
