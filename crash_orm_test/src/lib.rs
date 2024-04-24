@@ -7,3 +7,14 @@ pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
         NoTls,
     ).await.unwrap()
 }
+
+#[macro_export]
+macro_rules! default_create_table {
+    ($entity:ty, $conn:expr) => {
+        if !<$entity>::table_exists(&$conn).await.unwrap() {
+            <$entity>::create_table(&$conn).await.unwrap();
+        } else {
+            <$entity>::truncate_table(&$conn).await.unwrap();
+        }
+    };
+}

@@ -252,17 +252,21 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     insert_index += 1;
 
     let insert_field_names = insert_field_names.to_string();
-    let insert_field_names = insert_field_names.strip_suffix(",").unwrap();
+    let insert_field_names = insert_field_names.strip_suffix(",").unwrap_or("");
     let insert_field_self_values_format =
-        insert_field_self_values_format.strip_suffix(",").unwrap();
+        insert_field_self_values_format.strip_suffix(",").unwrap_or("");
 
     let select_by_id_string = format!("SELECT * FROM {} WHERE id = $1", ident_str);
     let select_all_string = format!("SELECT * FROM {}", ident_str);
     let count_string = format!("SELECT COUNT(*) FROM {}", ident_str);
-    let insert_string = format!(
-        "INSERT INTO {}({}) VALUES ({}) RETURNING id",
-        ident_str, insert_field_names, insert_field_self_values_format
-    );
+    let insert_string = if insert_field_names.is_empty() {
+        format!("INSERT INTO {} DEFAULT VALUES RETURNING id", ident_str)
+    } else {
+        format!(
+            "INSERT INTO {}({}) VALUES ({}) RETURNING id",
+            ident_str, insert_field_names, insert_field_self_values_format
+        )
+    };
     let delete_string = format!("DELETE FROM {} WHERE id = $1", ident_str);
     let update_string = format!(
         "UPDATE {} SET {} WHERE id = ${}",
