@@ -268,10 +268,19 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         )
     };
     let delete_string = format!("DELETE FROM {} WHERE id = $1", ident_str);
-    let update_string = format!(
-        "UPDATE {} SET {} WHERE id = ${}",
-        ident_str, update_fields, insert_index
-    );
+
+    let update_statement = if update_fields.is_empty() {
+        quote!()
+    } else {
+        let update_string = format!(
+            "UPDATE {} SET {} WHERE id = ${}",
+            ident_str, update_fields, insert_index
+        );
+        quote! {
+            connection.execute_query(#update_string,&[#insert_field_self_values &self.id]).await?;
+        }
+    };
+
     let ident_column = Ident::new(&*format!("{}Column", ident.to_string()), ident.span());
 
     let mut output = quote! {
@@ -340,7 +349,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     return Err(crash_orm::Error::from_str("You can't update an entity without an id."));
                 }
 
-                connection.execute_query(#update_string,&[#insert_field_self_values &self.id]).await?;
+                #update_statement
 
                 Ok(())
             }

@@ -1,17 +1,31 @@
 //! # Crash ORM
 //!
-//! A simple, typed ORM for Postgres.
+//! Crash ORM is an async database ORM built for Postgres.
+//!
+//! The ORM is still in heavy development and bugs might occur.
+//! There may also be breaking changes to the library in minor versions without further notice.
+//!
+//! # Table of Content
+//!- [Entity](Entity/Readme.md)
+//!  - [Property Types](Entity/Types.md)
+//!  - [Relations](Entity/Relations.md)
+//!- [Query](Query/Readme.md)
+//!- [Schema](Schema/Readme.md)
+//!
+//! # Request changes for documentation
+//! Please [open an issue](https://github.com/Cr4shd3v/crash_orm/issues/new/choose) with the "Documentation" Template.
+//!
+//! You can also directly open a pull request with the changes you propose.
 //!
 //! # Getting Started
-//!
-//! # Setup Postgres
 //! This ORM only works with Postgres.
 //! The ORM requires you to have a working installation of Postgres.
 //!
 //! To connect to postgres, you will need a connection string based on the following structure:
 //!
-//! ## postgresql://user:password@netloc/dbname
-//!
+//! ```no_build
+//! postgresql://user:password@netloc/dbname
+//! ```
 //!
 //! # Create the CrashOrmDatabaseConnection
 //! The first thing you want to do is creating the CrashOrmDatabaseConnection.
