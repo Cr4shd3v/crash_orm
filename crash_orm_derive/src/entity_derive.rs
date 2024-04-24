@@ -94,6 +94,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
                         let rows = connection.query_many(#query, &[&self.id]).await?;
+                        use crash_orm::Entity;
                         Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
                     }
                 });
@@ -102,7 +103,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "ManyToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::ManyToOne::from(#field_ident.unwrap())?)
                             } else {
@@ -114,6 +115,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
+                                use crash_orm::Entity;
                                 Ok(Some(#entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
                             } else {
                                 Ok(None)
@@ -122,13 +124,14 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::ManyToOne::from(#field_ident)?;
 
                             Ok(())
                         }
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                            use crash_orm::Entity;
                             #entity_type::get_by_id(connection, self.#field_ident.target_id).await
                         }
                     });
@@ -136,7 +139,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "OneToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::OneToOne::from(#field_ident.unwrap())?)
                             } else {
@@ -148,6 +151,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
+                                use crash_orm::Entity;
                                 Ok(Some(#entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
                             } else {
                                 Ok(None)
@@ -156,13 +160,14 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::OneToOne::from(#field_ident)?;
 
                             Ok(())
                         }
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                            use crash_orm::Entity;
                             #entity_type::get_by_id(connection, self.#field_ident.target_id).await
                         }
                     });
@@ -186,6 +191,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                 functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                        use crash_orm::Entity;
                         let row = connection.query_single(#query, &[&self.id]).await?;
                         Ok(#entity_type::load_from_row(&row))
                     }
