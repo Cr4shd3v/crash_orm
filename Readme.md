@@ -10,17 +10,13 @@ The goal of this project is to provide an easy-to-use API to interact with your 
 
 **ALSO NOTE**: I won't add any other database engine until version 1.0 or until I replace tokio_postgres with a different library.
 
-## Getting Started
-
-You can find the Getting Started Page [here](docs/Getting%20Started/Readme.md).
-
 ## Documentation
-The Documentation is located [here](docs/Readme.md).
+The Documentation is located [at docs.rs](https://docs.rs/crash_orm/latest/crash_orm/).
 
-However, the documentation is still expanding and some features are not documented yet.
 Feel free to [open an issue](https://github.com/Cr4shd3v/crash_orm/issues/new/choose) if you need more / better documentation of a part of this package.
 
 ## Reporting Issues / Requesting features
 
 Always feel free to [open an issue](https://github.com/Cr4shd3v/crash_orm/issues/new/choose) when you encounter a bug or when you are missing a feature.
+
 I will try to implement as many features as possible, especially considering the structure of this ORM.

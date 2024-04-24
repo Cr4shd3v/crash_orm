@@ -23,9 +23,7 @@
 //!
 //! To connect to postgres, you will need a connection string based on the following structure:
 //!
-//! ```no_build
 //! postgresql://user:password@netloc/dbname
-//! ```
 //!
 //! # Create the CrashOrmDatabaseConnection
 //! The first thing you want to do is creating the CrashOrmDatabaseConnection.
@@ -59,7 +57,7 @@
 //!
 //! This will generate a lot of code, if you are curious, you can inspect this struct with 'cargo expand'.
 //!
-//! For more info, visit the [repository](https://github.com/Cr4shd3v/crash_orm).
+//! For more info, visit the corresponding docs mentioned above.
 
 #![warn(missing_docs)]
 
