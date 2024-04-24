@@ -12,6 +12,7 @@ jobs:
       postgres:
         image: postgres
         env:
+          POSTGRES_DB: crash_orm_test
           POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
@@ -23,8 +24,6 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      - name: Create Database
-        run: sudo -u postgres createdb crash_orm_test
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
