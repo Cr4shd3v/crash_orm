@@ -1,3 +1,9 @@
+# v0.2.0
+- feat: Uuid, i32, i64 as primary keys [#70]
+- feat: owned values now possible in query condition
+- doc: doc is now in rust [#71]
+- fix: entity without any fields besides an id fail to compile [#72]
+
 # v0.1.5
 - fix create table sql
 
