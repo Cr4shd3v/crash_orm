@@ -12,7 +12,7 @@ pub struct TestItemUuid {
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemI32 {
-    pub id: Option<Uuid>,
+    pub id: Option<i32>,
     pub t: u32,
     pub test_item_uuid: OneToOne<TestItemUuid, Uuid>,
 }
