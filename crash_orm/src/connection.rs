@@ -1,3 +1,4 @@
+use std::env;
 use std::ops::Deref;
 use std::sync::Arc;
 
@@ -63,7 +64,7 @@ impl CrashOrmDatabaseConnection {
     /// Internal testing only
     pub async fn test() -> crate::Result<Self> {
         Self::new(
-            "postgresql://crash_orm:postgres@localhost/crash_orm_test",
+            &*env::var("DATABASE_URL").unwrap_or(String::from("postgresql://crash_orm:postgres@localhost/crash_orm_test")),
             tokio_postgres::NoTls,
         )
         .await
