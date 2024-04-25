@@ -1,7 +1,10 @@
 # v0.2.0
 - feat: Uuid, i32, i64 as primary keys (#70)
 - feat: owned values now possible in query condition
+- feat: Batch execute persist_all / insert_all (#60)
+- feat: Move migrations into crash_orm crate behind "migration" feature (#74)
 - doc: doc is now in rust (#71)
+- test: Automated testing before release (#68)
 - fix: entity without any fields besides an id fail to compile (#72)
 
 # v0.1.5
