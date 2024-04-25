@@ -310,6 +310,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 self.id
             }
 
+            fn get_values(&self) -> Vec<&(dyn crash_orm::postgres::types::ToSql + Sync)> {
+                vec![
+                    #insert_field_self_values
+                ]
+            }
+
             fn load_from_row(row: &crash_orm::postgres::Row) -> #ident {
                 #ident {
                     #select_fields

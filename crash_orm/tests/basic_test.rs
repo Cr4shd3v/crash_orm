@@ -101,7 +101,7 @@ async fn test_get_all() {
     }
 
     vec![TestItem2::test(), TestItem2::test(), TestItem2::test()]
-        .persist_all(&conn)
+        .insert_all(&conn)
         .await
         .unwrap();
 

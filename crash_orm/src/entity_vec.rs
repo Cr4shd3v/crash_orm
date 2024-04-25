@@ -12,7 +12,9 @@ pub trait EntityVec<P> {
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
     /// Batch insert all entities in the vector
-    async fn insert_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
+    ///
+    /// This does **not** update the ids of the entity if needed.
+    async fn insert_all(&self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
     /// Shortcut function to call [Entity::remove] on every entity in this vector.
     ///
@@ -30,18 +32,22 @@ impl<T: Entity<T, P> + Sync, P: PrimaryKey> EntityVec<P> for Vec<T> {
         Ok(())
     }
 
-    async fn insert_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()> {
+    async fn insert_all(&self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         if self.is_empty() {
             return Ok(());
         }
 
         let insert_field_count = T::__INSERT_FIELD_NAMES.split(",").count();
-        let insert_values_string = (0..self.len()).map(|_| {
-            format!("()")
+        let insert_values_string = (0..self.len()).map(|row_index| {
+            format!("({})", (0..insert_field_count).map(|value_index| {
+                format!("${}", (row_index * insert_field_count) + value_index + 1)
+            }).collect::<Vec<String>>().join(","))
         }).collect::<Vec<String>>().join(",");
 
+        let values = self.iter().map(|entity| entity.get_values()).flatten().collect::<Vec<&(dyn ToSql + Sync)>>();
+
         let query = format!("INSERT INTO {}({}) VALUES {}", T::TABLE_NAME, T::__INSERT_FIELD_NAMES, insert_values_string);
-        connection.execute_query(&*query, &[]).await?;
+        connection.execute_query(&*query, values.as_slice()).await?;
 
         Ok(())
     }

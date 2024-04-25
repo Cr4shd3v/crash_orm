@@ -295,6 +295,12 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Parses a [`Row`] into self
     fn load_from_row(row: &Row) -> T;
 
+    /// Get all values of this entity as vector for database insertion.
+    ///
+    /// This method is used internally and should not be used manually.
+    #[doc(hidden)]
+    fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
+
     /// Retrieves an entity by its id
     async fn get_by_id(connection: &impl DatabaseConnection, id: P) -> crate::Result<T>;
 
