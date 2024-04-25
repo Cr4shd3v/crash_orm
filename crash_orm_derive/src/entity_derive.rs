@@ -209,6 +209,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         if field_ident_str != "id" {
             column_consts.extend(quote! {
+                #[allow(missing_docs)]
                 pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
             });
 
@@ -288,8 +289,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     };
 
     let ident_column = Ident::new(&*format!("{}Column", ident.to_string()), ident.span());
+    let ident_column_doc = format!("Column struct for [{}]", ident_str);
 
     let mut output = quote! {
+        #[doc=#ident_column_doc]
         #vis struct #ident_column;
 
         impl #ident_column {
