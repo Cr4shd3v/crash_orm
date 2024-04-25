@@ -11,6 +11,7 @@
 //!  - [Relations](relations)
 //!- [Query](query)
 //!- [Schema](schema)
+//!- [Migration](migration)
 //!
 //! # Request changes for documentation
 //! Please [open an issue](https://github.com/Cr4shd3v/crash_orm/issues/new/choose) with the "Documentation" Template.
