@@ -107,11 +107,13 @@ async fn test_get_all() {
 
     let results = TestItem2::get_all(&conn).await;
     assert!(results.is_ok());
-    let mut results = results.unwrap();
+    let results = results.unwrap();
     assert_eq!(results.len(), 3);
 
     // cleanup
     results.remove_all(&conn).await.unwrap();
+
+    assert!(TestItem2::get_all(&conn).await.unwrap().is_empty());
 }
 
 #[derive(Entity, Debug, Schema)]
