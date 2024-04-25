@@ -280,6 +280,10 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
+    /// Internal field for batch insert
+    #[doc(hidden)]
+    const __INSERT_FIELD_NAMES: &'static str;
+
     /// This type references the column struct of this entity
     type ColumnType: BaseColumn<T, P>;
 

@@ -9,9 +9,10 @@ use crate::{DatabaseConnection, Entity, PrimaryKey};
 #[async_trait]
 pub trait EntityVec<P> {
     /// Shortcut function to call [Entity::persist] on every entity in this vector.
-    ///
-    /// This will be a batch insert/update in the future.
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
+
+    /// Batch insert all entities in the vector
+    async fn insert_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
     /// Shortcut function to call [Entity::remove] on every entity in this vector.
     ///
@@ -25,6 +26,22 @@ impl<T: Entity<T, P> + Sync, P: PrimaryKey> EntityVec<P> for Vec<T> {
         for entity in self {
             entity.persist(connection).await?;
         }
+
+        Ok(())
+    }
+
+    async fn insert_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()> {
+        if self.is_empty() {
+            return Ok(());
+        }
+
+        let insert_field_count = T::__INSERT_FIELD_NAMES.split(",").count();
+        let insert_values_string = (0..self.len()).map(|_| {
+            format!("()")
+        }).collect::<Vec<String>>().join(",");
+
+        let query = format!("INSERT INTO {}({}) VALUES {}", T::TABLE_NAME, T::__INSERT_FIELD_NAMES, insert_values_string);
+        connection.execute_query(&*query, &[]).await?;
 
         Ok(())
     }

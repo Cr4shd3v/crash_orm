@@ -302,6 +302,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         impl crash_orm::Entity<#ident, #primary_type> for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
+            const __INSERT_FIELD_NAMES: &'static str = #insert_field_names;
+
             type ColumnType = #ident_column;
 
             fn get_id(&self) -> Option<#primary_type> {
