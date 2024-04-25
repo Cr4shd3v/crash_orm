@@ -92,3 +92,5 @@ mod query;
 mod column_value;
 mod relations;
 mod primary;
+#[cfg(feature = "migration")]
+pub mod migration;

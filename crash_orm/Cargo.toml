@@ -13,6 +13,7 @@ keywords = ["async", "database", "framework", "orm"]
 
 [features]
 default = []
+migration = ["with-chrono"]
 with-rust-decimal = ["rust_decimal"]
 with-chrono = ["chrono", "tokio-postgres/with-chrono-0_4"]
 with-uuid = ["uuid", "tokio-postgres/with-uuid-1"]
@@ -32,7 +33,7 @@ serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
-crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "with-serde"] }
+crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "with-serde", "migration"] }
 tokio-test = { workspace = true }
 crash_orm_test = { path = "../crash_orm_test" }
 uuid = { workspace = true, features = ["v7"] }

@@ -1,5 +1,2 @@
-# Crash ORM Migration
-Migrations for [Crash ORM](../Readme.md).
-
-## Documentation
-You can find the documentation for migrations [here](../docs/Migration/Readme.md).
+# Crash ORM Migration (deprecated)
+This was moved into the [crash_orm](https://crates.io/crates/crash_orm) crate behind the "migration" feature for version 0.2.
