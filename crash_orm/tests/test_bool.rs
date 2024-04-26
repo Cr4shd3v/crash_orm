@@ -47,14 +47,14 @@ async fn test_bool() {
 
     let results = TestItem13::query()
         .condition(TestItem13Column::ACTIVE.is_true())
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem13::query()
         .condition(TestItem13Column::ACTIVE.is_false())
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);

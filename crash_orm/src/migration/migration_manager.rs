@@ -22,7 +22,7 @@ pub trait CrashOrmMigrationManager<T: DatabaseConnection> {
 
             let migration_in_db = CrashOrmMigrationRecord::query()
                 .condition(CrashOrmMigrationRecordColumn::NAME.equals(&name))
-                .execute(conn)
+                .fetch(conn)
                 .await?;
 
             if migration_in_db.is_empty() {

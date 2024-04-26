@@ -53,7 +53,7 @@ async fn test_cast() {
                 .cast_to_text()
                 .equals(&String::from("440")),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);

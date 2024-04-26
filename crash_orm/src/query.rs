@@ -93,7 +93,7 @@
 //! # TestEntity::create_table_if_not_exists(&conn).await.unwrap();
 //! let results: Vec<TestEntity> = TestEntity::query()
 //!     .condition(TestEntityColumn::ID.equals(1))
-//!     .execute(&conn).await.unwrap();
+//!     .fetch(&conn).await.unwrap();
 //! # });
 //! ```
 
@@ -206,7 +206,7 @@ impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities.
-    pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<T>> {
+    pub async fn fetch(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<T>> {
         let (query, values) = self.get_raw_query();
 
         let rows = connection
@@ -219,6 +219,22 @@ impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
             .await?;
 
         Ok(rows.iter().map(|r| T::load_from_row(r)).collect::<Vec<T>>())
+    }
+
+    /// Execute this query and returns a single result as an entity
+    pub async fn fetch_single(self, connection: &impl DatabaseConnection) -> crate::Result<T> {
+        let (query, values) = self.get_raw_query();
+
+        let row = connection
+            .query_single(
+                &*query,
+                slice_query_value_iter(values.as_slice())
+                    .collect::<Vec<&(dyn ToSql + Sync)>>()
+                    .as_slice(),
+            )
+            .await?;
+
+        Ok(T::load_from_row(&row))
     }
 }
 
@@ -235,7 +251,7 @@ impl<T: Entity<T, P>, P: PrimaryKey> SelectQuery<T, P> {
     /// Execute this query and returns the result as a vector of [Row].
     ///
     /// This can't be parsed automatically, since the selected columns can be anything you want.
-    pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<Row>> {
+    pub async fn fetch(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<Row>> {
         let (query, values) = self.get_raw_query();
 
         let rows = connection
@@ -248,5 +264,23 @@ impl<T: Entity<T, P>, P: PrimaryKey> SelectQuery<T, P> {
             .await?;
 
         Ok(rows)
+    }
+
+    /// Execute this query and returns a single result as [Row].
+    ///
+    /// This can't be parsed automatically, since the selected columns can be anything you want.
+    pub async fn fetch_single(self, connection: &impl DatabaseConnection) -> crate::Result<Row> {
+        let (query, values) = self.get_raw_query();
+
+        let row = connection
+            .query_single(
+                &*query,
+                slice_query_value_iter(values.as_slice())
+                    .collect::<Vec<&(dyn ToSql + Sync)>>()
+                    .as_slice(),
+            )
+            .await?;
+
+        Ok(row)
     }
 }

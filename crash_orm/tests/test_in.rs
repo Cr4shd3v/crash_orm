@@ -47,7 +47,7 @@ async fn test_in() {
 
     let results = TestItem14::query()
         .condition(TestItem14Column::NUMBER.in_vec(vec![439, 440]))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -55,7 +55,7 @@ async fn test_in() {
 
     let results = TestItem14::query()
         .condition(TestItem14Column::NUMBER.not_in_vec(vec![439, 440]))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
@@ -65,7 +65,7 @@ async fn test_in() {
             TestItem14Column::NAME1
                 .in_vec(vec![String::from("test12"), String::from("test1234")]),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);

@@ -38,12 +38,17 @@ async fn test_query_simple() {
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
     let results = TestItem4::query()
         .condition(TestItem4Column::NAME.equals(String::from("test123")))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 1);
+
+    let result = TestItem4::query()
+        .condition(TestItem4Column::NAME.equals(String::from("test123")))
+        .fetch_single(&conn).await;
+    assert!(result.is_ok());
 
     assert!(TestItem4::drop_table(&conn).await.is_ok());
 }
@@ -91,7 +96,7 @@ async fn test_query_complex() {
 
     let results = TestItem5::query()
         .condition(TestItem5Column::NAME1.equals(String::from("test123")))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("1: {:?}", results);
     assert!(results.is_ok());
@@ -103,7 +108,7 @@ async fn test_query_complex() {
                 .equals(String::from("test123"))
                 .and(TestItem5Column::NUMBER.is_null()),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("2: {:?}", results);
     assert!(results.is_ok());
@@ -115,7 +120,7 @@ async fn test_query_complex() {
                 .is_null()
                 .or(TestItem5Column::NAME2.is_null()),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("3: {:?}", results);
     assert!(results.is_ok());
@@ -123,7 +128,7 @@ async fn test_query_complex() {
 
     let results = TestItem5::query()
         .condition(TestItem5Column::NAME2.is_null().not())
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("4: {:?}", results);
     assert!(results.is_ok());

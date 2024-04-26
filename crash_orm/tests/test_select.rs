@@ -48,7 +48,7 @@ async fn test_select() {
         .unwrap();
 
     let results = TestItem16::select_query(&[&TestItem16Column::NUMBER])
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -61,7 +61,7 @@ async fn test_select() {
         &TestItem16Column::NAME1,
         &TestItem16Column::ACTIVE,
     ])
-    .execute(&conn)
+    .fetch(&conn)
     .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -74,7 +74,7 @@ async fn test_select() {
         &TestItem16Column::NAME1.reverse(),
     ])
     .condition(TestItem16Column::ACTIVE.is_true())
-    .execute(&conn)
+    .fetch(&conn)
     .await;
     println!("{:?}", results);
     assert!(results.is_ok());

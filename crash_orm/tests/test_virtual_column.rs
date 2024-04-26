@@ -53,7 +53,7 @@ async fn test_virtual_column() {
 
     let results = TestItem15::query()
         .condition(TestItem15Column::NAME1.length().equals(&7))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -65,7 +65,7 @@ async fn test_virtual_column() {
                 .lowercase()
                 .equals(&String::from("test1234")),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
@@ -76,7 +76,7 @@ async fn test_virtual_column() {
                 .uppercase()
                 .equals(&String::from("TEST123")),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
@@ -87,7 +87,7 @@ async fn test_virtual_column() {
                 .reverse()
                 .equals(&String::from("321tset")),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
@@ -98,7 +98,7 @@ async fn test_virtual_column() {
                 .repeat(&2)
                 .equals(&String::from("test123test123")),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
@@ -109,7 +109,7 @@ async fn test_virtual_column() {
                 .concat(vec![&TestItem15Column::ID])
                 .equals(&String::from("test1232")),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
@@ -120,14 +120,14 @@ async fn test_virtual_column() {
                 .md5()
                 .equals(&String::from("cc03e747a6afbbcbf8be7668acfebee5")),
         )
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem15::query()
         .condition(TestItem15Column::DECIMAL.ceil().equals(&1.0))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -137,7 +137,7 @@ async fn test_virtual_column() {
 
     let results = TestItem15::query()
         .condition(TestItem15Column::DECIMAL.floor().equals(&0.0))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -147,7 +147,7 @@ async fn test_virtual_column() {
 
     let results = TestItem15::query()
         .condition(TestItem15Column::DECIMAL.round().equals(&2.0))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -157,7 +157,7 @@ async fn test_virtual_column() {
 
     let results = TestItem15::query()
         .condition(TestItem15Column::SQRT.sqrt().equals(&4.0))
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 1);

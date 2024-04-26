@@ -37,7 +37,7 @@ async fn test_uuid() {
 
     let result = TestItemUuid::query()
         .condition(TestItemUuidColumn::ID.equals(uuid))
-        .execute(&conn).await.unwrap();
+        .fetch(&conn).await.unwrap();
     assert_eq!(result.len(), 1);
     assert_eq!(result[0].test, 111);
 

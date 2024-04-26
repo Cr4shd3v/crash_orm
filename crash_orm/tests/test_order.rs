@@ -49,7 +49,7 @@ async fn test_order() {
 
     let results = TestItem17::query()
         .order(&TestItem17Column::NUMBER, OrderDirection::ASC)
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     println!("{:?}", results);
     assert!(results.is_ok());
@@ -61,7 +61,7 @@ async fn test_order() {
     let results = TestItem17::query()
         .condition(TestItem17Column::NUMBER.greater_equal(&400))
         .order(&TestItem17Column::NUMBER, OrderDirection::DESC)
-        .execute(&conn)
+        .fetch(&conn)
         .await;
     assert!(results.is_ok());
     let results = results.unwrap();

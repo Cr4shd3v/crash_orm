@@ -75,7 +75,7 @@ async fn test_many_to_one() {
         .await
         .unwrap();
 
-    let results = TestItem21::query().execute(&conn).await;
+    let results = TestItem21::query().fetch(&conn).await;
     assert!(results.is_ok());
     let results = results.unwrap();
     assert_eq!(results.len(), 2);
