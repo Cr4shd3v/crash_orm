@@ -1,3 +1,6 @@
+# v0.2.1
+- fixed documentation link on crates.io
+
 # v0.2.0
 - feat: Uuid, i32, i64 as primary keys (#70)
 - feat: owned values now possible in query condition
