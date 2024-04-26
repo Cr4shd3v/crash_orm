@@ -19,6 +19,7 @@ with-chrono = ["chrono", "tokio-postgres/with-chrono-0_4"]
 with-uuid = ["uuid", "tokio-postgres/with-uuid-1"]
 with-serde = ["serde", "serde_json", "tokio-postgres/with-serde_json-1"]
 with-eui48 = ["eui48", "tokio-postgres/with-eui48-1"]
+with-bit-vec = ["bit-vec", "tokio-postgres/with-bit-vec-0_6"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -33,9 +34,10 @@ uuid = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 eui48 = { workspace = true, optional = true }
+bit-vec = { workspace = true, optional = true }
 
 [dev-dependencies]
-crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "with-serde", "with-eui48", "migration"] }
+crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "with-serde", "with-eui48", "with-bit-vec", "migration"] }
 tokio-test = { workspace = true }
 crash_orm_test = { path = "../crash_orm_test" }
 uuid = { workspace = true, features = ["v7"] }

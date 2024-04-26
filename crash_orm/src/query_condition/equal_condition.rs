@@ -58,3 +58,5 @@ impl_equal_entity_column!(Vec<u8>);
 impl_equal_entity_column!(serde_json::Value);
 #[cfg(feature = "with-eui48")]
 impl_equal_entity_column!(eui48::MacAddress);
+#[cfg(feature = "with-bit-vec")]
+impl_equal_entity_column!(bit_vec::BitVec);
