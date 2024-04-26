@@ -13,6 +13,8 @@ quote = "^1.0"
 tokio = "^1.29"
 tokio-test = "0.4.4"
 async-trait = "^0.1"
+convert_case = "^0.6.0"
+
 rust_decimal = "^1"
 chrono = "^0.4"
 uuid = "^1.8"
@@ -20,6 +22,7 @@ serde = "^1.0"
 serde_json = "^1.0"
 eui48 = "^1"
 bit-vec = "^0.6"
-convert_case = "^0.6.0"
+time = "^0.3"
+
 crash_orm = { path = "crash_orm", version = "0.2.1" }
 crash_orm_derive = { path = "crash_orm_derive", version = "0.2.1" }

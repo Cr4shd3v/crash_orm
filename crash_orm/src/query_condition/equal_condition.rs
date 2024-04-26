@@ -60,3 +60,11 @@ impl_equal_entity_column!(serde_json::Value);
 impl_equal_entity_column!(eui48::MacAddress);
 #[cfg(feature = "with-bit-vec")]
 impl_equal_entity_column!(bit_vec::BitVec);
+#[cfg(feature = "with-time")]
+impl_equal_entity_column!(time::PrimitiveDateTime);
+#[cfg(feature = "with-time")]
+impl_equal_entity_column!(time::OffsetDateTime);
+#[cfg(feature = "with-time")]
+impl_equal_entity_column!(time::Date);
+#[cfg(feature = "with-time")]
+impl_equal_entity_column!(time::Time);

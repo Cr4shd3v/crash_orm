@@ -123,6 +123,14 @@ simple_column_value!(String);
 simple_column_value!(eui48::MacAddress);
 #[cfg(feature = "with-bit-vec")]
 simple_column_value!(bit_vec::BitVec);
+#[cfg(feature = "with-time")]
+simple_column_value!(time::PrimitiveDateTime);
+#[cfg(feature = "with-time")]
+simple_column_value!(time::OffsetDateTime);
+#[cfg(feature = "with-time")]
+simple_column_value!(time::Date);
+#[cfg(feature = "with-time")]
+simple_column_value!(time::Time);
 
 impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for VirtualColumn<T, U, P> {
     fn get_sql(&self) -> BoxedColumnValue {

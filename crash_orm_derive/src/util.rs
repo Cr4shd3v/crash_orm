@@ -121,6 +121,10 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "Value" => "jsonb",
         "MacAddress" => "macaddr",
         "BitVec" => "varbit",
+        "PrimitiveDateTime" => "timestamp",
+        "OffsetDateTime" => "timestamp with time zone",
+        "Date" => "date",
+        "Time" => "time",
         _ => panic!("unsupported type {}", path),
     };
 

@@ -98,3 +98,11 @@ impl_compare_entity_column!(chrono::DateTime<chrono::FixedOffset>);
 impl_compare_entity_column!(chrono::NaiveDate);
 #[cfg(feature = "with-chrono")]
 impl_compare_entity_column!(chrono::NaiveTime);
+#[cfg(feature = "with-time")]
+impl_compare_entity_column!(time::PrimitiveDateTime);
+#[cfg(feature = "with-time")]
+impl_compare_entity_column!(time::OffsetDateTime);
+#[cfg(feature = "with-time")]
+impl_compare_entity_column!(time::Date);
+#[cfg(feature = "with-time")]
+impl_compare_entity_column!(time::Time);
