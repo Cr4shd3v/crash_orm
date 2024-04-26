@@ -1,11 +1,11 @@
 [package]
 name = "crash_orm_derive"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT"
 description = "Macros for Crash ORM"
 homepage = "https://github.com/Cr4shd3v/crash_orm"
-documentation = "https://github.com/Cr4shd3v/crash_orm/blob/master/docs/Readme.md"
+documentation = "https://docs.rs/crash_orm/latest/crash_orm_derive/"
 repository = "https://github.com/Cr4shd3v/crash_orm"
 readme = "Readme.md"
 categories = ["database"]

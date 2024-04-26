@@ -19,5 +19,5 @@ uuid = "^1.8"
 serde = "^1.0"
 serde_json = "^1.0"
 convert_case = "^0.6.0"
-crash_orm = { path = "crash_orm", version = "0.2.0" }
-crash_orm_derive = { path = "crash_orm_derive", version = "0.2.0" }
+crash_orm = { path = "crash_orm", version = "0.2.1" }
+crash_orm_derive = { path = "crash_orm_derive", version = "0.2.1" }
