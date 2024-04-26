@@ -56,3 +56,5 @@ impl_equal_entity_column!(uuid::Uuid);
 impl_equal_entity_column!(Vec<u8>);
 #[cfg(feature = "with-serde")]
 impl_equal_entity_column!(serde_json::Value);
+#[cfg(feature = "with-eui48")]
+impl_equal_entity_column!(eui48::MacAddress);

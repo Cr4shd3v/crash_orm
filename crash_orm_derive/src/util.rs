@@ -119,6 +119,7 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "Uuid" => "uuid",
         "Json" => "json",
         "Value" => "jsonb",
+        "MacAddress" => "macaddr",
         _ => panic!("unsupported type {}", path),
     };
 

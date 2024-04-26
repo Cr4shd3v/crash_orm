@@ -119,6 +119,8 @@ simple_column_value!(chrono::NaiveDate);
 #[cfg(feature = "with-chrono")]
 simple_column_value!(chrono::NaiveTime);
 simple_column_value!(String);
+#[cfg(feature = "with-eui48")]
+simple_column_value!(eui48::MacAddress);
 
 impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for VirtualColumn<T, U, P> {
     fn get_sql(&self) -> BoxedColumnValue {
