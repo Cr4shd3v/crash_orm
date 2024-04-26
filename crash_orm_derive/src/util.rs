@@ -125,6 +125,9 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "OffsetDateTime" => "timestamp with time zone",
         "Date" => "date",
         "Time" => "time",
+        "Point" => "point",
+        "Rect" => "box",
+        "LineString" => "path",
         _ => panic!("unsupported type {}", path),
     };
 

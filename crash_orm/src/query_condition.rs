@@ -59,6 +59,8 @@ pub enum QueryCondition<T: Entity<T, P>, P: PrimaryKey> {
     In(BoxedColumnValue, Vec<BoxedColumnValue>),
     /// SQL: v1 NOT IN (v2)
     NotIn(BoxedColumnValue, Vec<BoxedColumnValue>),
+    /// SQL: v1 ~= v2
+    SameAs(BoxedColumnValue, BoxedColumnValue),
     /// INTERNAL
     #[allow(non_camel_case_types)]
     #[doc(hidden)]
@@ -267,6 +269,17 @@ impl<T: Entity<T, P>, P: PrimaryKey> QueryCondition<T, P> {
 
                 (
                     format!("{} NOT IN ({})", name_query, list.join(",")),
+                    name_values,
+                    index,
+                )
+            }
+            QueryCondition::SameAs(name, value) => {
+                let (name_query, mut name_values, index) = name.resolve(index);
+                let (value_query, value_values, index) = value.resolve(index);
+                name_values.extend(value_values);
+
+                (
+                    format!("{} ~= {}", name_query, value_query),
                     name_values,
                     index,
                 )

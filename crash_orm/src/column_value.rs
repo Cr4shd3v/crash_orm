@@ -131,6 +131,12 @@ simple_column_value!(time::OffsetDateTime);
 simple_column_value!(time::Date);
 #[cfg(feature = "with-time")]
 simple_column_value!(time::Time);
+#[cfg(feature = "with-geo-types")]
+simple_column_value!(geo_types::Point);
+#[cfg(feature = "with-geo-types")]
+simple_column_value!(geo_types::Rect);
+#[cfg(feature = "with-geo-types")]
+simple_column_value!(geo_types::LineString);
 
 impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for VirtualColumn<T, U, P> {
     fn get_sql(&self) -> BoxedColumnValue {

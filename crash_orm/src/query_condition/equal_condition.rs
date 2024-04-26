@@ -28,6 +28,23 @@ macro_rules! impl_equal_entity_column {
     };
 }
 
+macro_rules! impl_equal_entity_column_geo {
+    ($column_type:ty) => {
+        impl<T: Entity<T, P>, U: Column<$column_type, T, P>, P: PrimaryKey> EqualQueryColumn<$column_type, T, P> for U {
+            fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T, P> {
+                QueryCondition::SameAs(self.get_sql(), other.into_typed_value().get_sql())
+            }
+
+            fn not_equals(
+                &self,
+                other: impl IntoSql<$column_type>,
+            ) -> QueryCondition<T, P> {
+                QueryCondition::Not(Box::new(QueryCondition::SameAs(self.get_sql(), other.into_typed_value().get_sql())))
+            }
+        }
+    };
+}
+
 impl_equal_entity_column!(bool);
 impl_equal_entity_column!(i8);
 impl_equal_entity_column!(i16);
@@ -68,3 +85,9 @@ impl_equal_entity_column!(time::OffsetDateTime);
 impl_equal_entity_column!(time::Date);
 #[cfg(feature = "with-time")]
 impl_equal_entity_column!(time::Time);
+#[cfg(feature = "with-geo-types")]
+impl_equal_entity_column_geo!(geo_types::Point);
+#[cfg(feature = "with-geo-types")]
+impl_equal_entity_column_geo!(geo_types::Rect);
+#[cfg(feature = "with-geo-types")]
+impl_equal_entity_column_geo!(geo_types::LineString);
