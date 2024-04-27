@@ -202,7 +202,7 @@ macro_rules! sql_impl_for_relation {
             where
                 Self: Sized,
             {
-                <u32 as ToSql>::accepts(ty)
+                <P as ToSql>::accepts(ty)
             }
 
             fn to_sql_checked(
