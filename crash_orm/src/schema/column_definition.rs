@@ -24,10 +24,10 @@ impl ColumnDefinition {
     }
 
     /// Creates a column definition from the database
-    pub(crate) fn from_database(name: &'static str, sql_type: Type, nullable: bool) -> Self {
+    pub(crate) fn from_database(name: String, sql_type: Type, nullable: bool) -> Self {
         Self {
             old_name: Some(name.to_string()),
-            name: name.to_string(),
+            name,
             old_sql_type: Some(sql_type.clone()),
             sql_type,
             old_nullable: Some(nullable),
