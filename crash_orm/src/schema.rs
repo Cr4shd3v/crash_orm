@@ -90,4 +90,9 @@
 //! ```
 
 mod schema;
+mod schema_builder;
+mod column_definition;
+mod sql_type;
+
 pub use schema::*;
+pub use schema_builder::*;
