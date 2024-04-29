@@ -70,21 +70,29 @@ impl TableDefinition {
         Ok(())
     }
 
-    pub fn drop_column(&mut self, name: &str) {
+    /// Drop a column
+    pub fn drop_column(&mut self, name: &str) -> crate::Result<()> {
         self.dropped_columns.push(name.to_string());
-        let (index, _) = self.columns.iter().enumerate().find(|(index, v)| v.name == name).unwrap();
+        let Some((index, _)) = self.columns.iter().enumerate().find(|(_, v)| v.name == name && v.old_name.is_some()) else {
+            return Err(crate::Error::String(format!("Tried to remove non existing column {}", name)));
+        };
         self.columns.remove(index);
+
+        Ok(())
     }
 
     /// Apply the changes to the database
     pub async fn apply(self, conn: &impl DatabaseConnection) -> crate::Result<()> {
         if let Some(ref old_name) = self.old_name {
             if &**old_name != &*self.name {
-                // Change table name
-                println!("Detected different table name");
+                conn.execute_query(&*format!("ALTER TABLE {} RENAME TO {}", old_name, self.name), &[]).await?;
             }
 
             let mut alters = vec![];
+
+            for dropped_column in self.dropped_columns {
+                alters.push(format!("DROP COLUMN {}", dropped_column));
+            }
 
             for column in self.columns {
                 if column.old_name.is_none() {
@@ -98,7 +106,20 @@ impl TableDefinition {
                     if old_name != column.name {
                         alters.push(format!("RENAME COLUMN {} TO {}", old_name, column.name));
                     }
-                    // Edit column
+
+                    let old_sql_type = column.old_sql_type.unwrap();
+                    if old_sql_type != column.sql_type {
+                        alters.push(format!("ALTER COLUMN {} TYPE {}", column.name, column.sql_type.name()));
+                    }
+
+                    let old_nullable = column.old_nullable.unwrap();
+                    if old_nullable != column.nullable {
+                        if !column.nullable {
+                            alters.push(format!("ALTER COLUMN {} DROP NOT NULL", column.name));
+                        } else {
+                            alters.push(format!("ALTER COLUMN {} SET NOT NULL", column.name));
+                        }
+                    }
                 }
             }
 
