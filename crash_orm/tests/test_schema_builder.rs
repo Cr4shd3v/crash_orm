@@ -22,10 +22,10 @@ pub async fn test_schema_builder() {
     table.apply(&conn).await.unwrap();
 
     let mut table = TableDefinition::load_from_database(&conn, "test_schema_builder").await.unwrap();
-    table.edit_column("number", |c| {
-        c.change_type(Type::INT8);
-        c.rename("number2");
-        c.set_nullable(true);
+    table.edit_column("number", |column| {
+        column.change_type(Type::INT8);
+        column.rename("number2");
+        column.set_nullable(true);
     });
     table.apply(&conn).await.unwrap();
 
