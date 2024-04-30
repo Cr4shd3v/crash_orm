@@ -43,7 +43,7 @@ WHERE
             .collect::<Vec<String>>();
 
         let rows = conn.query_many(
-            "SELECT column_name, is_nullable, (SELECT oid FROM pg_catalog.pg_type pg_type WHERE pg_type.typname = c.udt_name) FROM information_schema.columns c WHERE table_schema = 'public' AND table_name = $1",
+            "SELECT column_name, is_nullable, (SELECT oid FROM pg_catalog.pg_type pg_type WHERE pg_type.typname = c.udt_name), column_default FROM information_schema.columns c WHERE table_schema = 'public' AND table_name = $1",
             &[&name.to_string()],
         ).await?;
 
@@ -54,8 +54,9 @@ WHERE
             let sql_type_id: u32 = column_row.get(2);
             let sql_type = Type::from_oid(sql_type_id).unwrap();
             let is_primary = primary_keys.contains(&name);
+            let default_value: Option<String> = column_row.get(3);
 
-            columns.push(ColumnDefinition::from_database(name, sql_type, is_nullable == "YES", is_primary));
+            columns.push(ColumnDefinition::from_database(name, sql_type, is_nullable == "YES", is_primary, default_value));
         }
 
         Ok(Self {
