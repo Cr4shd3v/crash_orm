@@ -30,7 +30,8 @@ pub async fn test_schema_builder() {
     table.edit_column("number", |column| {
         column.change_type(Type::INT8)
             .rename("number2")
-            .set_nullable(true);
+            .set_nullable(true)
+            .set_default_value(Some("NULL".to_string()));
     });
     table.apply(&conn).await.unwrap();
 

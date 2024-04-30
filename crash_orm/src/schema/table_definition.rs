@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+
 use postgres::types::Type;
 
 use crate::{ColumnDefinition, DatabaseConnection};
@@ -157,6 +158,15 @@ WHERE
                         }
                     }
 
+                    let old_default_value = column.old_default_value.unwrap();
+                    if column.default_value != old_default_value {
+                        if column.default_value.is_some() {
+                            alters.push(format!("ALTER COLUMN {} SET DEFAULT {}", column.name, column.default_value.unwrap()));
+                        } else {
+                            alters.push(format!("ALTER COLUMN {} DROP DEFAULT", column.name));
+                        }
+                    }
+
                     if column.primary_key {
                         primary_keys.push(column.name);
                     }
@@ -189,6 +199,11 @@ WHERE
 
                 if column.primary_key {
                     primary_columns.push(column.name);
+                }
+
+                if column.default_value.is_some() {
+                    let default_value = column.default_value.unwrap();
+                    string.push_str(&*format!(" DEFAULT {}", default_value));
                 }
 
                 columns.push(string);
