@@ -46,6 +46,12 @@ impl TableDefinition {
         })
     }
 
+    /// Drops the table with provided `table_name`
+    pub async fn drop_table(conn: &impl DatabaseConnection, table_name: &str) -> crate::Result<()> {
+        conn.execute_query(&*format!("DROP TABLE IF EXISTS {} CASCADE", table_name), &[]).await?;
+        Ok(())
+    }
+
     /// Rename the table
     pub fn rename(&mut self, new_name: &str) -> &mut TableDefinition {
         self.name = new_name.to_string();
@@ -104,7 +110,7 @@ impl TableDefinition {
                 } else {
                     let old_name = column.old_name.unwrap();
                     if old_name != column.name {
-                        alters.push(format!("RENAME COLUMN {} TO {}", old_name, column.name));
+                        conn.execute_query(&*format!("ALTER TABLE {} RENAME COLUMN {} TO {}", self.name, old_name, column.name), &[]).await?;
                     }
 
                     let old_sql_type = column.old_sql_type.unwrap();
@@ -123,11 +129,26 @@ impl TableDefinition {
                 }
             }
 
-            let query = format!("ALTER TABLE {} {}", self.name, alters.join(","));
+            let query = format!("ALTER TABLE {} {}", self.name, alters.join(", "));
 
             conn.execute_query(&*query, &[]).await?;
         } else {
-            // New table
+            let mut columns = vec![];
+
+            for column in self.columns {
+                let mut string = format!("{} {} ", column.name, column.sql_type.name());
+
+                if column.nullable {
+                    string.push_str("NULL");
+                } else {
+                    string.push_str("NOT NULL");
+                }
+
+                columns.push(string);
+            }
+
+            let query = format!("CREATE TABLE public.{}({})", self.name, columns.join(","));
+            conn.execute_query(&*query, &[]).await?;
         }
 
         Ok(())
