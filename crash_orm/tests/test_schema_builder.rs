@@ -35,5 +35,16 @@ pub async fn test_schema_builder() {
     });
     table.apply(&conn).await.unwrap();
 
+    let mut rel_table = TableDefinition::new("test_schema_builder_rel");
+    rel_table.add_column(ColumnDefinition::new("id", Type::INT8, false).primary()).unwrap();
+    rel_table.apply(&conn).await.unwrap();
+
+    let mut table = TableDefinition::load_from_database(&conn, "test_schema_builder").await.unwrap();
+    table.edit_column("number2", |column| {
+        column.set_foreign_key("test_schema_builder_rel", "id");
+    });
+    table.apply(&conn).await.unwrap();
+
     TableDefinition::drop_table(&conn, "test_schema_builder").await.unwrap();
+    TableDefinition::drop_table(&conn, "test_schema_builder_rel").await.unwrap();
 }

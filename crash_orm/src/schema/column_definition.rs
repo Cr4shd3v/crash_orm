@@ -1,5 +1,7 @@
 use postgres::types::Type;
 
+use crate::schema::foreign_key::ForeignKey;
+
 /// Struct describing a column in a table
 pub struct ColumnDefinition {
     pub(crate) old_name: Option<String>,
@@ -11,6 +13,8 @@ pub struct ColumnDefinition {
     pub(crate) primary_key: bool,
     pub(crate) old_default_value: Option<Option<String>>,
     pub(crate) default_value: Option<String>,
+    pub(crate) old_foreign_key: Option<Option<ForeignKey>>,
+    pub(crate) foreign_key: Option<ForeignKey>,
 }
 
 impl ColumnDefinition {
@@ -26,11 +30,14 @@ impl ColumnDefinition {
             primary_key: false,
             old_default_value: None,
             default_value: None,
+            old_foreign_key: None,
+            foreign_key: None,
         }
     }
 
     /// Creates a column definition from the database
-    pub(crate) fn from_database(name: String, sql_type: Type, nullable: bool, primary_key: bool, default_value: Option<String>) -> Self {
+    pub(crate) fn from_database(name: String, sql_type: Type, nullable: bool, primary_key: bool,
+                                default_value: Option<String>, foreign_key: Option<ForeignKey>) -> Self {
         Self {
             old_name: Some(name.to_string()),
             name,
@@ -41,6 +48,8 @@ impl ColumnDefinition {
             primary_key,
             old_default_value: Some(default_value.clone()),
             default_value,
+            old_foreign_key: Some(foreign_key.clone()),
+            foreign_key,
         }
     }
 
@@ -68,9 +77,32 @@ impl ColumnDefinition {
         self
     }
 
+    /// Shortcut method to create a primary key for this column
+    pub fn primary(mut self) -> ColumnDefinition {
+        self.primary_key = true;
+        self
+    }
+
     /// Change the default value
     pub fn set_default_value(&mut self, default_value: Option<String>) -> &mut ColumnDefinition {
         self.default_value = default_value;
+        self
+    }
+
+    /// Remove the current foreign key constraint
+    pub fn remove_foreign_key(&mut self) -> &mut ColumnDefinition {
+        self.foreign_key = None;
+        self
+    }
+
+    /// Set the foreign key constraint
+    pub fn set_foreign_key(&mut self, target_table: &str, target_field: &str) -> &mut ColumnDefinition {
+        self.foreign_key = Some(ForeignKey {
+            name: None,
+            src_field: self.name.clone(),
+            target_table: target_table.to_string(),
+            target_field: target_field.to_string(),
+        });
         self
     }
 }

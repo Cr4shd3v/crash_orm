@@ -96,4 +96,5 @@ pub use table_definition::*;
 mod schema;
 mod column_definition;
 mod table_definition;
+mod foreign_key;
 

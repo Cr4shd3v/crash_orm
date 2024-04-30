@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use postgres::types::Type;
 
 use crate::{ColumnDefinition, DatabaseConnection};
+use crate::schema::foreign_key::ForeignKey;
 
 /// Struct describing a table in the database
 pub struct TableDefinition {
@@ -11,6 +12,7 @@ pub struct TableDefinition {
     columns: Vec<ColumnDefinition>,
     dropped_columns: Vec<String>,
     old_primary_keys: Option<Vec<String>>,
+    old_foreign_keys: Option<Vec<ForeignKey>>,
 }
 
 impl TableDefinition {
@@ -22,6 +24,7 @@ impl TableDefinition {
             columns: vec![],
             dropped_columns: vec![],
             old_primary_keys: None,
+            old_foreign_keys: None,
         }
     }
 
@@ -43,6 +46,15 @@ WHERE
             .map(|row| row.get::<usize, String>(0))
             .collect::<Vec<String>>();
 
+        let foreign_key_query = format!("SELECT conname,
+  pg_catalog.pg_get_constraintdef(r.oid, true) as condef
+FROM pg_catalog.pg_constraint r
+WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
+        let foreign_key_rows = conn.query_many(&*foreign_key_query, &[]).await?;
+        let foreign_keys = foreign_key_rows.iter()
+            .map(|row| ForeignKey::from_row(row))
+            .collect::<Vec<ForeignKey>>();
+
         let rows = conn.query_many(
             "SELECT column_name, is_nullable, (SELECT oid FROM pg_catalog.pg_type pg_type WHERE pg_type.typname = c.udt_name), column_default FROM information_schema.columns c WHERE table_schema = 'public' AND table_name = $1",
             &[&name.to_string()],
@@ -56,8 +68,9 @@ WHERE
             let sql_type = Type::from_oid(sql_type_id).unwrap();
             let is_primary = primary_keys.contains(&name);
             let default_value: Option<String> = column_row.get(3);
+            let foreign_key = foreign_keys.iter().find(|v| v.src_field == name).map(|v| v.clone());
 
-            columns.push(ColumnDefinition::from_database(name, sql_type, is_nullable == "YES", is_primary, default_value));
+            columns.push(ColumnDefinition::from_database(name, sql_type, is_nullable == "YES", is_primary, default_value, foreign_key));
         }
 
         Ok(Self {
@@ -66,6 +79,7 @@ WHERE
             columns,
             dropped_columns: vec![],
             old_primary_keys: Some(primary_keys),
+            old_foreign_keys: Some(foreign_keys),
         })
     }
 
@@ -118,6 +132,7 @@ WHERE
             }
 
             let old_primary_keys = self.old_primary_keys.unwrap();
+            let old_foreign_keys = self.old_foreign_keys.unwrap();
             let mut primary_keys = vec![];
             let mut primary_keys_dropped = false;
             let mut alters = vec![];
@@ -126,6 +141,10 @@ WHERE
                 if old_primary_keys.contains(&dropped_column) && !primary_keys_dropped {
                     alters.push(format!("DROP CONSTRAINT {}_pkey", self.name));
                     primary_keys_dropped = true;
+                }
+
+                if let Some(foreign_key) = old_foreign_keys.iter().find(|v| v.src_field == dropped_column) {
+                    alters.push(format!("DROP CONSTRAINT {}", foreign_key.name.as_ref().unwrap()));
                 }
 
                 alters.push(format!("DROP COLUMN {}", dropped_column));
@@ -167,6 +186,24 @@ WHERE
                         }
                     }
 
+                    let old_foreign_key = column.old_foreign_key.unwrap();
+                    if column.foreign_key != old_foreign_key {
+                        if let Some(foreign_key) = column.foreign_key {
+                            if old_foreign_key.is_some() {
+                                let old_foreign_key = old_foreign_key.unwrap();
+                                alters.push(format!("DROP CONSTRAINT {}", old_foreign_key.name.unwrap()));
+                            }
+
+                            alters.push(format!(
+                                "ADD CONSTRAINT {}_{}_fkey FOREIGN KEY ({}) REFERENCES {}({})",
+                                self.name, column.name, foreign_key.src_field, foreign_key.target_table, foreign_key.target_field,
+                            ));
+                        } else {
+                            let old_foreign_key = old_foreign_key.unwrap();
+                            alters.push(format!("DROP CONSTRAINT {}", old_foreign_key.name.unwrap()));
+                        }
+                    }
+
                     if column.primary_key {
                         primary_keys.push(column.name);
                     }
@@ -204,6 +241,11 @@ WHERE
                 if column.default_value.is_some() {
                     let default_value = column.default_value.unwrap();
                     string.push_str(&*format!(" DEFAULT {}", default_value));
+                }
+
+                if column.foreign_key.is_some() {
+                    let foreign_key = column.foreign_key.unwrap();
+                    string.push_str(&*format!(" REFERENCES {}({})", foreign_key.target_table, foreign_key.target_field));
                 }
 
                 columns.push(string);
