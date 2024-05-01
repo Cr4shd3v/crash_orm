@@ -1,3 +1,11 @@
+# v0.3.0
+- feat: fetch single result
+- feat: add eui48 crate support
+- feat: add bit-vec crate support
+- feat: add time crate support
+- feat: geo-types crate support
+- feat: Schemabuilder for migrations
+
 # v0.2.1
 - fixed documentation link on crates.io
 
