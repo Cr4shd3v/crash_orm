@@ -124,11 +124,12 @@ WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
         Ok(())
     }
 
-    /// Apply the changes to the database
-    pub async fn apply(self, conn: &impl DatabaseConnection) -> crate::Result<()> {
+    /// Returns the diff in sql statements
+    pub fn diff_sql(self) -> Vec<String> {
+        let mut queries = vec![];
         if let Some(ref old_name) = self.old_name {
             if &**old_name != &*self.name {
-                conn.execute_query(&*format!("ALTER TABLE {} RENAME TO {}", old_name, self.name), &[]).await?;
+                queries.push(format!("ALTER TABLE {} RENAME TO {}", old_name, self.name));
             }
 
             let old_primary_keys = self.old_primary_keys.unwrap();
@@ -160,7 +161,7 @@ WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
                 } else {
                     let old_name = column.old_name.unwrap();
                     if old_name != column.name {
-                        conn.execute_query(&*format!("ALTER TABLE {} RENAME COLUMN {} TO {}", self.name, old_name, column.name), &[]).await?;
+                        queries.push(format!("ALTER TABLE {} RENAME COLUMN {} TO {}", self.name, old_name, column.name));
                     }
 
                     let old_sql_type = column.old_sql_type.unwrap();
@@ -220,7 +221,7 @@ WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
 
             let query = format!("ALTER TABLE {} {}", self.name, alters.join(","));
 
-            conn.execute_query(&*query, &[]).await?;
+            queries.push(query);
         } else {
             let mut columns = vec![];
             let mut primary_columns = vec![];
@@ -256,6 +257,17 @@ WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
             }
 
             let query = format!("CREATE TABLE public.{}({})", self.name, columns.join(","));
+            queries.push(query);
+        }
+
+        queries
+    }
+
+    /// Apply the changes to the database
+    pub async fn apply(self, conn: &impl DatabaseConnection) -> crate::Result<()> {
+        let queries = self.diff_sql();
+
+        for query in queries {
             conn.execute_query(&*query, &[]).await?;
         }
 
