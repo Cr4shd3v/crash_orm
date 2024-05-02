@@ -10,7 +10,7 @@ pub use in_condition::*;
 pub use like_condition::*;
 pub use null_condition::*;
 
-use crate::{BoxedColumnValue, Entity, PrimaryKeyType};
+use crate::{BoxedColumnValue, Entity, PrimaryKey};
 
 mod null_condition;
 mod equal_condition;
@@ -20,7 +20,7 @@ mod bool_condition;
 mod in_condition;
 
 /// Query condition for entity
-pub enum QueryCondition<T: Entity<T, P>, P: PrimaryKeyType> {
+pub enum QueryCondition<T: Entity<T, P>, P: PrimaryKey> {
     /// SQL: v1 = v2
     Equals(BoxedColumnValue, BoxedColumnValue),
     /// SQL: v1 <> v2
@@ -67,7 +67,7 @@ pub enum QueryCondition<T: Entity<T, P>, P: PrimaryKeyType> {
     __(PhantomData<T>, PhantomData<P>),
 }
 
-impl<T: Entity<T, P>, P: PrimaryKeyType> QueryCondition<T, P> {
+impl<T: Entity<T, P>, P: PrimaryKey> QueryCondition<T, P> {
     pub(crate) fn resolve(
         self,
         index: usize,

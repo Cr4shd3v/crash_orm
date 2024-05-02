@@ -223,7 +223,14 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 #[allow(missing_docs)]
                 pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
             });
+        } else {
+            column_consts.extend(quote! {
+                #[allow(missing_docs)]
+                pub const #field_ident_upper: crash_orm::EntityColumn::<#primary_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
+            });
+        }
 
+        if field_ident_str != primary_field_name {
             if is_relation_value_holder(&field_type) {
                 let field_ident_upper_id = Ident::new(
                     &*format!("{}_PRIMARY", field_ident_str.to_uppercase()),
@@ -309,8 +316,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         impl #ident_column {
             #column_consts
         }
-
-        impl crash_orm::BaseColumn<#ident, #primary_type> for #ident_column {}
 
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::Entity<#ident, #primary_type> for #ident {

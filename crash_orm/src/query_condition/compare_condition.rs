@@ -1,9 +1,9 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{Column, Entity, IntoSql, PrimaryKeyType, QueryCondition};
+use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
 /// Trait implementing comparison operator [QueryCondition]
-pub trait CompareQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> {
+pub trait CompareQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
     /// Creates [QueryCondition::GreaterThan] from self and other
     fn greater_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
 
@@ -33,7 +33,7 @@ pub trait CompareQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> {
 
 macro_rules! impl_compare_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKeyType> CompareQueryColumn<$column_type, U, P> for R {
+        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey> CompareQueryColumn<$column_type, U, P> for R {
             fn greater_than(
                 &self,
                 other: impl IntoSql<$column_type>,

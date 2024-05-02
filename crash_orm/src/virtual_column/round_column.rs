@@ -1,9 +1,9 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, Column, Entity, PrimaryKeyType, VirtualColumn};
+use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 
 /// Trait implementing round database functions to create [VirtualColumn]s for number columns
-pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, P>, P: PrimaryKeyType> {
+pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, P>, P: PrimaryKey> {
     /// Ceil function
     fn ceil(&self) -> VirtualColumn<R, U, P>;
 
@@ -16,7 +16,7 @@ pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, P>, P: PrimaryKeyT
 
 macro_rules! impl_round_virtual_column {
     ($column_type:ty, $out_type:ty) => {
-        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKeyType>
+        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey>
             RoundVirtualColumn<$column_type, $out_type, U, P> for R
         {
             fn ceil(&self) -> VirtualColumn<$out_type, U, P> {

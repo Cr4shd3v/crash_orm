@@ -39,7 +39,7 @@
 //!
 //! ```rust
 //! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{BaseColumn, Entity, EqualQueryColumn};
+//! use crash_orm::{Entity, EqualQueryColumn};
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
@@ -61,7 +61,7 @@
 //! Example:
 //! ```rust
 //! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{BaseColumn, Entity, OrderDirection};
+//! use crash_orm::{Entity, OrderDirection};
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
@@ -79,7 +79,7 @@
 //!
 //! ```rust
 //! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{BaseColumn, Entity, EqualQueryColumn};
+//! use crash_orm::{Entity, EqualQueryColumn};
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -103,7 +103,7 @@ use std::sync::Arc;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKeyType, QueryCondition, UntypedColumn};
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
 use crate::entity::slice_query_value_iter;
 
 /// Direction of the Order
@@ -196,13 +196,13 @@ macro_rules! base_query_functions {
 }
 
 /// Struct representing a database query created by [Entity::query].
-pub struct Query<T: Entity<T, P>, P: PrimaryKeyType> {
+pub struct Query<T: Entity<T, P>, P: PrimaryKey> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, P>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKeyType> Query<T, P> {
+impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities.
@@ -239,13 +239,13 @@ impl<T: Entity<T, P>, P: PrimaryKeyType> Query<T, P> {
 }
 
 /// Struct representing a special query created by [Entity::select_query].
-pub struct SelectQuery<T: Entity<T, P>, P: PrimaryKeyType> {
+pub struct SelectQuery<T: Entity<T, P>, P: PrimaryKey> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, P>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKeyType> SelectQuery<T, P> {
+impl<T: Entity<T, P>, P: PrimaryKey> SelectQuery<T, P> {
     base_query_functions!(SelectQuery);
 
     /// Execute this query and returns the result as a vector of [Row].

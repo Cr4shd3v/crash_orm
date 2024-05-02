@@ -1,4 +1,4 @@
-use crash_orm::{BaseColumn, Entity, EntityVec, EqualQueryColumn, RoundVirtualColumn, Schema, SqrtVirtualColumn, StringVirtualColumn};
+use crash_orm::{Entity, EntityVec, EqualQueryColumn, RoundVirtualColumn, Schema, SqrtVirtualColumn, StringVirtualColumn};
 use crash_orm_derive::{Entity, Schema};
 use crash_orm_test::setup_test_connection;
 

@@ -1,7 +1,7 @@
-use crate::{BoxedColumnValue, Column, Entity, PrimaryKeyType, TypedColumnValue, UntypedColumnValue, VirtualColumn};
+use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, TypedColumnValue, UntypedColumnValue, VirtualColumn};
 
 /// Trait implementing string database functions to create [VirtualColumn]s for string columns
-pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKeyType> {
+pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKey> {
     /// Convert self to lowercase
     fn lowercase(&self) -> VirtualColumn<String, U, P>;
 
@@ -24,7 +24,7 @@ pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKeyType> {
     fn md5(&self) -> VirtualColumn<String, U, P>;
 }
 
-impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKeyType> StringVirtualColumn<U, P> for R {
+impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColumn<U, P> for R {
     fn lowercase(&self) -> VirtualColumn<String, U, P> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedColumnValue::new(

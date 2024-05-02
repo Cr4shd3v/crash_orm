@@ -261,7 +261,7 @@ use async_trait::async_trait;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
-use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, PrimaryKeyType, Query, QueryCondition, SelectQuery, UntypedColumn};
+use crate::{BoxedColumnValue, DatabaseConnection, PrimaryKey, Query, QueryCondition, SelectQuery, UntypedColumn};
 
 /// Trait implemented for all database entities.
 ///
@@ -276,7 +276,7 @@ use crate::{BaseColumn, BoxedColumnValue, DatabaseConnection, PrimaryKeyType, Qu
 /// }
 /// ```
 #[async_trait]
-pub trait Entity<T: Entity<T, P>, P: PrimaryKeyType>: Send + Debug + 'static {
+pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
@@ -285,7 +285,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKeyType>: Send + Debug + 'static {
     const __INSERT_FIELD_NAMES: &'static str;
 
     /// This type references the column struct of this entity
-    type ColumnType: BaseColumn<T, P>;
+    type ColumnType;
 
     /// Returns the id of the entity.
     ///

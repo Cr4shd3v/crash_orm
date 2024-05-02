@@ -16,7 +16,7 @@ impl PrimaryKeyType for uuid::Uuid {}
 
 /// Trait marking a type as a primary key.
 ///
-/// This trait is implemented for tuples of primary keys
+/// This trait is implemented for tuples of [PrimaryKeyType].
 pub trait PrimaryKey: Sync + Send + 'static {}
 
 macro_rules! tuple_impls {
