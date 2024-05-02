@@ -31,7 +31,7 @@ use std::sync::Arc;
 
 use tokio_postgres::types::ToSql;
 
-use crate::{Entity, EntityColumn, PrimaryKey, VirtualColumn};
+use crate::{Entity, EntityColumn, PrimaryKeyType, VirtualColumn};
 
 /// Struct containing a part of a query with raw sql and values prepared for tokio-postgres.
 #[derive(Clone)]
@@ -69,10 +69,10 @@ impl BoxedColumnValue {
 /// This value trait is typed. For untyped values use [`UntypedColumnValue`].
 pub trait TypedColumnValue<T: ToSql>: UntypedColumnValue {}
 
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for VirtualColumn<T, U, P> {}
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for VirtualColumn<Option<T>, U, P> {}
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for EntityColumn<T, U, P> {}
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for EntityColumn<Option<T>, U, P> {}
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> TypedColumnValue<T> for VirtualColumn<T, U, P> {}
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> TypedColumnValue<T> for VirtualColumn<Option<T>, U, P> {}
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> TypedColumnValue<T> for EntityColumn<T, U, P> {}
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> TypedColumnValue<T> for EntityColumn<Option<T>, U, P> {}
 
 impl<R: UntypedColumnValue + ToSql> TypedColumnValue<R> for R {}
 
@@ -138,13 +138,13 @@ simple_column_value!(geo_types::Rect);
 #[cfg(feature = "with-geo-types")]
 simple_column_value!(geo_types::LineString);
 
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for VirtualColumn<T, U, P> {
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> UntypedColumnValue for VirtualColumn<T, U, P> {
     fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }
 }
 
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for EntityColumn<T, U, P> {
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> UntypedColumnValue for EntityColumn<T, U, P> {
     fn get_sql(&self) -> BoxedColumnValue {
         self.get_sql()
     }

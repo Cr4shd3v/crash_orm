@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{Entity, PrimaryKey};
+use crate::{Entity, PrimaryKeyType};
 use crate::relations::macros::{default_relation_function, sql_impl_for_relation};
 
 /// Struct representing the many site of the n:1 relationship.
@@ -9,13 +9,13 @@ use crate::relations::macros::{default_relation_function, sql_impl_for_relation}
 ///
 /// The counterpart for [ManyToOne] is [OneToMany].
 #[derive(Debug)]
-pub struct ManyToOne<T: Entity<T, P>, P: PrimaryKey> {
+pub struct ManyToOne<T: Entity<T, P>, P: PrimaryKeyType> {
     _p: PhantomData<T>,
     /// Raw id of the relation
     pub target_id: P,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKey> ManyToOne<T, P> {
+impl<T: Entity<T, P>, P: PrimaryKeyType> ManyToOne<T, P> {
     default_relation_function!(ManyToOne);
 }
 
@@ -45,12 +45,12 @@ sql_impl_for_relation!(ManyToOne);
 /// }
 /// ```
 #[derive(Debug)]
-pub struct OneToMany<T: Entity<T, P>, P: PrimaryKey> {
+pub struct OneToMany<T: Entity<T, P>, P: PrimaryKeyType> {
     _p: PhantomData<T>,
     _p1: PhantomData<P>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKey> OneToMany<T, P> {
+impl<T: Entity<T, P>, P: PrimaryKeyType> OneToMany<T, P> {
     /// Constructs a 1:n relation
     pub fn new() -> OneToMany<T, P> {
         OneToMany { _p: PhantomData, _p1: PhantomData }

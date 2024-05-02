@@ -7,7 +7,7 @@ pub use sqrt_column::*;
 pub use string_column::*;
 pub use text_cast_column::*;
 
-use crate::{BoxedColumnValue, Entity, PrimaryKey};
+use crate::{BoxedColumnValue, Entity, PrimaryKeyType};
 
 mod string_column;
 mod round_column;
@@ -20,14 +20,14 @@ mod text_cast_column;
 ///
 /// This also means, that you cannot add your own virtual columns.
 /// If you need more virtual columns, please [open an issue at the repository](https://github.com/Cr4shd3v/crash_orm/issues/new/choose).
-pub struct VirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+pub struct VirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> {
     sql: BoxedColumnValue,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
     phantom_3: PhantomData<P>,
 }
 
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> VirtualColumn<T, U, P> {
+impl<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> VirtualColumn<T, U, P> {
     /// Creates a virtual column with a [BoxedColumnValue]
     pub(crate) fn new(sql: BoxedColumnValue) -> VirtualColumn<T, U, P> {
         VirtualColumn {

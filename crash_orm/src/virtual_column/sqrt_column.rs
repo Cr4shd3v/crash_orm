@@ -1,16 +1,16 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
+use crate::{BoxedColumnValue, Column, Entity, PrimaryKeyType, VirtualColumn};
 
 /// Trait implementing sqrt database function to create [VirtualColumn] for decimal columns
-pub trait SqrtVirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+pub trait SqrtVirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKeyType> {
     /// Get square root of self
     fn sqrt(&self) -> VirtualColumn<T, U, P>;
 }
 
 macro_rules! impl_sqrt_virtual_column {
     ($column_type:ty) => {
-        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey> SqrtVirtualColumn<$column_type, U, P> for R {
+        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKeyType> SqrtVirtualColumn<$column_type, U, P> for R {
             fn sqrt(&self) -> VirtualColumn<$column_type, U, P> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedColumnValue::new(

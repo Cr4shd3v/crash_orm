@@ -103,7 +103,7 @@ use std::sync::Arc;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
+use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKeyType, QueryCondition, UntypedColumn};
 use crate::entity::slice_query_value_iter;
 
 /// Direction of the Order
@@ -196,13 +196,13 @@ macro_rules! base_query_functions {
 }
 
 /// Struct representing a database query created by [Entity::query].
-pub struct Query<T: Entity<T, P>, P: PrimaryKey> {
+pub struct Query<T: Entity<T, P>, P: PrimaryKeyType> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, P>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
+impl<T: Entity<T, P>, P: PrimaryKeyType> Query<T, P> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities.
@@ -239,13 +239,13 @@ impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
 }
 
 /// Struct representing a special query created by [Entity::select_query].
-pub struct SelectQuery<T: Entity<T, P>, P: PrimaryKey> {
+pub struct SelectQuery<T: Entity<T, P>, P: PrimaryKeyType> {
     base_query: BoxedColumnValue,
     condition: Option<QueryCondition<T, P>>,
     order: Vec<(BoxedColumnValue, OrderDirection)>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKey> SelectQuery<T, P> {
+impl<T: Entity<T, P>, P: PrimaryKeyType> SelectQuery<T, P> {
     base_query_functions!(SelectQuery);
 
     /// Execute this query and returns the result as a vector of [Row].
