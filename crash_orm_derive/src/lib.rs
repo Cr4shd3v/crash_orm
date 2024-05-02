@@ -8,12 +8,12 @@ mod entity_derive;
 mod schema_derive;
 mod util;
 
-#[proc_macro_derive(Entity, attributes(mapped_by))]
+#[proc_macro_derive(Entity, attributes(mapped_by, primary_key))]
 pub fn derive_entity(input: TokenStream) -> TokenStream {
     derive_entity_impl(input)
 }
 
-#[proc_macro_derive(Schema)]
+#[proc_macro_derive(Schema, attributes(primary_key))]
 pub fn derive_schema(input: TokenStream) -> TokenStream {
     derive_schema_impl(input)
 }

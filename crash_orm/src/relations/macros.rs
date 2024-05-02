@@ -13,7 +13,7 @@ macro_rules! default_relation_function {
         ///
         /// This utilizes the [Entity::get_id] function.
         pub fn from(entity: &impl Entity<T, P>) -> crate::Result<$rel_type<T, P>> {
-            let id = entity.get_id();
+            let id = entity.get_primary();
             if id.is_none() {
                 return Err(crate::Error::from_str(
                     "Can't link an entity that hasn't been inserted yet",

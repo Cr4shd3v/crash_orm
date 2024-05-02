@@ -58,7 +58,7 @@ impl<T: Entity<T, P> + Sync, P: PrimaryKey> EntityVec<P> for Vec<T> {
         }
 
         let ids = self.into_iter()
-            .map(|v| v.get_id())
+            .map(|v| v.get_primary())
             .filter(|v| v.is_some())
             .map(|v| v.unwrap())
             .collect::<Vec<P>>();

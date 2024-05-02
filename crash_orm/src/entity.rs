@@ -85,7 +85,7 @@
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let entity = TestItem::get_by_id(&conn, id).await.unwrap();
+//! let entity = TestItem::get_by_primary(&conn, id).await.unwrap();
 //! // Modify entity properties
 //! entity.update(&conn).await.unwrap();
 //! # });
@@ -116,7 +116,7 @@
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let mut entity = TestItem::get_by_id(&conn, id).await.unwrap();
+//! let mut entity = TestItem::get_by_primary(&conn, id).await.unwrap();
 //! // Modify entity properties
 //! entity.persist(&conn).await.unwrap();
 //! # });
@@ -148,7 +148,7 @@
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let entity = TestItem::get_by_id(&conn, id).await.unwrap();
+//! let entity = TestItem::get_by_primary(&conn, id).await.unwrap();
 //! # });
 //! ```
 //!
@@ -195,7 +195,7 @@
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let mut entity = TestItem::get_by_id(&conn, id).await.unwrap();
+//! let mut entity = TestItem::get_by_primary(&conn, id).await.unwrap();
 //! entity.remove(&conn).await.unwrap();
 //! # });
 //! ```
@@ -290,7 +290,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Returns the id of the entity.
     ///
     /// Used internally by the ORM
-    fn get_id(&self) -> Option<P>;
+    fn get_primary(&self) -> Option<P>;
 
     /// Parses a [`Row`] into self
     fn load_from_row(row: &Row) -> T;
@@ -302,7 +302,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
 
     /// Retrieves an entity by its id
-    async fn get_by_id(connection: &impl DatabaseConnection, id: P) -> crate::Result<T>;
+    async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> crate::Result<T>;
 
     /// Retrieves all entities
     async fn get_all(connection: &impl DatabaseConnection) -> crate::Result<Vec<T>>;

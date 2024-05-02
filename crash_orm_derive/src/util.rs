@@ -1,6 +1,6 @@
 use convert_case::{Case, Casing};
 use quote::ToTokens;
-use syn::{GenericArgument, Ident, PathArguments, Type};
+use syn::{Attribute, Field, GenericArgument, Ident, PathArguments, Type};
 
 pub(crate) fn extract_generic_type_ignore_option(ty: &Type, number: usize) -> Option<Type> {
     if get_type_string(ty) == "Option" {
@@ -140,4 +140,17 @@ pub(crate) fn ident_to_table_name(ident: &Ident) -> String {
 
 pub(crate) fn string_to_table_name(string: String) -> String {
     string.to_case(Case::Snake)
+}
+
+pub(crate) fn get_attribute_by_name<'a>(field: &'a Field, name: &'a str) -> Option<&'a Attribute> {
+    field.attrs.iter().find(|a| {
+        a.meta
+            .path()
+            .segments
+            .last()
+            .unwrap()
+            .to_token_stream()
+            .to_string()
+            == name
+    })
 }

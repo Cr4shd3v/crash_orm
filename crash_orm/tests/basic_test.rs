@@ -29,7 +29,7 @@ async fn test_basic() {
 
     item.insert_set_id(&conn).await.unwrap();
     assert!(item.id.is_some());
-    let item = TestItem1::get_by_id(&conn, item.id.unwrap()).await;
+    let item = TestItem1::get_by_primary(&conn, item.id.unwrap()).await;
     assert!(item.is_ok());
     let mut item = item.unwrap();
     println!("{:?}", item);
@@ -67,7 +67,7 @@ async fn test_persist() {
     assert!(item.id.is_some());
     item.name = String::from("test_updated");
     assert!(item.persist(&conn).await.is_ok());
-    let item_from_db = TestItem01::get_by_id(&conn, item.id.unwrap()).await;
+    let item_from_db = TestItem01::get_by_primary(&conn, item.id.unwrap()).await;
     assert!(item_from_db.is_ok());
     let item_from_db = item_from_db.unwrap();
     assert_eq!(&*item_from_db.name, "test_updated");

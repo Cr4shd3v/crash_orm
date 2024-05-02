@@ -15,7 +15,7 @@ async fn test_empty() {
 
     let item = TestItemEmpty { id: None };
     let id = item.insert_get_id(&conn).await.unwrap();
-    let mut entity = TestItemEmpty::get_by_id(&conn, id).await.unwrap();
+    let mut entity = TestItemEmpty::get_by_primary(&conn, id).await.unwrap();
     entity.persist(&conn).await.unwrap();
 
     TestItemEmpty::drop_table(&conn).await.unwrap();

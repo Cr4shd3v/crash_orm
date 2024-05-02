@@ -1,12 +1,10 @@
 use proc_macro::TokenStream;
 
-use quote::{quote, ToTokens};
-use syn::{Attribute, Data, DeriveInput, Field, Ident, parse_macro_input};
+use quote::quote;
+use syn::{Attribute, Data, DeriveInput, Ident, parse_macro_input};
+use syn::__private::Span;
 
-use crate::util::{
-    extract_generic_type, extract_generic_type_ignore_option, get_type_string, ident_to_table_name,
-    is_relation, is_relation_value_holder, string_to_table_name,
-};
+use crate::util::{extract_generic_type, extract_generic_type_ignore_option, get_attribute_by_name, get_type_string, ident_to_table_name, is_relation, is_relation_value_holder, string_to_table_name};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -31,19 +29,32 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut insert_index = 0usize;
     let mut update_index = 0usize;
 
-    let mut primary_type = None;
+    let (primary_type, primary_field_name) = {
+        let mut primary_type_id_field = None;
+        let mut defined_primary_key = None;
+        let mut defined_primary_key_name = None;
 
-    for field in &struct_data.fields {
-        let field_ident = field.ident.as_ref().unwrap();
-        let field_ident_str = field_ident.to_string();
-        if field_ident_str == "id" {
-            primary_type = Some(field.ty.clone());
+        for field in &struct_data.fields {
+            let field_ident = field.ident.as_ref().unwrap();
+            let field_ident_str = field_ident.to_string();
+            if field_ident_str == "id" {
+                primary_type_id_field = Some(field.ty.clone());
+            }
+
+            let primary_key = get_attribute_by_name(field, "primary_key").is_some();
+            if primary_key {
+                defined_primary_key = Some(field.ty.clone());
+                defined_primary_key_name = Some(field_ident_str);
+            }
         }
-    }
 
-    let Some(primary_type) = primary_type else {
-        panic!("The entity {} has no primary key", ident_str);
+        if defined_primary_key.is_some() {
+            (defined_primary_key.unwrap(), defined_primary_key_name.unwrap())
+        } else {
+            (primary_type_id_field.expect(&*format!("The entity {} has no primary key", ident_str)), "id".to_string())
+        }
     };
+    let primary_key_ident = Ident::new(&*primary_field_name, Span::call_site());
 
     let Some(primary_type) = extract_generic_type(&primary_type, 1) else {
         panic!("The identifier for entity {} must be an option", ident_str);
@@ -74,7 +85,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             let get_function_ident = Ident::new(&*format!("get_{}", field_ident_str), ident.span());
 
             if field_type_name == "OneToMany" {
-                let mapped_by = get_mapped_by_attribute(&field);
+                let mapped_by = get_attribute_by_name(&field, "mapped_by");
 
                 if mapped_by.is_none() {
                     panic!("The attribute \"mapped_by\" is required on OneToMany objects");
@@ -93,7 +104,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                 functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
-                        let rows = connection.query_many(#query, &[&self.id]).await?;
+                        let rows = connection.query_many(#query, &[&self.#primary_key_ident]).await?;
                         use crash_orm::Entity;
                         Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
                     }
@@ -116,7 +127,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
                                 use crash_orm::Entity;
-                                Ok(Some(#entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
+                                Ok(Some(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
                             } else {
                                 Ok(None)
                             }
@@ -132,7 +143,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
                             use crash_orm::Entity;
-                            #entity_type::get_by_id(connection, self.#field_ident.target_id).await
+                            #entity_type::get_by_primary(connection, self.#field_ident.target_id).await
                         }
                     });
                 }
@@ -152,7 +163,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
                                 use crash_orm::Entity;
-                                Ok(Some(#entity_type::get_by_id(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
+                                Ok(Some(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
                             } else {
                                 Ok(None)
                             }
@@ -168,12 +179,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                         async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
                             use crash_orm::Entity;
-                            #entity_type::get_by_id(connection, self.#field_ident.target_id).await
+                            #entity_type::get_by_primary(connection, self.#field_ident.target_id).await
                         }
                     });
                 }
             } else if field_type_name == "OneToOneRef" {
-                let mapped_by = get_mapped_by_attribute(&field);
+                let mapped_by = get_attribute_by_name(&field, "mapped_by");
 
                 if mapped_by.is_none() {
                     panic!("The attribute \"mapped_by\" is required on OneToOneRef objects");
@@ -192,7 +203,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
                         use crash_orm::Entity;
-                        let row = connection.query_single(#query, &[&self.id]).await?;
+                        let row = connection.query_single(#query, &[&self.#primary_key_ident]).await?;
                         Ok(#entity_type::load_from_row(&row))
                     }
                 });
@@ -207,7 +218,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         all_index += 1;
 
-        if field_ident_str != "id" {
+        if field_ident_str != primary_field_name {
             column_consts.extend(quote! {
                 #[allow(missing_docs)]
                 pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
@@ -215,7 +226,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             if is_relation_value_holder(&field_type) {
                 let field_ident_upper_id = Ident::new(
-                    &*format!("{}_ID", field_ident_str.to_uppercase()),
+                    &*format!("{}_PRIMARY", field_ident_str.to_uppercase()),
                     field_ident.span(),
                 );
                 let Some(target_entity_id_type) = extract_generic_type_ignore_option(field_type, 2) else {
@@ -263,28 +274,28 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let insert_field_self_values_format =
         insert_field_self_values_format.strip_suffix(",").unwrap_or("");
 
-    let select_by_id_string = format!("SELECT * FROM {} WHERE id = $1", ident_str);
+    let select_by_id_string = format!("SELECT * FROM {} WHERE {} = $1", ident_str, primary_field_name);
     let select_all_string = format!("SELECT * FROM {}", ident_str);
     let count_string = format!("SELECT COUNT(*) FROM {}", ident_str);
     let insert_string = if insert_field_names.is_empty() {
-        format!("INSERT INTO {} DEFAULT VALUES RETURNING id", ident_str)
+        format!("INSERT INTO {} DEFAULT VALUES RETURNING {}", ident_str, primary_field_name)
     } else {
         format!(
-            "INSERT INTO {}({}) VALUES ({}) RETURNING id",
-            ident_str, insert_field_names, insert_field_self_values_format
+            "INSERT INTO {}({}) VALUES ({}) RETURNING {}",
+            ident_str, insert_field_names, insert_field_self_values_format, primary_field_name
         )
     };
-    let delete_string = format!("DELETE FROM {} WHERE id = $1", ident_str);
+    let delete_string = format!("DELETE FROM {} WHERE {} = $1", ident_str, primary_field_name);
 
     let update_statement = if update_fields.is_empty() {
         quote!()
     } else {
         let update_string = format!(
-            "UPDATE {} SET {} WHERE id = ${}",
-            ident_str, update_fields, insert_index
+            "UPDATE {} SET {} WHERE {} = ${}",
+            ident_str, update_fields, primary_field_name, insert_index
         );
         quote! {
-            connection.execute_query(#update_string,&[#insert_field_self_values &self.id]).await?;
+            connection.execute_query(#update_string,&[#insert_field_self_values &self.#primary_key_ident]).await?;
         }
     };
 
@@ -309,8 +320,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             type ColumnType = #ident_column;
 
-            fn get_id(&self) -> Option<#primary_type> {
-                self.id
+            fn get_primary(&self) -> Option<#primary_type> {
+                self.#primary_key_ident
             }
 
             fn get_values(&self) -> Vec<&(dyn crash_orm::postgres::types::ToSql + Sync)> {
@@ -325,8 +336,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
             }
 
-            async fn get_by_id(connection: &impl crash_orm::DatabaseConnection, id: #primary_type) -> crash_orm::Result<#ident> {
-                let row = connection.query_single(#select_by_id_string, &[&id]).await?;
+            async fn get_by_primary(connection: &impl crash_orm::DatabaseConnection, #primary_key_ident: #primary_type) -> crash_orm::Result<#ident> {
+                let row = connection.query_single(#select_by_id_string, &[&#primary_key_ident]).await?;
                 Ok(Self::load_from_row(&row))
             }
 
@@ -347,22 +358,22 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             async fn insert_set_id(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
                 let id = self.insert_get_id(connection).await?;
-                self.id = Some(id);
+                self.#primary_key_ident = Some(id);
                 Ok(())
             }
 
             async fn remove(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
-                if self.id.is_none() {
+                if self.#primary_key_ident.is_none() {
                     return Ok(());
                 }
 
-                connection.execute_query(#delete_string, &[&self.id]).await?;
-                self.id = None;
+                connection.execute_query(#delete_string, &[&self.#primary_key_ident]).await?;
+                self.#primary_key_ident = None;
                 Ok(())
             }
 
             async fn update(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
-                if self.id.is_none() {
+                if self.#primary_key_ident.is_none() {
                     return Err(crash_orm::Error::from_str("You can't update an entity without an id."));
                 }
 
@@ -372,7 +383,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             }
 
             async fn persist(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
-                if self.id.is_none() {
+                if self.#primary_key_ident.is_none() {
                     self.insert_set_id(connection).await
                 } else {
                     self.update(connection).await
@@ -390,19 +401,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     }
 
     output.into()
-}
-
-fn get_mapped_by_attribute(field: &Field) -> Option<&Attribute> {
-    field.attrs.iter().find(|a| {
-        a.meta
-            .path()
-            .segments
-            .last()
-            .unwrap()
-            .to_token_stream()
-            .to_string()
-            == "mapped_by"
-    })
 }
 
 fn parse_mapped_by_arg(attribute: &Attribute) -> String {
