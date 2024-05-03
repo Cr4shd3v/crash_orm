@@ -27,6 +27,7 @@ macro_rules! tuple_impls {
 
 impl<P: PrimaryKeyType> PrimaryKey for P {}
 
+// Up to 16 columns can be composited to a primary key
 tuple_impls!(P1);
 tuple_impls!(P1 P2);
 tuple_impls!(P1 P2 P3);
@@ -39,3 +40,7 @@ tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9);
 tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10);
 tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11);
 tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12);
+tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13);
+tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13 P14);
+tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13 P14 P15);
+tuple_impls!(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13 P14 P15 P16);
