@@ -1,3 +1,8 @@
+# v0.4.1
+- doc: fix migration doc
+- doc: added missing docs on new public modules
+- doc: fixed some broken links in doc comments
+
 # v0.4.0
 - breaking: no public uses in crash_orm, moved to crash_orm::prelude
   - this means, that all features can be imported by `use crash_orm::prelude::*;`
