@@ -1,3 +1,10 @@
+# v0.4.0
+- breaking: no public uses in crash_orm, moved to crash_orm::prelude
+  - this means, that all features can be imported by `use crash_orm::prelude::*;`
+- feat: repeat on strings now uses `IntoSql<i32>`
+- updated tests
+- updated dependencies
+
 # v0.3.0
 - feat: fetch single result
 - feat: add eui48 crate support
