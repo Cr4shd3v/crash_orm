@@ -1,6 +1,6 @@
 # Crash ORM
 
-![crates.io](https://img.shields.io/crates/v/crash_orm.svg)
+[![crates.io](https://img.shields.io/crates/v/crash_orm.svg)](https://crates.io/crates/crash_orm)
 
 A simple, typed ORM for Postgres.
 
