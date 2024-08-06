@@ -38,25 +38,45 @@ macro_rules! impl_compare_entity_column {
                 &self,
                 other: impl IntoSql<$column_type>,
             ) -> QueryCondition<U, P> {
-                QueryCondition::GreaterThan(self.get_sql(), other.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let other_boxed = other.into_boxed_sql();
+                boxed.modify(|v| format!("{v} > {}", other_boxed.sql));
+                boxed.values.extend(other_boxed.values);
+
+                QueryCondition::new(boxed)
             }
 
             fn greater_equal(
                 &self,
                 other: impl IntoSql<$column_type>,
             ) -> QueryCondition<U, P> {
-                QueryCondition::GreaterEqual(self.get_sql(), other.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let other_boxed = other.into_boxed_sql();
+                boxed.modify(|v| format!("{v} >= {}", other_boxed.sql));
+                boxed.values.extend(other_boxed.values);
+
+                QueryCondition::new(boxed)
             }
 
             fn less_than(&self, other: impl IntoSql<$column_type>) -> QueryCondition<U, P> {
-                QueryCondition::LessThan(self.get_sql(), other.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let other_boxed = other.into_boxed_sql();
+                boxed.modify(|v| format!("{v} < {}", other_boxed.sql));
+                boxed.values.extend(other_boxed.values);
+
+                QueryCondition::new(boxed)
             }
 
             fn less_equal(
                 &self,
                 other: impl IntoSql<$column_type>,
             ) -> QueryCondition<U, P> {
-                QueryCondition::LessEqual(self.get_sql(), other.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let other_boxed = other.into_boxed_sql();
+                boxed.modify(|v| format!("{v} <= {}", other_boxed.sql));
+                boxed.values.extend(other_boxed.values);
+
+                QueryCondition::new(boxed)
             }
 
             fn between(
@@ -64,7 +84,14 @@ macro_rules! impl_compare_entity_column {
                 from: impl IntoSql<$column_type>,
                 to: impl IntoSql<$column_type>,
             ) -> QueryCondition<U, P> {
-                QueryCondition::Between(self.get_sql(), from.into_boxed_sql(), to.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let from_boxed = from.into_boxed_sql();
+                let to_boxed = to.into_boxed_sql();
+                boxed.modify(|v| format!("{v} BETWEEN {} AND {}", from_boxed.sql, to_boxed.sql));
+                boxed.values.extend(from_boxed.values);
+                boxed.values.extend(to_boxed.values);
+
+                QueryCondition::new(boxed)
             }
 
             fn not_between(
@@ -72,7 +99,14 @@ macro_rules! impl_compare_entity_column {
                 from: impl IntoSql<$column_type>,
                 to: impl IntoSql<$column_type>,
             ) -> QueryCondition<U, P> {
-                QueryCondition::NotBetween(self.get_sql(), from.into_boxed_sql(), to.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let from_boxed = from.into_boxed_sql();
+                let to_boxed = to.into_boxed_sql();
+                boxed.modify(|v| format!("{v} NOT BETWEEN {} AND {}", from_boxed.sql, to_boxed.sql));
+                boxed.values.extend(from_boxed.values);
+                boxed.values.extend(to_boxed.values);
+
+                QueryCondition::new(boxed)
             }
         }
     };

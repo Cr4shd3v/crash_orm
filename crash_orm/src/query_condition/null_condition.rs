@@ -13,10 +13,16 @@ pub trait NullQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
 
 impl<T: ToSql, U: Entity<U, P>, C: Column<Option<T>, U, P>, P: PrimaryKey> NullQueryColumn<T, U, P> for C {
     fn is_null(&self) -> QueryCondition<U, P> {
-        QueryCondition::IsNull(self.get_sql())
+        let mut boxed = self.get_sql();
+        boxed.modify(|v| format!("{v} IS NULL"));
+
+        QueryCondition::new(boxed)
     }
 
     fn is_not_null(&self) -> QueryCondition<U, P> {
-        QueryCondition::IsNotNull(self.get_sql())
+        let mut boxed = self.get_sql();
+        boxed.modify(|v| format!("{v} IS NOT NULL"));
+
+        QueryCondition::new(boxed)
     }
 }

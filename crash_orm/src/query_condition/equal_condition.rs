@@ -15,14 +15,24 @@ macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
         impl<T: Entity<T, P>, U: Column<$column_type, T, P>, P: PrimaryKey> EqualQueryColumn<$column_type, T, P> for U {
             fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T, P> {
-                QueryCondition::Equals(self.get_sql(), other.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let other_boxed = other.into_boxed_sql();
+                boxed.modify(|v| format!("{v} = {}", other_boxed.sql));
+                boxed.values.extend(other_boxed.values);
+
+                QueryCondition::new(boxed)
             }
 
             fn not_equals(
                 &self,
                 other: impl IntoSql<$column_type>,
             ) -> QueryCondition<T, P> {
-                QueryCondition::NotEquals(self.get_sql(), other.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let other_boxed = other.into_boxed_sql();
+                boxed.modify(|v| format!("{v} <> {}", other_boxed.sql));
+                boxed.values.extend(other_boxed.values);
+
+                QueryCondition::new(boxed)
             }
         }
     };
@@ -32,14 +42,19 @@ macro_rules! impl_equal_entity_column_geo {
     ($column_type:ty) => {
         impl<T: Entity<T, P>, U: Column<$column_type, T, P>, P: PrimaryKey> EqualQueryColumn<$column_type, T, P> for U {
             fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T, P> {
-                QueryCondition::SameAs(self.get_sql(), other.into_boxed_sql())
+                let mut boxed = self.get_sql();
+                let other_boxed = other.into_boxed_sql();
+                boxed.modify(|v| format!("{v} ~= {}", other_boxed.sql));
+                boxed.values.extend(other_boxed.values);
+
+                QueryCondition::new(boxed)
             }
 
             fn not_equals(
                 &self,
                 other: impl IntoSql<$column_type>,
             ) -> QueryCondition<T, P> {
-                QueryCondition::Not(Box::new(QueryCondition::SameAs(self.get_sql(), other.into_boxed_sql())))
+                self.equals(other).not()
             }
         }
     };

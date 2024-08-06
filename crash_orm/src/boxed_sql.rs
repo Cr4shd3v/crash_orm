@@ -35,11 +35,16 @@ impl BoxedSql {
     ) -> (String, Vec<Arc<Box<dyn ToSql + Sync + Send>>>, usize) {
         let mut sql = self.sql.clone();
         while sql.contains("_$i") {
-            sql = sql.replacen("_$i", &*format!("${}", index), 1);
+            sql = sql.replacen("_$i", &*format!("${index}"), 1);
             index += 1;
         }
 
         (sql, self.values.clone(), index)
+    }
+
+    /// Modify the raw sql string.
+    pub fn modify<F: FnOnce(&String) -> String>(&mut self, f: F) {
+        self.sql = f(&self.sql);
     }
 }
 

@@ -13,10 +13,20 @@ pub trait LikeQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
 
 impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> LikeQueryColumn<String, U, P> for R {
     fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P> {
-        QueryCondition::Like(self.get_sql(), like.into_boxed_sql())
+        let mut boxed = self.get_sql();
+        let other_boxed = like.into_boxed_sql();
+        boxed.modify(|v| format!("{v} LIKE {}", other_boxed.sql));
+        boxed.values.extend(other_boxed.values);
+
+        QueryCondition::new(boxed)
     }
 
     fn not_like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P> {
-        QueryCondition::NotLike(self.get_sql(), like.into_boxed_sql())
+        let mut boxed = self.get_sql();
+        let other_boxed = like.into_boxed_sql();
+        boxed.modify(|v| format!("{v} NOT LIKE {}", other_boxed.sql));
+        boxed.values.extend(other_boxed.values);
+
+        QueryCondition::new(boxed)
     }
 }

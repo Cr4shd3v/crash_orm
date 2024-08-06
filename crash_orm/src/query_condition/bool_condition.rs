@@ -12,10 +12,16 @@ pub trait BoolQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
 
 impl<U: Entity<U, P>, R: Column<bool, U, P>, P: PrimaryKey> BoolQueryColumn<bool, U, P> for R {
     fn is_true(&self) -> QueryCondition<U, P> {
-        QueryCondition::IsTrue(self.get_sql())
+        let mut boxed = self.get_sql();
+        boxed.modify(|v| format!("{v} IS TRUE"));
+
+        QueryCondition::new(boxed)
     }
 
     fn is_false(&self) -> QueryCondition<U, P> {
-        QueryCondition::IsFalse(self.get_sql())
+        let mut boxed = self.get_sql();
+        boxed.modify(|v| format!("{v} IS FALSE"));
+
+        QueryCondition::new(boxed)
     }
 }
