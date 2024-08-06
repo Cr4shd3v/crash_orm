@@ -31,38 +31,7 @@ use std::sync::Arc;
 
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{Entity, EntityColumn, PrimaryKey, VirtualColumn};
-
-/// Struct containing a part of a query with raw sql and values prepared for tokio-postgres.
-#[derive(Clone)]
-pub struct BoxedColumnValue {
-    pub(crate) sql: String,
-    pub(crate) value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>,
-}
-
-impl BoxedColumnValue {
-    /// Creates a new instance
-    pub(crate) fn new(
-        sql: String,
-        value: Vec<Arc<Box<dyn ToSql + Sync + Send + 'static>>>,
-    ) -> Self {
-        Self { sql, value }
-    }
-
-    /// Resolves this value into it's parts with inserted IDs
-    pub(crate) fn resolve(
-        &self,
-        mut index: usize,
-    ) -> (String, Vec<Arc<Box<dyn ToSql + Sync + Send>>>, usize) {
-        let mut sql = self.sql.clone();
-        while sql.contains("_$i") {
-            sql = sql.replacen("_$i", &*format!("${}", index), 1);
-            index += 1;
-        }
-
-        (sql, self.value.clone(), index)
-    }
-}
+use crate::prelude::*;
 
 /// Trait implemented on all values
 ///
@@ -81,14 +50,14 @@ impl<R: UntypedColumnValue + ToSql> TypedColumnValue<R> for R {}
 /// This value trait is untyped. For typed values use [`TypedColumnValue`].
 pub trait UntypedColumnValue {
     /// Internal function to get a sql representation of the value
-    fn get_sql(&self) -> BoxedColumnValue;
+    fn get_sql(&self) -> BoxedSql;
 }
 
 macro_rules! simple_column_value {
     ($column_type:ty) => {
         impl UntypedColumnValue for $column_type {
-            fn get_sql(&self) -> BoxedColumnValue {
-                BoxedColumnValue::new("_$i".to_string(), vec![Arc::new(Box::new(self.clone()))])
+            fn get_sql(&self) -> BoxedSql {
+                BoxedSql::new("_$i".to_string(), vec![Arc::new(Box::new(self.clone()))])
             }
         }
     };
@@ -139,42 +108,23 @@ simple_column_value!(geo_types::Rect);
 simple_column_value!(geo_types::LineString);
 
 impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for VirtualColumn<T, U, P> {
-    fn get_sql(&self) -> BoxedColumnValue {
+    fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }
 }
 
 impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for EntityColumn<T, U, P> {
-    fn get_sql(&self) -> BoxedColumnValue {
+    fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }
 }
 
 impl<T: UntypedColumnValue> UntypedColumnValue for Option<T> {
-    fn get_sql(&self) -> BoxedColumnValue {
+    fn get_sql(&self) -> BoxedSql {
         if self.is_some() {
             self.as_ref().unwrap().get_sql()
         } else {
-            BoxedColumnValue::new(String::from("NULL"), vec![])
+            BoxedSql::new(String::from("NULL"), vec![])
         }
-    }
-}
-
-/// Trait for converting any type that implements [ToSql] and [UntypedColumnValue] into a [TypedColumnValue].
-#[allow(clippy::wrong_self_convention)]
-pub trait IntoSql<T> {
-    /// Convert self into a [TypedColumnValue]
-    fn into_typed_value(&self) -> &(dyn TypedColumnValue<T>);
-}
-
-impl<T: ToSql + UntypedColumnValue> IntoSql<T> for T {
-    fn into_typed_value(&self) -> &(dyn TypedColumnValue<T>) {
-        self
-    }
-}
-
-impl<T: ToSql + UntypedColumnValue> IntoSql<T> for &T {
-    fn into_typed_value(&self) -> &(dyn TypedColumnValue<T>) {
-        *self
     }
 }

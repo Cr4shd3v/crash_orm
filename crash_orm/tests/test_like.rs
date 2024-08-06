@@ -47,14 +47,14 @@ async fn test_like() {
         .unwrap();
 
     let results = TestItem11::query()
-        .condition(TestItem11Column::NAME1.like("test123%".to_string()))
+        .condition(TestItem11Column::NAME1.like("test123%"))
         .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
     let results = TestItem11::query()
-        .condition(TestItem11Column::NAME1.not_like("test1234%".to_string()))
+        .condition(TestItem11Column::NAME1.not_like("test1234%"))
         .fetch(&conn)
         .await;
     assert!(results.is_ok());

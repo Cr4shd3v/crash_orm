@@ -50,7 +50,7 @@ async fn test_cast() {
         .condition(
             TestItem18Column::NUMBER
                 .cast_to_text()
-                .equals("440".to_string()),
+                .equals("440"),
         )
         .fetch(&conn)
         .await;

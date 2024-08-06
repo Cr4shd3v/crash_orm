@@ -12,7 +12,7 @@ pub use in_condition::*;
 pub use like_condition::*;
 pub use null_condition::*;
 
-use crate::prelude::{BoxedColumnValue, Entity, PrimaryKey};
+use crate::prelude::{BoxedSql, Entity, PrimaryKey};
 
 mod null_condition;
 mod equal_condition;
@@ -24,45 +24,45 @@ mod in_condition;
 /// Query condition for entity
 pub enum QueryCondition<T: Entity<T, P>, P: PrimaryKey> {
     /// SQL: v1 = v2
-    Equals(BoxedColumnValue, BoxedColumnValue),
+    Equals(BoxedSql, BoxedSql),
     /// SQL: v1 <> v2
-    NotEquals(BoxedColumnValue, BoxedColumnValue),
+    NotEquals(BoxedSql, BoxedSql),
     /// SQL: (c1) AND (c2)
     And(Box<QueryCondition<T, P>>, Box<QueryCondition<T, P>>),
     /// SQL: (c1) OR (c2)
     Or(Box<QueryCondition<T, P>>, Box<QueryCondition<T, P>>),
     /// SQL: v1 IS NULL
-    IsNull(BoxedColumnValue),
+    IsNull(BoxedSql),
     /// SQL: v1 IS NOT NULL
-    IsNotNull(BoxedColumnValue),
+    IsNotNull(BoxedSql),
     /// SQL: NOT (c1)
     Not(Box<QueryCondition<T, P>>),
     /// SQL: v1 LIKE v2
-    Like(BoxedColumnValue, BoxedColumnValue),
+    Like(BoxedSql, BoxedSql),
     /// SQL: v1 NOT LIKE v2
-    NotLike(BoxedColumnValue, BoxedColumnValue),
+    NotLike(BoxedSql, BoxedSql),
     /// SQL: v1 > v2
-    GreaterThan(BoxedColumnValue, BoxedColumnValue),
+    GreaterThan(BoxedSql, BoxedSql),
     /// SQL: v1 >= v2
-    GreaterEqual(BoxedColumnValue, BoxedColumnValue),
+    GreaterEqual(BoxedSql, BoxedSql),
     /// SQL: v1 < v2
-    LessThan(BoxedColumnValue, BoxedColumnValue),
+    LessThan(BoxedSql, BoxedSql),
     /// SQL: v1 <= v2
-    LessEqual(BoxedColumnValue, BoxedColumnValue),
+    LessEqual(BoxedSql, BoxedSql),
     /// SQL: v1 BETWEEN v2 AND v3
-    Between(BoxedColumnValue, BoxedColumnValue, BoxedColumnValue),
+    Between(BoxedSql, BoxedSql, BoxedSql),
     /// SQL: v1 NOT BETWEEN v2 AND v3
-    NotBetween(BoxedColumnValue, BoxedColumnValue, BoxedColumnValue),
+    NotBetween(BoxedSql, BoxedSql, BoxedSql),
     /// SQL: v1 IS TRUE
-    IsTrue(BoxedColumnValue),
+    IsTrue(BoxedSql),
     /// SQL: v1 IS FALSE
-    IsFalse(BoxedColumnValue),
+    IsFalse(BoxedSql),
     /// SQL: v1 IN (v2)
-    In(BoxedColumnValue, Vec<BoxedColumnValue>),
+    In(BoxedSql, Vec<BoxedSql>),
     /// SQL: v1 NOT IN (v2)
-    NotIn(BoxedColumnValue, Vec<BoxedColumnValue>),
+    NotIn(BoxedSql, Vec<BoxedSql>),
     /// SQL: v1 ~= v2
-    SameAs(BoxedColumnValue, BoxedColumnValue),
+    SameAs(BoxedSql, BoxedSql),
     /// INTERNAL
     #[allow(non_camel_case_types)]
     #[doc(hidden)]

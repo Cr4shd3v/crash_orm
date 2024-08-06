@@ -62,7 +62,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .lowercase()
-                .equals("test1234".to_string()),
+                .equals("test1234"),
         )
         .fetch(&conn)
         .await;
@@ -73,7 +73,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .uppercase()
-                .equals("TEST123".to_string()),
+                .equals("TEST123"),
         )
         .fetch(&conn)
         .await;
@@ -84,7 +84,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .reverse()
-                .equals("321tset".to_string()),
+                .equals("321tset"),
         )
         .fetch(&conn)
         .await;
@@ -95,7 +95,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .repeat(2)
-                .equals("test123test123".to_string()),
+                .equals("test123test123"),
         )
         .fetch(&conn)
         .await;
@@ -106,7 +106,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .concat(vec![&TestItem15Column::ID])
-                .equals("test1232".to_string()),
+                .equals("test1232"),
         )
         .fetch(&conn)
         .await;
@@ -117,7 +117,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .md5()
-                .equals("cc03e747a6afbbcbf8be7668acfebee5".to_string()),
+                .equals("cc03e747a6afbbcbf8be7668acfebee5"),
         )
         .fetch(&conn)
         .await;

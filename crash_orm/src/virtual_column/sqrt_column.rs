@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
+use crate::prelude::{BoxedSql, Column, Entity, PrimaryKey, VirtualColumn};
 
 /// Trait implementing sqrt database function to create [VirtualColumn] for decimal columns
 pub trait SqrtVirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
@@ -13,9 +13,9 @@ macro_rules! impl_sqrt_virtual_column {
         impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey> SqrtVirtualColumn<$column_type, U, P> for R {
             fn sqrt(&self) -> VirtualColumn<$column_type, U, P> {
                 let sql = self.get_sql();
-                VirtualColumn::new(BoxedColumnValue::new(
+                VirtualColumn::new(BoxedSql::new(
                     format!("SQRT({})", sql.sql),
-                    sql.value,
+                    sql.values,
                 ))
             }
         }

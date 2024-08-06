@@ -18,14 +18,14 @@ macro_rules! impl_in_entity_column {
                 &self,
                 other: Vec<impl IntoSql<$column_type>>,
             ) -> QueryCondition<U, P> {
-                QueryCondition::In(self.get_sql(), other.iter().map(|i| i.into_typed_value().get_sql()).collect())
+                QueryCondition::In(self.get_sql(), other.iter().map(|i| i.into_boxed_sql()).collect())
             }
 
             fn not_in_vec(
                 &self,
                 other: Vec<impl IntoSql<$column_type>>,
             ) -> QueryCondition<U, P> {
-                QueryCondition::NotIn(self.get_sql(), other.iter().map(|i| i.into_typed_value().get_sql()).collect())
+                QueryCondition::NotIn(self.get_sql(), other.iter().map(|i| i.into_boxed_sql()).collect())
             }
         }
     };

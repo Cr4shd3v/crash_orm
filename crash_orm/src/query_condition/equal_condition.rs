@@ -15,14 +15,14 @@ macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
         impl<T: Entity<T, P>, U: Column<$column_type, T, P>, P: PrimaryKey> EqualQueryColumn<$column_type, T, P> for U {
             fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T, P> {
-                QueryCondition::Equals(self.get_sql(), other.into_typed_value().get_sql())
+                QueryCondition::Equals(self.get_sql(), other.into_boxed_sql())
             }
 
             fn not_equals(
                 &self,
                 other: impl IntoSql<$column_type>,
             ) -> QueryCondition<T, P> {
-                QueryCondition::NotEquals(self.get_sql(), other.into_typed_value().get_sql())
+                QueryCondition::NotEquals(self.get_sql(), other.into_boxed_sql())
             }
         }
     };
@@ -32,14 +32,14 @@ macro_rules! impl_equal_entity_column_geo {
     ($column_type:ty) => {
         impl<T: Entity<T, P>, U: Column<$column_type, T, P>, P: PrimaryKey> EqualQueryColumn<$column_type, T, P> for U {
             fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T, P> {
-                QueryCondition::SameAs(self.get_sql(), other.into_typed_value().get_sql())
+                QueryCondition::SameAs(self.get_sql(), other.into_boxed_sql())
             }
 
             fn not_equals(
                 &self,
                 other: impl IntoSql<$column_type>,
             ) -> QueryCondition<T, P> {
-                QueryCondition::Not(Box::new(QueryCondition::SameAs(self.get_sql(), other.into_typed_value().get_sql())))
+                QueryCondition::Not(Box::new(QueryCondition::SameAs(self.get_sql(), other.into_boxed_sql())))
             }
         }
     };

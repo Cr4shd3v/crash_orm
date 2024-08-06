@@ -12,7 +12,7 @@ pub use min_column::*;
 pub use sum_column::*;
 
 use crate::entity::slice_query_value_iter;
-use crate::prelude::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition};
+use crate::prelude::{BoxedSql, DatabaseConnection, Entity, PrimaryKey, QueryCondition};
 
 mod sum_column;
 mod min_column;
@@ -43,9 +43,9 @@ impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> EntityColumn<T, U, P> {
         }
     }
 
-    /// Convert [EntityColumn] into a [BoxedColumnValue]
-    pub(crate) fn get_sql(&self) -> BoxedColumnValue {
-        BoxedColumnValue::new(self.name.to_string(), vec![])
+    /// Convert [EntityColumn] into a [BoxedSql]
+    pub(crate) fn get_sql(&self) -> BoxedSql {
+        BoxedSql::new(self.name.to_string(), vec![])
     }
 
     /// Count entries in this column.

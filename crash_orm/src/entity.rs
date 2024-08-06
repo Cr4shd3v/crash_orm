@@ -244,12 +244,7 @@ use async_trait::async_trait;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
-use crate::column::UntypedColumn;
-use crate::column_value::BoxedColumnValue;
-use crate::connection::DatabaseConnection;
-use crate::primary::PrimaryKey;
-use crate::query::{Query, SelectQuery};
-use crate::query_condition::QueryCondition;
+use crate::prelude::*;
 
 /// Trait implemented for all database entities.
 ///
@@ -324,7 +319,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     ///
     /// See [Query] for more details on how to build a query.
     fn query() -> Query<T, P> {
-        Query::new(BoxedColumnValue::new(
+        Query::new(BoxedSql::new(
             format!("SELECT * FROM {}", Self::TABLE_NAME),
             vec![],
         ))
@@ -356,7 +351,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())
-            .collect::<Vec<BoxedColumnValue>>();
+            .collect::<Vec<BoxedSql>>();
         let mut query = vec![];
         let mut values = vec![];
         let mut index = 1;
@@ -368,7 +363,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
             index = next_index;
         }
 
-        SelectQuery::new(BoxedColumnValue::new(
+        SelectQuery::new(BoxedSql::new(
             format!("SELECT {} FROM {}", query.join(","), Self::TABLE_NAME),
             values,
         ))

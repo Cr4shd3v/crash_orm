@@ -86,11 +86,13 @@ pub mod primary;
 #[cfg(feature = "migration")]
 #[cfg_attr(docsrs, doc(cfg(feature = "migration")))]
 pub mod migration;
+pub mod boxed_sql;
 
 pub mod prelude {
     //! Reexports all required modules and crates
 
     pub use crate::async_trait::*;
+    pub use crate::boxed_sql::*;
     pub use crate::column::*;
     pub use crate::column_value::*;
     pub use crate::connection::*;

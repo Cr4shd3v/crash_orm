@@ -2,7 +2,7 @@
 
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{BoxedColumnValue, Entity, EntityColumn, PrimaryKey, VirtualColumn};
+use crate::prelude::{BoxedSql, Entity, EntityColumn, PrimaryKey, VirtualColumn};
 
 /// Trait implemented on all Columns
 ///
@@ -19,17 +19,17 @@ impl<T: ToSql + Sync, U: Entity<U, P> + Sync, P: PrimaryKey> Column<T, U, P> for
 /// This column trait is untyped. For typed columns use [`Column`].
 pub trait UntypedColumn<U: Entity<U, P>, P: PrimaryKey>: Sync {
     /// Internal function to get a sql representation of the column
-    fn get_sql(&self) -> BoxedColumnValue;
+    fn get_sql(&self) -> BoxedSql;
 }
 
 impl<T: ToSql + Sync, U: Entity<U, P> + Sync, P: PrimaryKey> UntypedColumn<U, P> for EntityColumn<T, U, P> {
-    fn get_sql(&self) -> BoxedColumnValue {
+    fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }
 }
 
 impl<T: ToSql + Sync, U: Entity<U, P> + Sync, P: PrimaryKey> UntypedColumn<U, P> for VirtualColumn<T, U, P> {
-    fn get_sql(&self) -> BoxedColumnValue {
+    fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }
 }

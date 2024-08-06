@@ -99,7 +99,7 @@ use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
 use crate::entity::slice_query_value_iter;
-use crate::prelude::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
+use crate::prelude::{BoxedSql, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
 
 /// Direction of the Order
 #[derive(Debug)]
@@ -122,8 +122,8 @@ impl Display for OrderDirection {
 
 macro_rules! base_query_functions {
     ($base:ident) => {
-        /// Create a new query from a [BoxedColumnValue]
-        pub(crate) fn new(base_query: BoxedColumnValue) -> $base<T, P> {
+        /// Create a new query from a [BoxedSql]
+        pub(crate) fn new(base_query: BoxedSql) -> $base<T, P> {
             Self {
                 base_query,
                 condition: None,
@@ -192,9 +192,9 @@ macro_rules! base_query_functions {
 
 /// Struct representing a database query created by [Entity::query].
 pub struct Query<T: Entity<T, P>, P: PrimaryKey> {
-    base_query: BoxedColumnValue,
+    base_query: BoxedSql,
     condition: Option<QueryCondition<T, P>>,
-    order: Vec<(BoxedColumnValue, OrderDirection)>,
+    order: Vec<(BoxedSql, OrderDirection)>,
 }
 
 impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
@@ -235,9 +235,9 @@ impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
 
 /// Struct representing a special query created by [Entity::select_query].
 pub struct SelectQuery<T: Entity<T, P>, P: PrimaryKey> {
-    base_query: BoxedColumnValue,
+    base_query: BoxedSql,
     condition: Option<QueryCondition<T, P>>,
-    order: Vec<(BoxedColumnValue, OrderDirection)>,
+    order: Vec<(BoxedSql, OrderDirection)>,
 }
 
 impl<T: Entity<T, P>, P: PrimaryKey> SelectQuery<T, P> {

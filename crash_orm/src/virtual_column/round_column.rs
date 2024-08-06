@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
+use crate::prelude::{BoxedSql, Column, Entity, PrimaryKey, VirtualColumn};
 
 /// Trait implementing round database functions to create [VirtualColumn]s for number columns
 pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, P>, P: PrimaryKey> {
@@ -21,25 +21,25 @@ macro_rules! impl_round_virtual_column {
         {
             fn ceil(&self) -> VirtualColumn<$out_type, U, P> {
                 let sql = self.get_sql();
-                VirtualColumn::new(BoxedColumnValue::new(
+                VirtualColumn::new(BoxedSql::new(
                     format!("CEIL({})", sql.sql),
-                    sql.value,
+                    sql.values,
                 ))
             }
 
             fn floor(&self) -> VirtualColumn<$out_type, U, P> {
                 let sql = self.get_sql();
-                VirtualColumn::new(BoxedColumnValue::new(
+                VirtualColumn::new(BoxedSql::new(
                     format!("FLOOR({})", sql.sql),
-                    sql.value,
+                    sql.values,
                 ))
             }
 
             fn round(&self) -> VirtualColumn<$out_type, U, P> {
                 let sql = self.get_sql();
-                VirtualColumn::new(BoxedColumnValue::new(
+                VirtualColumn::new(BoxedSql::new(
                     format!("ROUND({})", sql.sql),
-                    sql.value,
+                    sql.values,
                 ))
             }
         }

@@ -36,7 +36,7 @@ async fn test_query_simple() {
     assert!(TestItem4::test().persist(&conn).await.is_ok());
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
     let results = TestItem4::query()
-        .condition(TestItem4Column::NAME.equals("test123".to_string()))
+        .condition(TestItem4Column::NAME.equals("test123"))
         .fetch(&conn)
         .await;
     println!("{:?}", results);
@@ -45,7 +45,7 @@ async fn test_query_simple() {
     assert_eq!(results.len(), 1);
 
     let result = TestItem4::query()
-        .condition(TestItem4Column::NAME.equals("test123".to_string()))
+        .condition(TestItem4Column::NAME.equals("test123"))
         .fetch_single(&conn).await;
     assert!(result.is_ok());
 
