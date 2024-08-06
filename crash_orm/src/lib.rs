@@ -61,6 +61,7 @@
 //! For more info, visit the corresponding docs mentioned above.
 
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(missing_docs)]
 
 pub extern crate async_trait;

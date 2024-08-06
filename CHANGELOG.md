@@ -1,3 +1,6 @@
+# v0.4.2
+- doc: fix doc not building
+
 # v0.4.1
 - doc: fix migration doc
 - doc: added missing docs on new public modules
