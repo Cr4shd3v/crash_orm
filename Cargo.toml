@@ -11,7 +11,7 @@ tokio-postgres = "^0.7"
 syn = "^2.0"
 quote = "^1.0"
 tokio = "^1.29"
-tokio-test = "0.4.4"
+tokio-test = "^0.4"
 async-trait = "^0.1"
 convert_case = "^0.6.0"
 
