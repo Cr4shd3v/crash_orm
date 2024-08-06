@@ -99,7 +99,7 @@ use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
 use crate::entity::slice_query_value_iter;
-use crate::prelude::{BoxedSql, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
+use crate::prelude::{BoxedSql, DatabaseConnection, Entity, QueryCondition, UntypedColumn};
 
 /// Direction of the Order
 #[derive(Debug)]
@@ -123,7 +123,7 @@ impl Display for OrderDirection {
 macro_rules! base_query_functions {
     ($base:ident) => {
         /// Create a new query from a [BoxedSql]
-        pub(crate) fn new(base_query: BoxedSql) -> $base<T, P> {
+        pub(crate) fn new(base_query: BoxedSql) -> $base<T> {
             Self {
                 base_query,
                 condition: None,
@@ -132,7 +132,7 @@ macro_rules! base_query_functions {
         }
 
         /// Set the condition for this query.
-        pub fn condition(mut self, condition: QueryCondition<T, P>) -> $base<T, P> {
+        pub fn condition(mut self, condition: QueryCondition<T>) -> $base<T> {
             self.condition = Some(condition);
             self
         }
@@ -140,9 +140,9 @@ macro_rules! base_query_functions {
         /// Add an order to this query.
         pub fn add_order(
             mut self,
-            order: &(dyn UntypedColumn<T, P>),
+            order: &(dyn UntypedColumn<T>),
             order_direction: OrderDirection,
-        ) -> $base<T, P> {
+        ) -> $base<T> {
             self.order.push((order.get_sql(), order_direction));
             self
         }
@@ -152,9 +152,9 @@ macro_rules! base_query_functions {
         /// This will OVERRIDE all previous orders.
         pub fn order(
             mut self,
-            order: &(dyn UntypedColumn<T, P>),
+            order: &(dyn UntypedColumn<T>),
             order_direction: OrderDirection,
-        ) -> $base<T, P> {
+        ) -> $base<T> {
             self.order.clear();
             self.order.push((order.get_sql(), order_direction));
             self
@@ -191,13 +191,13 @@ macro_rules! base_query_functions {
 }
 
 /// Struct representing a database query created by [Entity::query].
-pub struct Query<T: Entity<T, P>, P: PrimaryKey> {
+pub struct Query<T: Entity<T>> {
     base_query: BoxedSql,
-    condition: Option<QueryCondition<T, P>>,
+    condition: Option<QueryCondition<T>>,
     order: Vec<(BoxedSql, OrderDirection)>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
+impl<T: Entity<T>> Query<T> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities.
@@ -234,13 +234,13 @@ impl<T: Entity<T, P>, P: PrimaryKey> Query<T, P> {
 }
 
 /// Struct representing a special query created by [Entity::select_query].
-pub struct SelectQuery<T: Entity<T, P>, P: PrimaryKey> {
+pub struct SelectQuery<T: Entity<T>> {
     base_query: BoxedSql,
-    condition: Option<QueryCondition<T, P>>,
+    condition: Option<QueryCondition<T>>,
     order: Vec<(BoxedSql, OrderDirection)>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKey> SelectQuery<T, P> {
+impl<T: Entity<T>> SelectQuery<T> {
     base_query_functions!(SelectQuery);
 
     /// Execute this query and returns the result as a vector of [Row].

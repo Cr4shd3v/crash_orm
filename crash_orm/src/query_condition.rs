@@ -12,7 +12,7 @@ pub use in_condition::*;
 pub use like_condition::*;
 pub use null_condition::*;
 
-use crate::prelude::{BoxedSql, Entity, PrimaryKey};
+use crate::prelude::{BoxedSql, Entity};
 
 mod null_condition;
 mod equal_condition;
@@ -22,19 +22,17 @@ mod bool_condition;
 mod in_condition;
 
 /// Query condition for entity
-pub struct QueryCondition<T: Entity<T, P>, P: PrimaryKey> {
+pub struct QueryCondition<T: Entity<T>> {
     /// [BoxedSql] of this query condition
     pub boxed: BoxedSql,
-    phantom_1: PhantomData<T>,
-    phantom_2: PhantomData<P>,
+    phantom: PhantomData<T>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKey> QueryCondition<T, P> {
+impl<T: Entity<T>> QueryCondition<T> {
     pub(crate) fn new(boxed: BoxedSql) -> Self {
         Self {
             boxed,
-            phantom_1: PhantomData,
-            phantom_2: PhantomData,
+            phantom: PhantomData,
         }
     }
 
@@ -46,21 +44,21 @@ impl<T: Entity<T, P>, P: PrimaryKey> QueryCondition<T, P> {
     }
 
     /// Build AND condition from self and other
-    pub fn and(mut self, other: QueryCondition<T, P>) -> QueryCondition<T, P> {
+    pub fn and(mut self, other: QueryCondition<T>) -> QueryCondition<T> {
         self.boxed.modify(|v| format!("({v}) AND ({})", other.boxed.sql));
         self.boxed.values.extend(other.boxed.values);
         self
     }
 
     /// Build OR condition from self and other
-    pub fn or(mut self, other: QueryCondition<T, P>) -> QueryCondition<T, P> {
+    pub fn or(mut self, other: QueryCondition<T>) -> QueryCondition<T> {
         self.boxed.modify(|v| format!("({v}) OR ({})", other.boxed.sql));
         self.boxed.values.extend(other.boxed.values);
         self
     }
 
     /// Build NOT condition from self
-    pub fn not(mut self) -> QueryCondition<T, P> {
+    pub fn not(mut self) -> QueryCondition<T> {
         self.boxed.modify(|v| format!("NOT({v})"));
         self
     }

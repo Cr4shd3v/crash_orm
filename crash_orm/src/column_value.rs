@@ -38,10 +38,10 @@ use crate::prelude::*;
 /// This value trait is typed. For untyped values use [`UntypedColumnValue`].
 pub trait TypedColumnValue<T: ToSql>: UntypedColumnValue {}
 
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for VirtualColumn<T, U, P> {}
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for VirtualColumn<Option<T>, U, P> {}
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for EntityColumn<T, U, P> {}
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> TypedColumnValue<T> for EntityColumn<Option<T>, U, P> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for VirtualColumn<T, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for VirtualColumn<Option<T>, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for EntityColumn<T, U> {}
+impl<T: ToSql, U: Entity<U>> TypedColumnValue<T> for EntityColumn<Option<T>, U> {}
 
 impl<R: UntypedColumnValue + ToSql> TypedColumnValue<R> for R {}
 
@@ -107,13 +107,13 @@ simple_column_value!(geo_types::Rect);
 #[cfg(feature = "with-geo-types")]
 simple_column_value!(geo_types::LineString);
 
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for VirtualColumn<T, U, P> {
+impl<T: ToSql, U: Entity<U>> UntypedColumnValue for VirtualColumn<T, U> {
     fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }
 }
 
-impl<T: ToSql, U: Entity<U, P>, P: PrimaryKey> UntypedColumnValue for EntityColumn<T, U, P> {
+impl<T: ToSql, U: Entity<U>> UntypedColumnValue for EntityColumn<T, U> {
     fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }

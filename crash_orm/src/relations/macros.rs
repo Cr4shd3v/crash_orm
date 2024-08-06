@@ -12,7 +12,7 @@ macro_rules! default_relation_function {
         /// Creates the relation from an entity.
         ///
         /// This utilizes the [Entity::get_primary] function.
-        pub fn from(entity: &impl Entity<T, P>) -> crate::Result<$rel_type<T, P>> {
+        pub fn from(entity: &impl PrimaryKeyEntity<T, P>) -> crate::Result<$rel_type<T, P>> {
             let id = entity.get_primary();
             if id.is_none() {
                 return Err(crate::Error::from_str(
@@ -28,7 +28,7 @@ macro_rules! default_relation_function {
 #[allow(missing_docs)]
 macro_rules! sql_impl_for_relation {
     ($rel_type:tt) => {
-        impl<T: Entity<T, P>, P: PrimaryKeyType> tokio_postgres::types::ToSql for $rel_type<T, P> {
+        impl<T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType> tokio_postgres::types::ToSql for $rel_type<T, P> {
             fn to_sql(
                 &self,
                 ty: &tokio_postgres::types::Type,
@@ -56,7 +56,7 @@ macro_rules! sql_impl_for_relation {
             }
         }
 
-        impl<'a, T: Entity<T, P>, P: PrimaryKeyType + tokio_postgres::types::FromSql<'a>> tokio_postgres::types::FromSql<'a> for $rel_type<T, P> {
+        impl<'a, T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType + tokio_postgres::types::FromSql<'a>> tokio_postgres::types::FromSql<'a> for $rel_type<T, P> {
             fn from_sql(ty: &tokio_postgres::types::Type, raw: &'a [u8]) -> Result<Self, Box<dyn std::error::Error + Sync + Send>> {
                 let id = P::from_sql(ty, raw)?;
                 Ok($rel_type::<T, P>::new(id))

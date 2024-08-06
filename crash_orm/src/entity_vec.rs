@@ -3,7 +3,8 @@
 use async_trait::async_trait;
 use postgres::types::ToSql;
 
-use crate::prelude::{DatabaseConnection, Entity, PrimaryKey};
+use crate::entity::PrimaryKeyEntity;
+use crate::prelude::{DatabaseConnection, PrimaryKey};
 
 /// Trait implementing useful functions for vectors of entities.
 ///
@@ -25,7 +26,7 @@ pub trait EntityVec<P> {
 }
 
 #[async_trait]
-impl<T: Entity<T, P> + Sync, P: PrimaryKey + ToSql> EntityVec<P> for Vec<T> {
+impl<T: PrimaryKeyEntity<T, P> + Sync, P: PrimaryKey + ToSql> EntityVec<P> for Vec<T> {
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         for entity in self {
             entity.persist(connection).await?;

@@ -259,7 +259,7 @@ use crate::prelude::*;
 /// }
 /// ```
 #[async_trait]
-pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
+pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
@@ -270,11 +270,6 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// This type references the column struct of this entity
     type ColumnType;
 
-    /// Returns the id of the entity.
-    ///
-    /// Used internally by the ORM
-    fn get_primary(&self) -> Option<P>;
-
     /// Parses a [`Row`] into self
     fn load_from_row(row: &Row) -> Self where Self: Sized;
 
@@ -284,19 +279,11 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     #[doc(hidden)]
     fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
 
-    /// Retrieves an entity by its primary key
-    async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> Result<Self> where Self: Sized;
-
     /// Retrieves all entities
     async fn get_all(connection: &impl DatabaseConnection) -> Result<Vec<Self>> where Self: Sized;
 
     /// Returns the count of entries in the table
     async fn count(connection: &impl DatabaseConnection) -> Result<i64>;
-
-    /// Insert and returns the id
-    ///
-    /// This DOES NOT set the id in the entity
-    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> Result<P>;
 
     /// Insert and set id
     ///
@@ -318,7 +305,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Creates a [Query] for this Entity.
     ///
     /// See [Query] for more details on how to build a query.
-    fn query() -> Query<T, P> {
+    fn query() -> Query<T> {
         Query::new(BoxedSql::new(
             format!("SELECT * FROM {}", Self::TABLE_NAME),
             vec![],
@@ -328,7 +315,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Count the entries based on a [QueryCondition].
     async fn count_query(
         connection: &impl DatabaseConnection,
-        condition: QueryCondition<T, P>,
+        condition: QueryCondition<T>,
     ) -> Result<i64> {
         let (query, values, _) = condition.resolve(1);
 
@@ -347,7 +334,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     /// Select specific columns ([EntityColumn] or [VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query(columns: &[&(dyn UntypedColumn<T, P>)]) -> SelectQuery<T, P> {
+    fn select_query(columns: &[&(dyn UntypedColumn<T>)]) -> SelectQuery<T> {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())
@@ -368,6 +355,23 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
             values,
         ))
     }
+}
+
+/// Contains all primary key related functions of an entity.
+#[async_trait]
+pub trait PrimaryKeyEntity<T: Entity<T>, P: PrimaryKey>: Entity<T> {
+    /// Returns the id of the entity.
+    ///
+    /// Used internally by the ORM
+    fn get_primary(&self) -> Option<P>;
+
+    /// Retrieves an entity by its primary key
+    async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> Result<Self> where Self: Sized;
+
+    /// Insert and returns the id
+    ///
+    /// This DOES NOT set the id in the entity
+    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> Result<P>;
 }
 
 pub(crate) fn slice_query_value_iter<'a>(

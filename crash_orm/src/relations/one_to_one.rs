@@ -1,19 +1,19 @@
 use std::marker::PhantomData;
 
-use crate::prelude::{Entity, PrimaryKeyType};
+use crate::prelude::{PrimaryKeyEntity, PrimaryKeyType};
 use crate::relations::macros::{default_relation_function, sql_impl_for_relation};
 
 /// Struct representing the owning site of a 1:1 relationship.
 ///
 /// This actually holds the value of the relationship compared to [OneToOneRef].
 #[derive(Debug)]
-pub struct OneToOne<T: Entity<T, P>, P: PrimaryKeyType> {
+pub struct OneToOne<T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType> {
     _p: PhantomData<T>,
     /// Raw id of the relation
     pub target_id: P,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKeyType> OneToOne<T, P> {
+impl<T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType> OneToOne<T, P> {
     default_relation_function!(OneToOne);
 }
 
@@ -42,12 +42,12 @@ sql_impl_for_relation!(OneToOne);
 /// }
 /// ```
 #[derive(Debug)]
-pub struct OneToOneRef<T: Entity<T, P>, P: PrimaryKeyType> {
+pub struct OneToOneRef<T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType> {
     _p: PhantomData<T>,
     _p1: PhantomData<P>,
 }
 
-impl<T: Entity<T, P>, P: PrimaryKeyType> OneToOneRef<T, P> {
+impl<T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType> OneToOneRef<T, P> {
     /// Constructs the unowned site of the 1:1 relation
     pub fn new() -> OneToOneRef<T, P> {
         OneToOneRef { _p: PhantomData, _p1: PhantomData }

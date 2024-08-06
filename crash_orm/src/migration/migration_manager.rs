@@ -28,13 +28,13 @@ pub trait CrashOrmMigrationManager<T: DatabaseConnection> {
             if migration_in_db.is_empty() {
                 local_migration.up(conn).await?;
 
-                let migration_entry = CrashOrmMigrationRecord {
+                let mut migration_entry = CrashOrmMigrationRecord {
                     id: None,
                     name,
                     executed_at: Utc::now(),
                 };
 
-                migration_entry.insert_get_id(conn).await?;
+                migration_entry.insert_set_id(conn).await?;
             }
         }
 

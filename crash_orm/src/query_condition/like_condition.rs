@@ -1,18 +1,18 @@
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
+use crate::prelude::{Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing like operator [QueryCondition]
-pub trait LikeQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+pub trait LikeQueryColumn<T: ToSql, U: Entity<U>> {
     /// Creates [QueryCondition::Like] from self and other
-    fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P>;
+    fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U>;
 
     /// Creates [QueryCondition::NotLike] from self and other
-    fn not_like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P>;
+    fn not_like(&self, like: impl IntoSql<String>) -> QueryCondition<U>;
 }
 
-impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> LikeQueryColumn<String, U, P> for R {
-    fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P> {
+impl<U: Entity<U>, R: Column<String, U>> LikeQueryColumn<String, U> for R {
+    fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U> {
         let mut boxed = self.get_sql();
         let other_boxed = like.into_boxed_sql();
         boxed.modify(|v| format!("{v} LIKE {}", other_boxed.sql));
@@ -21,7 +21,7 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> LikeQueryColumn<St
         QueryCondition::new(boxed)
     }
 
-    fn not_like(&self, like: impl IntoSql<String>) -> QueryCondition<U, P> {
+    fn not_like(&self, like: impl IntoSql<String>) -> QueryCondition<U> {
         let mut boxed = self.get_sql();
         let other_boxed = like.into_boxed_sql();
         boxed.modify(|v| format!("{v} NOT LIKE {}", other_boxed.sql));

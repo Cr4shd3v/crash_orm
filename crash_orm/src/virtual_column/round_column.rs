@@ -1,25 +1,25 @@
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{BoxedSql, Column, Entity, PrimaryKey, VirtualColumn};
+use crate::prelude::{BoxedSql, Column, Entity, VirtualColumn};
 
 /// Trait implementing round database functions to create [VirtualColumn]s for number columns
-pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U>> {
     /// Ceil function
-    fn ceil(&self) -> VirtualColumn<R, U, P>;
+    fn ceil(&self) -> VirtualColumn<R, U>;
 
     /// Floor function
-    fn floor(&self) -> VirtualColumn<R, U, P>;
+    fn floor(&self) -> VirtualColumn<R, U>;
 
     /// Round function
-    fn round(&self) -> VirtualColumn<R, U, P>;
+    fn round(&self) -> VirtualColumn<R, U>;
 }
 
 macro_rules! impl_round_virtual_column {
     ($column_type:ty, $out_type:ty) => {
-        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey>
-            RoundVirtualColumn<$column_type, $out_type, U, P> for R
+        impl<U: Entity<U>, R: Column<$column_type, U>>
+            RoundVirtualColumn<$column_type, $out_type, U> for R
         {
-            fn ceil(&self) -> VirtualColumn<$out_type, U, P> {
+            fn ceil(&self) -> VirtualColumn<$out_type, U> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedSql::new(
                     format!("CEIL({})", sql.sql),
@@ -27,7 +27,7 @@ macro_rules! impl_round_virtual_column {
                 ))
             }
 
-            fn floor(&self) -> VirtualColumn<$out_type, U, P> {
+            fn floor(&self) -> VirtualColumn<$out_type, U> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedSql::new(
                     format!("FLOOR({})", sql.sql),
@@ -35,7 +35,7 @@ macro_rules! impl_round_virtual_column {
                 ))
             }
 
-            fn round(&self) -> VirtualColumn<$out_type, U, P> {
+            fn round(&self) -> VirtualColumn<$out_type, U> {
                 let sql = self.get_sql();
                 VirtualColumn::new(BoxedSql::new(
                     format!("ROUND({})", sql.sql),

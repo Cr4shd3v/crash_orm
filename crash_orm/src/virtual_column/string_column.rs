@@ -1,31 +1,31 @@
-use crate::prelude::{BoxedSql, Column, Entity, IntoSql, PrimaryKey, UntypedColumnValue, VirtualColumn};
+use crate::prelude::{BoxedSql, Column, Entity, IntoSql, UntypedColumnValue, VirtualColumn};
 
 /// Trait implementing string database functions to create [VirtualColumn]s for string columns
-pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKey> {
+pub trait StringVirtualColumn<U: Entity<U>> {
     /// Convert self to lowercase
-    fn lowercase(&self) -> VirtualColumn<String, U, P>;
+    fn lowercase(&self) -> VirtualColumn<String, U>;
 
     /// Convert self to uppercase
-    fn uppercase(&self) -> VirtualColumn<String, U, P>;
+    fn uppercase(&self) -> VirtualColumn<String, U>;
 
     /// Reverse self
-    fn reverse(&self) -> VirtualColumn<String, U, P>;
+    fn reverse(&self) -> VirtualColumn<String, U>;
 
     /// Get the length of self
-    fn length(&self) -> VirtualColumn<i32, U, P>;
+    fn length(&self) -> VirtualColumn<i32, U>;
 
     /// Repeat self `repetition` times
-    fn repeat(&self, repetition: impl IntoSql<i32>) -> VirtualColumn<String, U, P>;
+    fn repeat(&self, repetition: impl IntoSql<i32>) -> VirtualColumn<String, U>;
 
     /// Concat self and other
-    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U, P>;
+    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U>;
 
     /// Creates the md5 hash of this string
-    fn md5(&self) -> VirtualColumn<String, U, P>;
+    fn md5(&self) -> VirtualColumn<String, U>;
 }
 
-impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColumn<U, P> for R {
-    fn lowercase(&self) -> VirtualColumn<String, U, P> {
+impl<U: Entity<U>, R: Column<String, U>> StringVirtualColumn<U> for R {
+    fn lowercase(&self) -> VirtualColumn<String, U> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedSql::new(
             format!("LOWER({})", sql.sql),
@@ -33,7 +33,7 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColum
         ))
     }
 
-    fn uppercase(&self) -> VirtualColumn<String, U, P> {
+    fn uppercase(&self) -> VirtualColumn<String, U> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedSql::new(
             format!("UPPER({})", sql.sql),
@@ -41,7 +41,7 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColum
         ))
     }
 
-    fn reverse(&self) -> VirtualColumn<String, U, P> {
+    fn reverse(&self) -> VirtualColumn<String, U> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedSql::new(
             format!("REVERSE({})", sql.sql),
@@ -49,7 +49,7 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColum
         ))
     }
 
-    fn length(&self) -> VirtualColumn<i32, U, P> {
+    fn length(&self) -> VirtualColumn<i32, U> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedSql::new(
             format!("LENGTH({})", sql.sql),
@@ -57,7 +57,7 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColum
         ))
     }
 
-    fn repeat(&self, repetition: impl IntoSql<i32>) -> VirtualColumn<String, U, P> {
+    fn repeat(&self, repetition: impl IntoSql<i32>) -> VirtualColumn<String, U> {
         let sql = self.get_sql();
         let repetition_sql = repetition.into_boxed_sql();
         let mut values = sql.values;
@@ -68,7 +68,7 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColum
         ))
     }
 
-    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U, P> {
+    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U> {
         let mut sql = self.get_sql();
         for value in other {
             let value_sql = value.get_sql();
@@ -80,7 +80,7 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColum
         VirtualColumn::new(sql)
     }
 
-    fn md5(&self) -> VirtualColumn<String, U, P> {
+    fn md5(&self) -> VirtualColumn<String, U> {
         let sql = self.get_sql();
         VirtualColumn::new(BoxedSql::new(
             format!("MD5({})", sql.sql),

@@ -1,4 +1,4 @@
-use crash_orm::prelude::{Entity, EntityVec, Schema};
+use crash_orm::prelude::*;
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]

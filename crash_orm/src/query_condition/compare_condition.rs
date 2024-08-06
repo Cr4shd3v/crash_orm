@@ -1,43 +1,43 @@
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
+use crate::prelude::{Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing comparison operator [QueryCondition]
-pub trait CompareQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+pub trait CompareQueryColumn<T: ToSql, U: Entity<U>> {
     /// Creates [QueryCondition::GreaterThan] from self and other
-    fn greater_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn greater_than(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
     /// Creates [QueryCondition::GreaterEqual] from self and other
-    fn greater_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn greater_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
     /// Creates [QueryCondition::LessThan] from self and other
-    fn less_than(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn less_than(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
     /// Creates [QueryCondition::LessEqual] from self and other
-    fn less_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn less_equal(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
     /// Creates [QueryCondition::Between] from self and from - to
     fn between(
         &self,
         from: impl IntoSql<T>,
         to: impl IntoSql<T>,
-    ) -> QueryCondition<U, P>;
+    ) -> QueryCondition<U>;
 
     /// Creates [QueryCondition::NotBetween] from self and from - to
     fn not_between(
         &self,
         from: impl IntoSql<T>,
         to: impl IntoSql<T>,
-    ) -> QueryCondition<U, P>;
+    ) -> QueryCondition<U>;
 }
 
 macro_rules! impl_compare_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U, P>, R: Column<$column_type, U, P>, P: PrimaryKey> CompareQueryColumn<$column_type, U, P> for R {
+        impl<U: Entity<U>, R: Column<$column_type, U>> CompareQueryColumn<$column_type, U> for R {
             fn greater_than(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, P> {
+            ) -> QueryCondition<U> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
                 boxed.modify(|v| format!("{v} > {}", other_boxed.sql));
@@ -49,7 +49,7 @@ macro_rules! impl_compare_entity_column {
             fn greater_equal(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, P> {
+            ) -> QueryCondition<U> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
                 boxed.modify(|v| format!("{v} >= {}", other_boxed.sql));
@@ -58,7 +58,7 @@ macro_rules! impl_compare_entity_column {
                 QueryCondition::new(boxed)
             }
 
-            fn less_than(&self, other: impl IntoSql<$column_type>) -> QueryCondition<U, P> {
+            fn less_than(&self, other: impl IntoSql<$column_type>) -> QueryCondition<U> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
                 boxed.modify(|v| format!("{v} < {}", other_boxed.sql));
@@ -70,7 +70,7 @@ macro_rules! impl_compare_entity_column {
             fn less_equal(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, P> {
+            ) -> QueryCondition<U> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
                 boxed.modify(|v| format!("{v} <= {}", other_boxed.sql));
@@ -83,7 +83,7 @@ macro_rules! impl_compare_entity_column {
                 &self,
                 from: impl IntoSql<$column_type>,
                 to: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, P> {
+            ) -> QueryCondition<U> {
                 let mut boxed = self.get_sql();
                 let from_boxed = from.into_boxed_sql();
                 let to_boxed = to.into_boxed_sql();
@@ -98,7 +98,7 @@ macro_rules! impl_compare_entity_column {
                 &self,
                 from: impl IntoSql<$column_type>,
                 to: impl IntoSql<$column_type>,
-            ) -> QueryCondition<U, P> {
+            ) -> QueryCondition<U> {
                 let mut boxed = self.get_sql();
                 let from_boxed = from.into_boxed_sql();
                 let to_boxed = to.into_boxed_sql();

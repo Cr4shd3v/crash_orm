@@ -1,20 +1,20 @@
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
+use crate::prelude::{Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing equals operator [QueryCondition]
-pub trait EqualQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {
+pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
     /// Creates [QueryCondition::Equals] from self and other
-    fn equals(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn equals(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
     /// Creates [QueryCondition::NotEquals] from self and other
-    fn not_equals(&self, other: impl IntoSql<T>) -> QueryCondition<U, P>;
+    fn not_equals(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 }
 
 macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
-        impl<T: Entity<T, P>, U: Column<$column_type, T, P>, P: PrimaryKey> EqualQueryColumn<$column_type, T, P> for U {
-            fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T, P> {
+        impl<T: Entity<T>, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
+            fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
                 boxed.modify(|v| format!("{v} = {}", other_boxed.sql));
@@ -26,7 +26,7 @@ macro_rules! impl_equal_entity_column {
             fn not_equals(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<T, P> {
+            ) -> QueryCondition<T> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
                 boxed.modify(|v| format!("{v} <> {}", other_boxed.sql));
@@ -40,8 +40,8 @@ macro_rules! impl_equal_entity_column {
 
 macro_rules! impl_equal_entity_column_geo {
     ($column_type:ty) => {
-        impl<T: Entity<T, P>, U: Column<$column_type, T, P>, P: PrimaryKey> EqualQueryColumn<$column_type, T, P> for U {
-            fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T, P> {
+        impl<T: Entity<T>, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
+            fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
                 boxed.modify(|v| format!("{v} ~= {}", other_boxed.sql));
@@ -53,7 +53,7 @@ macro_rules! impl_equal_entity_column_geo {
             fn not_equals(
                 &self,
                 other: impl IntoSql<$column_type>,
-            ) -> QueryCondition<T, P> {
+            ) -> QueryCondition<T> {
                 self.equals(other).not()
             }
         }
