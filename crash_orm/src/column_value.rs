@@ -31,7 +31,7 @@ use std::sync::Arc;
 
 use tokio_postgres::types::ToSql;
 
-use crate::{Entity, EntityColumn, PrimaryKey, VirtualColumn};
+use crate::prelude::{Entity, EntityColumn, PrimaryKey, VirtualColumn};
 
 /// Struct containing a part of a query with raw sql and values prepared for tokio-postgres.
 #[derive(Clone)]

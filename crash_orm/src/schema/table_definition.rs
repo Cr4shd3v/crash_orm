@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use postgres::types::Type;
 
-use crate::{ColumnDefinition, DatabaseConnection};
+use crate::prelude::{ColumnDefinition, DatabaseConnection};
 use crate::schema::foreign_key::ForeignKey;
 
 /// Struct describing a table in the database

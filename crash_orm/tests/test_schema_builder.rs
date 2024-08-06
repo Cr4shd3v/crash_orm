@@ -1,6 +1,6 @@
 use tokio_postgres::types::Type;
 
-use crash_orm::{ColumnDefinition, TableDefinition};
+use crash_orm::prelude::{ColumnDefinition, TableDefinition};
 use crash_orm_test::setup_test_connection;
 
 #[tokio::test]

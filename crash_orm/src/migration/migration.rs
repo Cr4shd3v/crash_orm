@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::DatabaseConnection;
+use crate::connection::DatabaseConnection;
 
 /// Trait implemented for migrations
 #[async_trait]

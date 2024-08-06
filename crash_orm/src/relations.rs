@@ -9,8 +9,7 @@
 //! Declaring a OneToOne is quite simple:
 //!
 //! ```rust
-//! use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::OneToOne;
+//! use crash_orm::prelude::*;
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {
@@ -57,7 +56,7 @@
 //! ### Full OneToOne Example
 //! ```rust
 //! use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{OneToOne, OneToOneRef};
+//! use crash_orm::prelude::{OneToOne, OneToOneRef};
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {
@@ -84,8 +83,7 @@
 //! So let's start declaring a simple ManyToOne relation:
 //!
 //! ```rust
-//! use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::ManyToOne;
+//! use crash_orm::prelude::*;
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {
@@ -129,7 +127,7 @@
 //! ### Full OneToMany/ManyToOne Example
 //! ```rust
 //! use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{ManyToOne, OneToMany};
+//! use crash_orm::prelude::{ManyToOne, OneToMany};
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {

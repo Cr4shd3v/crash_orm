@@ -1,7 +1,6 @@
-use crash_orm::{
+use crash_orm::prelude::{
     Entity, EntityVec, EqualQueryColumn, Schema, TextCastVirtualColumn,
 };
-use crash_orm_derive::{Entity, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
@@ -51,7 +50,7 @@ async fn test_cast() {
         .condition(
             TestItem18Column::NUMBER
                 .cast_to_text()
-                .equals(&String::from("440")),
+                .equals("440".to_string()),
         )
         .fetch(&conn)
         .await;

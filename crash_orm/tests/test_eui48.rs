@@ -1,6 +1,6 @@
 use eui48::MacAddress;
-use crash_orm::{Entity, EqualQueryColumn, Schema};
-use crash_orm_derive::{Entity, Schema};
+
+use crash_orm::prelude::{Entity, EqualQueryColumn, Schema};
 use crash_orm_test::{default_create_table, setup_test_connection};
 
 #[derive(Entity, Debug, Schema)]

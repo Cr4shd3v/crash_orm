@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
+use crate::prelude::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 
 /// Trait implementing round database functions to create [VirtualColumn]s for number columns
 pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U, P>, P: PrimaryKey> {

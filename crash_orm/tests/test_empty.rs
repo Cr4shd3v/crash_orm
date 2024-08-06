@@ -1,5 +1,4 @@
-use crash_orm::{Schema, Entity};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{Entity, Schema};
 use crash_orm_test::{default_create_table, setup_test_connection};
 
 #[derive(Entity, Debug, Schema)]

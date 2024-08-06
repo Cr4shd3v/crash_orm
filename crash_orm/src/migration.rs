@@ -11,8 +11,7 @@
 //! Inside the lib.rs, create your migration manager:
 //! 
 //! ```
-//! use crash_orm::migration::{CrashOrmMigrationManager, Migration};
-//! use crash_orm::DatabaseConnection;
+//! use crash_orm::prelude::*;
 //! 
 //! pub struct MigrationManager;
 //! 
@@ -31,7 +30,7 @@
 //! 
 //! ```
 //! use crash_orm::async_trait::async_trait;
-//! use crash_orm::{DatabaseConnection, Schema};
+//! use crash_orm::prelude::{DatabaseConnection, Schema};
 //! use crash_orm::migration::Migration;
 //! 
 //! pub struct ExampleMigration;
@@ -60,8 +59,7 @@
 //! On Startup of your app, you should call the migrate_up method of your migration manager:
 //! 
 //! ```
-//! use crash_orm::migration::{CrashOrmMigrationManager, Migration};
-//! use crash_orm::DatabaseConnection;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! pub struct MigrationManager;

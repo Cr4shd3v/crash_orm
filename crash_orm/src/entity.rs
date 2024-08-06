@@ -39,8 +39,7 @@
 //! Example:
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Entity;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -50,7 +49,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! let mut entity = TestItem { id: None };
 //! entity.insert_set_id(&conn).await.unwrap();
@@ -70,8 +68,7 @@
 //!
 //! Example:
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Entity;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -81,7 +78,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
@@ -101,8 +97,7 @@
 //!
 //! Example:
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Entity;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -112,7 +107,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
@@ -133,8 +127,7 @@
 //!
 //! Example:
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Entity;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -144,7 +137,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
@@ -159,8 +151,7 @@
 //!
 //! Example:
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Entity;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -170,7 +161,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! let entity = TestItem::get_all(&conn).await.unwrap();
 //! # });
@@ -180,8 +170,7 @@
 //! To remove an entity, simply call remove on the corresponding entity:
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Entity;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -191,7 +180,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItem { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
@@ -209,8 +197,7 @@
 //! You can save an entire vector of entities with just one function call:
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::EntityVec;
+//! # use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -220,7 +207,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity_1 = TestItem { id: None };
 //! # let entity_n = TestItem { id: None };
@@ -233,8 +219,7 @@
 //! You can also remove an entire vector of entities:
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::EntityVec;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -244,12 +229,10 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity_1 = TestItem { id: None };
 //! # let entity_n = TestItem { id: None };
 //! let mut entities = vec![entity_1, /*...,*/ entity_n];
-//! # use crash_orm::Entity;
 //! # entities = TestItem::get_all(&conn).await.unwrap();
 //! entities.remove_all(&conn).await.unwrap();
 //! # });
@@ -261,7 +244,12 @@ use async_trait::async_trait;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, DatabaseConnection, PrimaryKey, Query, QueryCondition, SelectQuery, UntypedColumn};
+use crate::column::UntypedColumn;
+use crate::column_value::BoxedColumnValue;
+use crate::connection::DatabaseConnection;
+use crate::primary::PrimaryKey;
+use crate::query::{Query, SelectQuery};
+use crate::query_condition::QueryCondition;
 
 /// Trait implemented for all database entities.
 ///

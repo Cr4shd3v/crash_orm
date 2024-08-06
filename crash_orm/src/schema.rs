@@ -17,8 +17,7 @@
 //! A simple function returning a bool whether a table exists or not.
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Schema;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -36,8 +35,7 @@
 //! Creates the table based on the properties of the entity.
 //!
 //! ```no_run
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Schema;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -55,8 +53,7 @@
 //! Drop the table of the entity. This deletes the table itself from the database.
 //!
 //! ```no_run
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Schema;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -74,8 +71,7 @@
 //! Truncate the table of the entity. This deletes the content of the table from the database.
 //!
 //! ```no_run
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Schema;
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]

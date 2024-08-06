@@ -16,8 +16,7 @@
 //! Example:
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::Entity;
+//! use crash_orm::prelude::*;
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
@@ -38,8 +37,7 @@
 //! Example:
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{Entity, EqualQueryColumn};
+//! use crash_orm::prelude::*;
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
@@ -60,8 +58,7 @@
 //!
 //! Example:
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{Entity, OrderDirection};
+//! use crash_orm::prelude::*;
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
@@ -78,8 +75,7 @@
 //! When you are done building the query, you can finally execute it.
 //!
 //! ```rust
-//! # use crash_orm::derive::{Entity, Schema};
-//! use crash_orm::{Entity, EqualQueryColumn};
+//! use crash_orm::prelude::*;
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
@@ -89,7 +85,6 @@
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # use crash_orm::Schema;
 //! # TestEntity::create_table_if_not_exists(&conn).await.unwrap();
 //! let results: Vec<TestEntity> = TestEntity::query()
 //!     .condition(TestEntityColumn::ID.equals(1))
@@ -103,8 +98,8 @@ use std::sync::Arc;
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
 use crate::entity::slice_query_value_iter;
+use crate::prelude::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition, UntypedColumn};
 
 /// Direction of the Order
 #[derive(Debug)]

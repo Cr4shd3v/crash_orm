@@ -7,8 +7,8 @@ pub use max_column::*;
 pub use min_column::*;
 pub use sum_column::*;
 
-use crate::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition};
 use crate::entity::slice_query_value_iter;
+use crate::prelude::{BoxedColumnValue, DatabaseConnection, Entity, PrimaryKey, QueryCondition};
 
 mod sum_column;
 mod min_column;

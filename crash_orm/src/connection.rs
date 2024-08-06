@@ -143,7 +143,7 @@ impl<T: DatabaseConnection + Send> DatabaseConnection for Arc<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::CrashOrmDatabaseConnection;
+    use crate::prelude::CrashOrmDatabaseConnection;
 
     #[tokio::test]
     async fn test_connection() {

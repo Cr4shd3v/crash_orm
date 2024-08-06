@@ -1,5 +1,4 @@
-use crash_orm::{Entity, EqualQueryColumn, NullQueryColumn, Schema};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{Entity, EqualQueryColumn, NullQueryColumn, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
@@ -37,7 +36,7 @@ async fn test_query_simple() {
     assert!(TestItem4::test().persist(&conn).await.is_ok());
     assert!(TestItem4::test2().persist(&conn).await.is_ok());
     let results = TestItem4::query()
-        .condition(TestItem4Column::NAME.equals(String::from("test123")))
+        .condition(TestItem4Column::NAME.equals("test123".to_string()))
         .fetch(&conn)
         .await;
     println!("{:?}", results);
@@ -46,7 +45,7 @@ async fn test_query_simple() {
     assert_eq!(results.len(), 1);
 
     let result = TestItem4::query()
-        .condition(TestItem4Column::NAME.equals(String::from("test123")))
+        .condition(TestItem4Column::NAME.equals("test123".to_string()))
         .fetch_single(&conn).await;
     assert!(result.is_ok());
 

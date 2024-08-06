@@ -10,7 +10,7 @@ pub use in_condition::*;
 pub use like_condition::*;
 pub use null_condition::*;
 
-use crate::{BoxedColumnValue, Entity, PrimaryKey};
+use crate::prelude::{BoxedColumnValue, Entity, PrimaryKey};
 
 mod null_condition;
 mod equal_condition;

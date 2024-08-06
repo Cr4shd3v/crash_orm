@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, Entity, EntityColumn, PrimaryKey, VirtualColumn};
+use crate::prelude::{BoxedColumnValue, Entity, EntityColumn, PrimaryKey, VirtualColumn};
 
 /// Trait implemented on all Columns
 ///

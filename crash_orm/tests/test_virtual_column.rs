@@ -1,5 +1,4 @@
-use crash_orm::{Entity, EntityVec, EqualQueryColumn, RoundVirtualColumn, Schema, SqrtVirtualColumn, StringVirtualColumn};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{Entity, EntityVec, EqualQueryColumn, RoundVirtualColumn, Schema, SqrtVirtualColumn, StringVirtualColumn};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
@@ -52,7 +51,7 @@ async fn test_virtual_column() {
         .unwrap();
 
     let results = TestItem15::query()
-        .condition(TestItem15Column::NAME1.length().equals(&7))
+        .condition(TestItem15Column::NAME1.length().equals(7))
         .fetch(&conn)
         .await;
     println!("{:?}", results);
@@ -63,7 +62,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .lowercase()
-                .equals(&String::from("test1234")),
+                .equals("test1234".to_string()),
         )
         .fetch(&conn)
         .await;
@@ -74,7 +73,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .uppercase()
-                .equals(&String::from("TEST123")),
+                .equals("TEST123".to_string()),
         )
         .fetch(&conn)
         .await;
@@ -85,7 +84,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .reverse()
-                .equals(&String::from("321tset")),
+                .equals("321tset".to_string()),
         )
         .fetch(&conn)
         .await;
@@ -95,8 +94,8 @@ async fn test_virtual_column() {
     let results = TestItem15::query()
         .condition(
             TestItem15Column::NAME1
-                .repeat(&2)
-                .equals(&String::from("test123test123")),
+                .repeat(2)
+                .equals("test123test123".to_string()),
         )
         .fetch(&conn)
         .await;
@@ -107,7 +106,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .concat(vec![&TestItem15Column::ID])
-                .equals(&String::from("test1232")),
+                .equals("test1232".to_string()),
         )
         .fetch(&conn)
         .await;
@@ -118,7 +117,7 @@ async fn test_virtual_column() {
         .condition(
             TestItem15Column::NAME1
                 .md5()
-                .equals(&String::from("cc03e747a6afbbcbf8be7668acfebee5")),
+                .equals("cc03e747a6afbbcbf8be7668acfebee5".to_string()),
         )
         .fetch(&conn)
         .await;
@@ -126,7 +125,7 @@ async fn test_virtual_column() {
     assert_eq!(results.unwrap().len(), 1);
 
     let results = TestItem15::query()
-        .condition(TestItem15Column::DECIMAL.ceil().equals(&1.0))
+        .condition(TestItem15Column::DECIMAL.ceil().equals(1.0))
         .fetch(&conn)
         .await;
     println!("{:?}", results);
@@ -136,7 +135,7 @@ async fn test_virtual_column() {
     assert!(results[0].active);
 
     let results = TestItem15::query()
-        .condition(TestItem15Column::DECIMAL.floor().equals(&0.0))
+        .condition(TestItem15Column::DECIMAL.floor().equals(0.0))
         .fetch(&conn)
         .await;
     println!("{:?}", results);
@@ -146,7 +145,7 @@ async fn test_virtual_column() {
     assert!(results[0].active);
 
     let results = TestItem15::query()
-        .condition(TestItem15Column::DECIMAL.round().equals(&2.0))
+        .condition(TestItem15Column::DECIMAL.round().equals(2.0))
         .fetch(&conn)
         .await;
     println!("{:?}", results);
@@ -156,7 +155,7 @@ async fn test_virtual_column() {
     assert!(!results[0].active);
 
     let results = TestItem15::query()
-        .condition(TestItem15Column::SQRT.sqrt().equals(&4.0))
+        .condition(TestItem15Column::SQRT.sqrt().equals(4.0))
         .fetch(&conn)
         .await;
     assert!(results.is_ok());

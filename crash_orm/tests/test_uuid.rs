@@ -1,7 +1,6 @@
 use uuid::Uuid;
 
-use crash_orm::{Entity, EqualQueryColumn, OneToOne, Schema};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{Entity, EqualQueryColumn, OneToOne, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]

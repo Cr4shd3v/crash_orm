@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
+use crate::prelude::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
 /// Trait implementing equals operator [QueryCondition]
 pub trait EqualQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {

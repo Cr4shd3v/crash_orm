@@ -1,7 +1,6 @@
-use crash_orm::{
+use crash_orm::prelude::{
     CompareQueryColumn, Entity, EntityVec, OrderDirection, Schema,
 };
-use crash_orm_derive::{Entity, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
@@ -59,7 +58,7 @@ async fn test_order() {
     assert_eq!(results[1].number.unwrap(), 441);
 
     let results = TestItem17::query()
-        .condition(TestItem17Column::NUMBER.greater_equal(&400))
+        .condition(TestItem17Column::NUMBER.greater_equal(400))
         .order(&TestItem17Column::NUMBER, OrderDirection::DESC)
         .fetch(&conn)
         .await;

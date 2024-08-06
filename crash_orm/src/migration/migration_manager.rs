@@ -1,9 +1,9 @@
 use async_trait::async_trait;
 use chrono::Utc;
 
-use crate::{DatabaseConnection, Entity, EqualQueryColumn, Schema};
 use crate::migration::entity::{CrashOrmMigrationRecord, CrashOrmMigrationRecordColumn};
 use crate::migration::migration::Migration;
+use crate::prelude::{DatabaseConnection, Entity, EqualQueryColumn, Schema};
 
 /// Trait to be implemented for a migration manager as documented [here](crate::migration).
 #[async_trait]

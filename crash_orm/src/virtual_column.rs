@@ -7,7 +7,7 @@ pub use sqrt_column::*;
 pub use string_column::*;
 pub use text_cast_column::*;
 
-use crate::{BoxedColumnValue, Entity, PrimaryKey};
+use crate::prelude::{BoxedColumnValue, Entity, PrimaryKey};
 
 mod string_column;
 mod round_column;

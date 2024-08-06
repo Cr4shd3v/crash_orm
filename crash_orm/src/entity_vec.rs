@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use postgres::types::ToSql;
 
-use crate::{DatabaseConnection, Entity, PrimaryKey};
+use crate::prelude::{DatabaseConnection, Entity, PrimaryKey};
 
 /// Trait implementing useful functions for vectors of entities.
 ///

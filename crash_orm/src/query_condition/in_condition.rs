@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
+use crate::prelude::{Column, Entity, IntoSql, PrimaryKey, QueryCondition};
 
 /// Trait implementing IN operator [QueryCondition]
 pub trait InQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {

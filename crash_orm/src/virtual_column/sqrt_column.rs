@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
+use crate::prelude::{BoxedColumnValue, Column, Entity, PrimaryKey, VirtualColumn};
 
 /// Trait implementing sqrt database function to create [VirtualColumn] for decimal columns
 pub trait SqrtVirtualColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {

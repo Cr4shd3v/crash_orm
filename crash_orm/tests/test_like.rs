@@ -1,7 +1,6 @@
 use rust_decimal::Decimal;
 
-use crash_orm::{Entity, EntityVec, LikeQueryColumn, Schema};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{Entity, EntityVec, LikeQueryColumn, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
@@ -48,14 +47,14 @@ async fn test_like() {
         .unwrap();
 
     let results = TestItem11::query()
-        .condition(TestItem11Column::NAME1.like(String::from("test123%")))
+        .condition(TestItem11Column::NAME1.like("test123%".to_string()))
         .fetch(&conn)
         .await;
     assert!(results.is_ok());
     assert_eq!(results.unwrap().len(), 2);
 
     let results = TestItem11::query()
-        .condition(TestItem11Column::NAME1.not_like(String::from("test1234%")))
+        .condition(TestItem11Column::NAME1.not_like("test1234%".to_string()))
         .fetch(&conn)
         .await;
     assert!(results.is_ok());

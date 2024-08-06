@@ -1,5 +1,4 @@
-use crash_orm::{BoolQueryColumn, Entity, EntityVec, Schema};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{BoolQueryColumn, Entity, EntityVec, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]

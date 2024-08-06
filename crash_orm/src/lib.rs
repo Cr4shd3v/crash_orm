@@ -29,9 +29,9 @@
 //! # Create the CrashOrmDatabaseConnection
 //! The first thing you want to do is creating the CrashOrmDatabaseConnection.
 //!
-//! ```no_run
-//! use crash_orm::CrashOrmDatabaseConnection;
+//!```no_run
 //! use crash_orm::postgres::NoTls;
+//! use crash_orm::prelude::*;
 //!
 //! # tokio_test::block_on(async {
 //! let conn = CrashOrmDatabaseConnection::new("postgresql://<user>:<password>@<netloc>/<dbname>", NoTls).await
@@ -66,32 +66,42 @@ pub extern crate async_trait;
 pub extern crate crash_orm_derive as derive;
 pub extern crate tokio_postgres as postgres;
 
-pub use column::*;
-pub use column_value::*;
-pub use connection::*;
-pub use entity::*;
-pub use entity_column::*;
-pub use entity_vec::*;
-pub use error::*;
-pub use primary::*;
-pub use query::*;
-pub use query_condition::*;
-pub use relations::*;
-pub use schema::*;
-pub use virtual_column::*;
+pub use crate::error::*;
 
-mod connection;
-mod entity;
-mod error;
-mod entity_vec;
-mod schema;
-mod entity_column;
-mod query_condition;
-mod virtual_column;
-mod column;
-mod query;
-mod column_value;
-mod relations;
-mod primary;
+pub mod connection;
+pub mod entity;
+pub mod error;
+pub mod entity_vec;
+pub mod schema;
+pub mod entity_column;
+pub mod query_condition;
+pub mod virtual_column;
+pub mod column;
+pub mod query;
+pub mod column_value;
+pub mod relations;
+pub mod primary;
 #[cfg(feature = "migration")]
 pub mod migration;
+
+pub mod prelude {
+    pub use crate::async_trait::*;
+    pub use crate::column::*;
+    pub use crate::column_value::*;
+    pub use crate::connection::*;
+    pub use crate::derive::*;
+    pub use crate::entity::*;
+    pub use crate::entity_column::*;
+    pub use crate::entity_vec::*;
+    pub use crate::error::*;
+    #[cfg(feature = "migration")]
+    pub use crate::migration::*;
+    pub use crate::primary::*;
+    pub use crate::query::*;
+    pub use crate::query_condition::*;
+    pub use crate::relations::*;
+    pub use crate::schema::*;
+    pub use crate::virtual_column::*;
+
+    pub extern crate tokio_postgres as postgres;
+}

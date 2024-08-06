@@ -1,4 +1,4 @@
-use crate::{BoxedColumnValue, Column, Entity, PrimaryKey, TypedColumnValue, UntypedColumnValue, VirtualColumn};
+use crate::prelude::{BoxedColumnValue, Column, Entity, IntoSql, PrimaryKey, UntypedColumnValue, VirtualColumn};
 
 /// Trait implementing string database functions to create [VirtualColumn]s for string columns
 pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKey> {
@@ -15,7 +15,7 @@ pub trait StringVirtualColumn<U: Entity<U, P>, P: PrimaryKey> {
     fn length(&self) -> VirtualColumn<i32, U, P>;
 
     /// Repeat self `repetition` times
-    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U, P>;
+    fn repeat(&self, repetition: impl IntoSql<i32>) -> VirtualColumn<String, U, P>;
 
     /// Concat self and other
     fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U, P>;
@@ -57,9 +57,9 @@ impl<U: Entity<U, P>, R: Column<String, U, P>, P: PrimaryKey> StringVirtualColum
         ))
     }
 
-    fn repeat(&self, repetition: &(dyn TypedColumnValue<i32>)) -> VirtualColumn<String, U, P> {
+    fn repeat(&self, repetition: impl IntoSql<i32>) -> VirtualColumn<String, U, P> {
         let sql = self.get_sql();
-        let repetition_sql = repetition.get_sql();
+        let repetition_sql = repetition.into_typed_value().get_sql();
         let mut values = sql.value;
         values.extend(repetition_sql.value);
         VirtualColumn::new(BoxedColumnValue::new(

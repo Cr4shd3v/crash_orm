@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{Entity, PrimaryKeyType};
+use crate::prelude::{Entity, PrimaryKeyType};
 use crate::relations::macros::{default_relation_function, sql_impl_for_relation};
 
 /// Struct representing the owning site of a 1:1 relationship.
@@ -25,8 +25,7 @@ sql_impl_for_relation!(OneToOne);
 ///
 /// Requires the mapped_by attribute to work as shown below.
 /// ```
-/// use crash_orm::{OneToOne, OneToOneRef, Entity};
-/// use crash_orm_derive::Entity;
+/// use crash_orm::prelude::*;
 ///
 /// #[derive(Entity, Debug)]
 /// struct TestItem1 {

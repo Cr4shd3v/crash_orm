@@ -103,8 +103,8 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #[crash_orm::async_trait::async_trait]
-        impl crash_orm::Schema for #ident {
-            async fn create_table(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+        impl crash_orm::prelude::Schema for #ident {
+            async fn create_table(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 #sequence_create_quote
                 connection.execute_query(#create_string, &[]).await?;
                 #sequence_created_alter_quote
@@ -112,19 +112,19 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
                 Ok(())
             }
 
-            async fn drop_table(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn drop_table(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 connection.execute_query(#drop_string, &[]).await?;
 
                 Ok(())
             }
 
-            async fn truncate_table(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn truncate_table(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 connection.execute_query(#truncate_string, &[]).await?;
 
                 Ok(())
             }
 
-            async fn table_exists(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<bool> {
+            async fn table_exists(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<bool> {
                 let row = connection.query_single(#table_exists_string, &[]).await?;
                 let exists: bool = row.get(0);
                 Ok(exists)

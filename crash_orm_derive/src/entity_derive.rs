@@ -92,7 +92,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
 
                 select_fields.extend(quote! {
-                    #field_ident: crash_orm::OneToMany::new(),
+                    #field_ident: crash_orm::prelude::OneToMany::new(),
                 });
 
                 let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
@@ -103,9 +103,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 );
 
                 functions.extend(quote! {
-                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
+                    async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
                         let rows = connection.query_many(#query, &[&self.#primary_key_ident]).await?;
-                        use crash_orm::Entity;
+                        use crash_orm::prelude::Entity;
                         Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
                     }
                 });
@@ -114,9 +114,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "ManyToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::prelude::Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
-                                Some(crash_orm::ManyToOne::from(#field_ident.unwrap())?)
+                                Some(crash_orm::prelude::ManyToOne::from(#field_ident.unwrap())?)
                             } else {
                                 None
                             };
@@ -124,9 +124,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
-                                use crash_orm::Entity;
+                                use crash_orm::prelude::Entity;
                                 Ok(Some(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
                             } else {
                                 Ok(None)
@@ -135,14 +135,14 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
-                            self.#field_ident = crash_orm::ManyToOne::from(#field_ident)?;
+                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::prelude::Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
+                            self.#field_ident = crash_orm::prelude::ManyToOne::from(#field_ident)?;
 
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
-                            use crash_orm::Entity;
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                            use crash_orm::prelude::Entity;
                             #entity_type::get_by_primary(connection, self.#field_ident.target_id).await
                         }
                     });
@@ -150,9 +150,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "OneToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::prelude::Entity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
-                                Some(crash_orm::OneToOne::from(#field_ident.unwrap())?)
+                                Some(crash_orm::prelude::OneToOne::from(#field_ident.unwrap())?)
                             } else {
                                 None
                             };
@@ -160,9 +160,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
-                                use crash_orm::Entity;
+                                use crash_orm::prelude::Entity;
                                 Ok(Some(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
                             } else {
                                 Ok(None)
@@ -171,14 +171,14 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
-                            self.#field_ident = crash_orm::OneToOne::from(#field_ident)?;
+                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::prelude::Entity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
+                            self.#field_ident = crash_orm::prelude::OneToOne::from(#field_ident)?;
 
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
-                            use crash_orm::Entity;
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                            use crash_orm::prelude::Entity;
                             #entity_type::get_by_primary(connection, self.#field_ident.target_id).await
                         }
                     });
@@ -191,7 +191,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
 
                 select_fields.extend(quote! {
-                    #field_ident: crash_orm::OneToOneRef::new(),
+                    #field_ident: crash_orm::prelude::OneToOneRef::new(),
                 });
 
                 let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
@@ -201,8 +201,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 );
 
                 functions.extend(quote! {
-                    async fn #get_function_ident(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#entity_type> {
-                        use crash_orm::Entity;
+                    async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                        use crash_orm::prelude::Entity;
                         let row = connection.query_single(#query, &[&self.#primary_key_ident]).await?;
                         Ok(#entity_type::load_from_row(&row))
                     }
@@ -221,12 +221,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         if field_ident_str != primary_field_name {
             column_consts.extend(quote! {
                 #[allow(missing_docs)]
-                pub const #field_ident_upper: crash_orm::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
+                pub const #field_ident_upper: crash_orm::prelude::EntityColumn::<#field_type, #ident, #primary_type> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
             });
         } else {
             column_consts.extend(quote! {
                 #[allow(missing_docs)]
-                pub const #field_ident_upper: crash_orm::EntityColumn::<#primary_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
+                pub const #field_ident_upper: crash_orm::prelude::EntityColumn::<#primary_type, #ident, #primary_type> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
             });
         }
 
@@ -240,7 +240,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     panic!("Missing generic parameter at {}", field_ident_str);
                 };
                 column_consts.extend(quote! {
-                    pub const #field_ident_upper_id: crash_orm::EntityColumn::<#target_entity_id_type, #ident, #primary_type> = crash_orm::EntityColumn::new(#field_ident_str);
+                    pub const #field_ident_upper_id: crash_orm::prelude::EntityColumn::<#target_entity_id_type, #ident, #primary_type> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
                 });
             }
 
@@ -318,7 +318,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         }
 
         #[crash_orm::async_trait::async_trait]
-        impl crash_orm::Entity<#ident, #primary_type> for #ident {
+        impl crash_orm::prelude::Entity<#ident, #primary_type> for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
             const __INSERT_FIELD_NAMES: &'static str = #insert_field_names;
@@ -341,33 +341,33 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 }
             }
 
-            async fn get_by_primary(connection: &impl crash_orm::DatabaseConnection, #primary_key_ident: #primary_type) -> crash_orm::Result<#ident> {
+            async fn get_by_primary(connection: &impl crash_orm::prelude::DatabaseConnection, #primary_key_ident: #primary_type) -> crash_orm::Result<#ident> {
                 let row = connection.query_single(#select_by_id_string, &[&#primary_key_ident]).await?;
                 Ok(Self::load_from_row(&row))
             }
 
-            async fn get_all(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
+            async fn get_all(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
                 let rows = connection.query_many(#select_all_string, &[]).await?;
                 Ok(rows.iter().map(|v| Self::load_from_row(v)).collect::<Vec<Self>>())
             }
 
-            async fn count(connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<i64> {
+            async fn count(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<i64> {
                 let row = connection.query_single(#count_string, &[]).await?;
                 Ok(row.get(0))
             }
 
-            async fn insert_get_id(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<#primary_type> {
+            async fn insert_get_id(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#primary_type> {
                 let rows = connection.query_many(#insert_string,&[#insert_field_self_values]).await?;
                 Ok(rows.get(0).unwrap().get(0))
             }
 
-            async fn insert_set_id(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn insert_set_id(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 let id = self.insert_get_id(connection).await?;
                 self.#primary_key_ident = Some(id);
                 Ok(())
             }
 
-            async fn remove(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn remove(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.#primary_key_ident.is_none() {
                     return Ok(());
                 }
@@ -377,7 +377,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 Ok(())
             }
 
-            async fn update(&self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn update(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.#primary_key_ident.is_none() {
                     return Err(crash_orm::Error::from_str("You can't update an entity without an id."));
                 }
@@ -387,7 +387,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 Ok(())
             }
 
-            async fn persist(&mut self, connection: &impl crash_orm::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn persist(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.#primary_key_ident.is_none() {
                     self.insert_set_id(connection).await
                 } else {

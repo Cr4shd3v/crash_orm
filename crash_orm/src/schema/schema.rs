@@ -1,5 +1,6 @@
 use async_trait::async_trait;
-use crate::DatabaseConnection;
+
+use crate::connection::DatabaseConnection;
 
 /// Trait implementing functions to modify the table itself in the database.
 ///

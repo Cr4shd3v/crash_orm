@@ -1,5 +1,4 @@
-use crash_orm::{Entity, EntityVec, InQueryColumn, Schema};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{Entity, EntityVec, InQueryColumn, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]

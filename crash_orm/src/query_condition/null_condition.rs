@@ -1,6 +1,6 @@
 use tokio_postgres::types::ToSql;
 
-use crate::{Column, Entity, PrimaryKey, QueryCondition};
+use crate::prelude::{Column, Entity, PrimaryKey, QueryCondition};
 
 /// Trait implementing null check [QueryCondition].
 pub trait NullQueryColumn<T: ToSql, U: Entity<U, P>, P: PrimaryKey> {

@@ -1,5 +1,4 @@
-use crash_orm::{CompareQueryColumn, Entity, EntityVec, Schema};
-use crash_orm_derive::{Entity, Schema};
+use crash_orm::prelude::{CompareQueryColumn, Entity, EntityVec, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
