@@ -1,3 +1,5 @@
+//! Contains the [PrimaryKeyType] trait.
+
 use tokio_postgres::types::ToSql;
 
 /// Trait marking a type as a primary key.

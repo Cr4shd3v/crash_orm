@@ -1,3 +1,5 @@
+//! Contains traits defining columns as typed or untyped traits.
+
 use tokio_postgres::types::ToSql;
 
 use crate::prelude::{BoxedColumnValue, Entity, EntityColumn, PrimaryKey, VirtualColumn};

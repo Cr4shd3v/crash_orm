@@ -281,7 +281,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     fn get_primary(&self) -> Option<P>;
 
     /// Parses a [`Row`] into self
-    fn load_from_row(row: &Row) -> T;
+    fn load_from_row(row: &Row) -> Self where Self: Sized;
 
     /// Get all values of this entity as vector for database insertion.
     ///
@@ -290,10 +290,10 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
     fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
 
     /// Retrieves an entity by its id
-    async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> crate::Result<T>;
+    async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> crate::Result<Self> where Self: Sized;
 
     /// Retrieves all entities
-    async fn get_all(connection: &impl DatabaseConnection) -> crate::Result<Vec<T>>;
+    async fn get_all(connection: &impl DatabaseConnection) -> crate::Result<Vec<Self>> where Self: Sized;
 
     /// Returns the count of entries in the table
     async fn count(connection: &impl DatabaseConnection) -> crate::Result<i64>;

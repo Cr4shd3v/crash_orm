@@ -1,3 +1,5 @@
+//! Contains utility functions for vectors of entities.
+
 use async_trait::async_trait;
 use postgres::types::ToSql;
 

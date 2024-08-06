@@ -1,3 +1,9 @@
+//! Contains the definition of a connection supported by the ORM.
+//!
+//! All connections that should be used by the ORM must implement [DatabaseConnection].
+//!
+//! The default implementation for a connection with tokio-postgres is [CrashOrmDatabaseConnection].
+
 use std::ops::Deref;
 use std::sync::Arc;
 

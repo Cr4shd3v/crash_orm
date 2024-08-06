@@ -1,3 +1,7 @@
+//! Contains an [error enum](Error) for all types of errors in the ORM.
+//!
+//! Also contains a [result](Result) with that error type.
+
 use std::fmt::{Debug, Display, Formatter};
 
 /// Type alias for Result with the custom [Error]

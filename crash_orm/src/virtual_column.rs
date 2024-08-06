@@ -1,3 +1,5 @@
+//! See [VirtualColumn].
+
 use std::marker::PhantomData;
 
 use tokio_postgres::types::ToSql;

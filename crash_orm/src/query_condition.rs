@@ -1,3 +1,5 @@
+//! Contains the definition of query conditions.
+
 use std::marker::PhantomData;
 use std::sync::Arc;
 

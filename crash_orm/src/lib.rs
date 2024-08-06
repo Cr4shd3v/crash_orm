@@ -85,6 +85,8 @@ pub mod primary;
 pub mod migration;
 
 pub mod prelude {
+    //! Reexports all required modules and crates
+
     pub use crate::async_trait::*;
     pub use crate::column::*;
     pub use crate::column_value::*;
