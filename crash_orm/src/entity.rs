@@ -349,7 +349,7 @@ pub trait Entity<T: Entity<T, P>, P: PrimaryKey>: Send + Debug + 'static {
         Ok(row.get(0))
     }
 
-    /// Select specific columns ([crate::EntityColumn] or [crate::VirtualColumn]) from this entity.
+    /// Select specific columns ([crate::prelude::EntityColumn] or [crate::prelude::VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
     fn select_query(columns: &[&(dyn UntypedColumn<T, P>)]) -> SelectQuery<T, P> {

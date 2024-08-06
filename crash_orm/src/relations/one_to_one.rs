@@ -21,7 +21,7 @@ sql_impl_for_relation!(OneToOne);
 
 /// Struct representing the unowned site of the 1:1 relationship.
 ///
-/// For the owning site of this relation, see [crate::OneToOne].
+/// For the owning site of this relation, see [OneToOne].
 ///
 /// Requires the mapped_by attribute to work as shown below.
 /// ```

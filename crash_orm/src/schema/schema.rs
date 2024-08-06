@@ -4,7 +4,7 @@ use crate::connection::DatabaseConnection;
 
 /// Trait implementing functions to modify the table itself in the database.
 ///
-/// This trait can be derived, usually together with [Entity](crate::Entity).
+/// This trait can be derived, usually together with [Entity](crate::prelude::Entity).
 ///
 /// ```
 /// use crash_orm::derive::{Entity, Schema};

@@ -11,7 +11,7 @@ macro_rules! default_relation_function {
 
         /// Creates the relation from an entity.
         ///
-        /// This utilizes the [Entity::get_id] function.
+        /// This utilizes the [Entity::get_primary] function.
         pub fn from(entity: &impl Entity<T, P>) -> crate::Result<$rel_type<T, P>> {
             let id = entity.get_primary();
             if id.is_none() {

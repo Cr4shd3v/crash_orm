@@ -60,6 +60,7 @@
 //!
 //! For more info, visit the corresponding docs mentioned above.
 
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs)]
 
 pub extern crate async_trait;
@@ -82,6 +83,7 @@ pub mod column_value;
 pub mod relations;
 pub mod primary;
 #[cfg(feature = "migration")]
+#[cfg_attr(docsrs, doc(cfg(feature = "migration")))]
 pub mod migration;
 
 pub mod prelude {
@@ -97,6 +99,7 @@ pub mod prelude {
     pub use crate::entity_vec::*;
     pub use crate::error::*;
     #[cfg(feature = "migration")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "migration")))]
     pub use crate::migration::*;
     pub use crate::primary::*;
     pub use crate::query::*;

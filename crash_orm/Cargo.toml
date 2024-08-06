@@ -45,3 +45,7 @@ crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-
 tokio-test = { workspace = true }
 crash_orm_test = { path = "../crash_orm_test" }
 uuid = { workspace = true, features = ["v7"] }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
