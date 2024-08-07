@@ -359,7 +359,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
 
 /// Contains all primary key related functions of an entity.
 #[async_trait]
-pub trait PrimaryKeyEntity<T: Entity<T>, P: PrimaryKey>: Entity<T> {
+pub trait PrimaryKeyEntity<T: Entity<T>, P: ColumnType>: Entity<T> {
     /// Returns the id of the entity.
     ///
     /// Used internally by the ORM

@@ -82,7 +82,7 @@ pub mod column;
 pub mod query;
 pub mod column_value;
 pub mod relations;
-pub mod primary;
+pub mod column_type;
 #[cfg(feature = "migration")]
 #[cfg_attr(docsrs, doc(cfg(feature = "migration")))]
 pub mod migration;
@@ -94,6 +94,7 @@ pub mod prelude {
     pub use crate::async_trait::*;
     pub use crate::boxed_sql::*;
     pub use crate::column::*;
+    pub use crate::column_type::*;
     pub use crate::column_value::*;
     pub use crate::connection::*;
     pub use crate::derive::*;
@@ -104,7 +105,6 @@ pub mod prelude {
     #[cfg(feature = "migration")]
     #[cfg_attr(docsrs, doc(cfg(feature = "migration")))]
     pub use crate::migration::*;
-    pub use crate::primary::*;
     pub use crate::query::*;
     pub use crate::query_condition::*;
     pub use crate::relations::*;

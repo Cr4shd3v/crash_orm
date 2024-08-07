@@ -28,7 +28,7 @@ macro_rules! default_relation_function {
 #[allow(missing_docs)]
 macro_rules! sql_impl_for_relation {
     ($rel_type:tt) => {
-        impl<T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType> tokio_postgres::types::ToSql for $rel_type<T, P> {
+        impl<T: PrimaryKeyEntity<T, P>, P: ColumnType> tokio_postgres::types::ToSql for $rel_type<T, P> {
             fn to_sql(
                 &self,
                 ty: &tokio_postgres::types::Type,
@@ -56,7 +56,7 @@ macro_rules! sql_impl_for_relation {
             }
         }
 
-        impl<'a, T: PrimaryKeyEntity<T, P>, P: PrimaryKeyType + tokio_postgres::types::FromSql<'a>> tokio_postgres::types::FromSql<'a> for $rel_type<T, P> {
+        impl<'a, T: PrimaryKeyEntity<T, P>, P: ColumnType> tokio_postgres::types::FromSql<'a> for $rel_type<T, P> {
             fn from_sql(ty: &tokio_postgres::types::Type, raw: &'a [u8]) -> Result<Self, Box<dyn std::error::Error + Sync + Send>> {
                 let id = P::from_sql(ty, raw)?;
                 Ok($rel_type::<T, P>::new(id))
