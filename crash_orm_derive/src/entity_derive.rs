@@ -282,7 +282,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let select_by_id_string = format!("SELECT * FROM {} WHERE {} = $1", ident_str, primary_field_name);
     let select_all_string = format!("SELECT * FROM {}", ident_str);
-    let count_string = format!("SELECT COUNT(*) FROM {}", ident_str);
+    let count_string = format!("SELECT COUNT({}) FROM {}", primary_key_ident.to_string(),ident_str);
     let insert_string = if insert_field_names.is_empty() {
         format!("INSERT INTO {} DEFAULT VALUES RETURNING {}", ident_str, primary_field_name)
     } else {
