@@ -96,10 +96,15 @@ WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
     }
 
     /// Edit a column
-    pub fn edit_column<T: FnOnce(&mut ColumnDefinition)>(&mut self, name: &str, edit_fn: T) {
-        let definition = self.columns.iter_mut()
-            .find(|column| column.name == name).unwrap();
+    pub fn edit_column<T: FnOnce(&mut ColumnDefinition)>(&mut self, name: &str, edit_fn: T) -> crate::Result<()> {
+        let Some(definition) = self.columns.iter_mut()
+            .find(|column| column.name == name) else {
+            return Err(crate::Error::String(format!("Tried to edit non existing column {}", name)));
+        };
+        
         edit_fn(definition);
+        
+        Ok(())
     }
 
     /// Add a new column
