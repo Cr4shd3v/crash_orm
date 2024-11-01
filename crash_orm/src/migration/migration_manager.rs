@@ -7,12 +7,12 @@ use crate::prelude::{DatabaseConnection, Entity, EqualQueryColumn, Schema};
 
 /// Trait to be implemented for a migration manager as documented [here](crate::migration).
 #[async_trait]
-pub trait CrashOrmMigrationManager<T: DatabaseConnection> {
+pub trait CrashOrmMigrationManager {
     /// Specifies the migrations for this manager.
-    fn get_migrations() -> Vec<Box<dyn Migration<T>>>;
+    fn get_migrations<T: DatabaseConnection>() -> Vec<Box<dyn Migration<T>>>;
 
     /// Function used to migrate your database to the latest migration.
-    async fn migrate_up(conn: &T) -> crate::Result<()> {
+    async fn migrate_up(conn: &impl DatabaseConnection) -> crate::Result<()> {
         CrashOrmMigrationRecord::create_table_if_not_exists(conn).await?;
 
         let local_migrations = Self::get_migrations();

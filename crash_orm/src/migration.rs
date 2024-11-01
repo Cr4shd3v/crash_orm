@@ -15,8 +15,8 @@
 //! 
 //! pub struct MigrationManager;
 //! 
-//! impl<T: DatabaseConnection> CrashOrmMigrationManager<T> for MigrationManager {
-//!     fn get_migrations() -> Vec<Box<dyn Migration<T>>> {
+//! impl CrashOrmMigrationManager for MigrationManager {
+//!     fn get_migrations<T: DatabaseConnection>() -> Vec<Box<dyn Migration<T>>> {
 //!         vec![
 //!             
 //!         ]
@@ -64,8 +64,8 @@
 //!
 //! pub struct MigrationManager;
 //!
-//! impl<T: DatabaseConnection> CrashOrmMigrationManager<T> for MigrationManager {
-//!     fn get_migrations() -> Vec<Box<dyn Migration<T>>> {
+//! impl CrashOrmMigrationManager for MigrationManager {
+//!     fn get_migrations<T: DatabaseConnection>() -> Vec<Box<dyn Migration<T>>> {
 //!         vec![
 //!
 //!         ]
