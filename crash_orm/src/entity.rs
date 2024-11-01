@@ -305,7 +305,7 @@ pub trait Entity: Send + Debug + 'static {
     /// Creates a [Query] for this Entity.
     ///
     /// See [Query] for more details on how to build a query.
-    fn query() -> Query<Self> where Self: Sized {
+    fn query() -> Query<Self, Self> where Self: Sized {
         Query::new(BoxedSql::new(
             format!("SELECT * FROM {}", Self::TABLE_NAME),
             vec![],
@@ -334,7 +334,7 @@ pub trait Entity: Send + Debug + 'static {
     /// Select specific columns ([EntityColumn] or [VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query(columns: &[&(dyn UntypedColumn<Self>)]) -> SelectQuery<Self> where Self: Sized {
+    fn select_query(columns: &[&(dyn UntypedColumn<Self>)]) -> Query<Self, Row> where Self: Sized {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())
@@ -350,7 +350,7 @@ pub trait Entity: Send + Debug + 'static {
             index = next_index;
         }
 
-        SelectQuery::new(BoxedSql::new(
+        Query::new(BoxedSql::new(
             format!("SELECT {} FROM {}", query.join(","), Self::TABLE_NAME),
             values,
         ))
