@@ -1,11 +1,11 @@
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
 
-use crate::prelude::{DatabaseConnection, Entity, EntityColumn, QueryCondition, slice_query_value_iter};
+use crate::prelude::{slice_query_value_iter, DatabaseConnection, Entity, EntityColumn, QueryCondition};
 
 /// Trait implementing the avg functions for columns
 #[async_trait]
-pub trait AvgColumn<T: ToSql, R: ToSql, U: Entity<U>> {
+pub trait AvgColumn<T: ToSql, R: ToSql, U: Entity> {
     /// Return the average value of this column
     ///
     /// `distinct`: Only unique entries. Duplicates are ignored.
@@ -25,7 +25,7 @@ pub trait AvgColumn<T: ToSql, R: ToSql, U: Entity<U>> {
 macro_rules! impl_avg_column {
     ($in_type:ty, $out_type:ty) => {
         #[async_trait]
-        impl<T: Entity<T> + Sync> AvgColumn<$in_type, $out_type, T> for EntityColumn<$in_type, T> {
+        impl<T: Entity + Sync> AvgColumn<$in_type, $out_type, T> for EntityColumn<$in_type, T> {
             async fn avg(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -80,7 +80,7 @@ macro_rules! impl_avg_column {
         }
 
         #[async_trait]
-        impl<T: Entity<T> + Sync> AvgColumn<$in_type, $out_type, T>
+        impl<T: Entity + Sync> AvgColumn<$in_type, $out_type, T>
             for EntityColumn<Option<$in_type>, T>
         {
             async fn avg(

@@ -6,7 +6,7 @@ use crate::prelude::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
 
 /// Trait implementing the max functions for columns
 #[async_trait]
-pub trait MaxColumn<T: ToSql, U: Entity<U>> {
+pub trait MaxColumn<T: ToSql, U: Entity> {
     /// Return the maximum value of this column
     async fn max(&self, connection: &impl DatabaseConnection) -> crate::Result<T>;
 
@@ -21,7 +21,7 @@ pub trait MaxColumn<T: ToSql, U: Entity<U>> {
 macro_rules! impl_max_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U> + Sync> MaxColumn<$column_type, U> for EntityColumn<$column_type, U> {
+        impl<U: Entity + Sync> MaxColumn<$column_type, U> for EntityColumn<$column_type, U> {
             async fn max(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -68,7 +68,7 @@ macro_rules! impl_max_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U> + Sync> MaxColumn<Option<$column_type>, U>
+        impl<U: Entity + Sync> MaxColumn<Option<$column_type>, U>
             for EntityColumn<Option<$column_type>, U>
         {
             async fn max(

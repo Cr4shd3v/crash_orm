@@ -7,13 +7,13 @@ use crate::relations::macros::{default_relation_function, sql_impl_for_relation}
 ///
 /// This actually holds the value of the relationship compared to [OneToOneRef].
 #[derive(Debug)]
-pub struct OneToOne<T: PrimaryKeyEntity<T, P>, P: ColumnType> {
+pub struct OneToOne<T: PrimaryKeyEntity<P>, P: ColumnType> {
     _p: PhantomData<T>,
     /// Raw id of the relation
     pub target_id: P,
 }
 
-impl<T: PrimaryKeyEntity<T, P>, P: ColumnType> OneToOne<T, P> {
+impl<T: PrimaryKeyEntity<P>, P: ColumnType> OneToOne<T, P> {
     default_relation_function!(OneToOne);
 }
 
@@ -42,12 +42,12 @@ sql_impl_for_relation!(OneToOne);
 /// }
 /// ```
 #[derive(Debug)]
-pub struct OneToOneRef<T: PrimaryKeyEntity<T, P>, P: ColumnType> {
+pub struct OneToOneRef<T: PrimaryKeyEntity<P>, P: ColumnType> {
     _p: PhantomData<T>,
     _p1: PhantomData<P>,
 }
 
-impl<T: PrimaryKeyEntity<T, P>, P: ColumnType> OneToOneRef<T, P> {
+impl<T: PrimaryKeyEntity<P>, P: ColumnType> OneToOneRef<T, P> {
     /// Constructs the unowned site of the 1:1 relation
     pub fn new() -> OneToOneRef<T, P> {
         OneToOneRef { _p: PhantomData, _p1: PhantomData }

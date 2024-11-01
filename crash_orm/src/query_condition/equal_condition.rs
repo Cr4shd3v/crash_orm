@@ -3,7 +3,7 @@ use tokio_postgres::types::ToSql;
 use crate::prelude::{Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing equals operator [QueryCondition]
-pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
+pub trait EqualQueryColumn<T: ToSql, U: Entity> {
     /// Creates [QueryCondition::Equals] from self and other
     fn equals(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
@@ -13,7 +13,7 @@ pub trait EqualQueryColumn<T: ToSql, U: Entity<U>> {
 
 macro_rules! impl_equal_entity_column {
     ($column_type:ty) => {
-        impl<T: Entity<T>, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
+        impl<T: Entity, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
             fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();
@@ -40,7 +40,7 @@ macro_rules! impl_equal_entity_column {
 
 macro_rules! impl_equal_entity_column_geo {
     ($column_type:ty) => {
-        impl<T: Entity<T>, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
+        impl<T: Entity, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {
             fn equals(&self, other: impl IntoSql<$column_type>) -> QueryCondition<T> {
                 let mut boxed = self.get_sql();
                 let other_boxed = other.into_boxed_sql();

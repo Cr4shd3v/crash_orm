@@ -3,7 +3,7 @@ use tokio_postgres::types::ToSql;
 use crate::prelude::{Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing like operator [QueryCondition]
-pub trait LikeQueryColumn<T: ToSql, U: Entity<U>> {
+pub trait LikeQueryColumn<T: ToSql, U: Entity> {
     /// Creates [QueryCondition::Like] from self and other
     fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U>;
 
@@ -11,7 +11,7 @@ pub trait LikeQueryColumn<T: ToSql, U: Entity<U>> {
     fn not_like(&self, like: impl IntoSql<String>) -> QueryCondition<U>;
 }
 
-impl<U: Entity<U>, R: Column<String, U>> LikeQueryColumn<String, U> for R {
+impl<U: Entity, R: Column<String, U>> LikeQueryColumn<String, U> for R {
     fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U> {
         let mut boxed = self.get_sql();
         let other_boxed = like.into_boxed_sql();

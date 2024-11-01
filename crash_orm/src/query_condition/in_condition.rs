@@ -3,7 +3,7 @@ use tokio_postgres::types::ToSql;
 use crate::prelude::{BoxedSql, Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing IN operator [QueryCondition]
-pub trait InQueryColumn<T: ToSql, U: Entity<U>> {
+pub trait InQueryColumn<T: ToSql, U: Entity> {
     /// Creates [QueryCondition::In] from self and other
     fn in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U>;
 
@@ -13,7 +13,7 @@ pub trait InQueryColumn<T: ToSql, U: Entity<U>> {
 
 macro_rules! impl_in_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U>, R: Column<$column_type, U>> InQueryColumn<$column_type, U> for R {
+        impl<U: Entity, R: Column<$column_type, U>> InQueryColumn<$column_type, U> for R {
             fn in_vec(
                 &self,
                 other: Vec<impl IntoSql<$column_type>>,

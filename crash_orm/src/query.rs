@@ -95,8 +95,8 @@
 use std::fmt::Display;
 use std::sync::Arc;
 
-use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
+use tokio_postgres::Row;
 
 use crate::entity::slice_query_value_iter;
 use crate::prelude::{BoxedSql, DatabaseConnection, Entity, QueryCondition, UntypedColumn};
@@ -191,13 +191,13 @@ macro_rules! base_query_functions {
 }
 
 /// Struct representing a database query created by [Entity::query].
-pub struct Query<T: Entity<T>> {
+pub struct Query<T: Entity> {
     base_query: BoxedSql,
     condition: Option<QueryCondition<T>>,
     order: Vec<(BoxedSql, OrderDirection)>,
 }
 
-impl<T: Entity<T>> Query<T> {
+impl<T: Entity> Query<T> {
     base_query_functions!(Query);
 
     /// Execute this query and returns the result as a vector of entities.
@@ -234,13 +234,13 @@ impl<T: Entity<T>> Query<T> {
 }
 
 /// Struct representing a special query created by [Entity::select_query].
-pub struct SelectQuery<T: Entity<T>> {
+pub struct SelectQuery<T: Entity> {
     base_query: BoxedSql,
     condition: Option<QueryCondition<T>>,
     order: Vec<(BoxedSql, OrderDirection)>,
 }
 
-impl<T: Entity<T>> SelectQuery<T> {
+impl<T: Entity> SelectQuery<T> {
     base_query_functions!(SelectQuery);
 
     /// Execute this query and returns the result as a vector of [Row].

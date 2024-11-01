@@ -3,7 +3,7 @@ use tokio_postgres::types::ToSql;
 use crate::prelude::{BoxedSql, Column, Entity, VirtualColumn};
 
 /// Trait implementing round database functions to create [VirtualColumn]s for number columns
-pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U>> {
+pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity> {
     /// Ceil function
     fn ceil(&self) -> VirtualColumn<R, U>;
 
@@ -16,7 +16,7 @@ pub trait RoundVirtualColumn<T: ToSql, R: ToSql, U: Entity<U>> {
 
 macro_rules! impl_round_virtual_column {
     ($column_type:ty, $out_type:ty) => {
-        impl<U: Entity<U>, R: Column<$column_type, U>>
+        impl<U: Entity, R: Column<$column_type, U>>
             RoundVirtualColumn<$column_type, $out_type, U> for R
         {
             fn ceil(&self) -> VirtualColumn<$out_type, U> {

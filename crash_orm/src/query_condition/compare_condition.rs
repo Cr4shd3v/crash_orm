@@ -3,7 +3,7 @@ use tokio_postgres::types::ToSql;
 use crate::prelude::{Column, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing comparison operator [QueryCondition]
-pub trait CompareQueryColumn<T: ToSql, U: Entity<U>> {
+pub trait CompareQueryColumn<T: ToSql, U: Entity> {
     /// Creates [QueryCondition::GreaterThan] from self and other
     fn greater_than(&self, other: impl IntoSql<T>) -> QueryCondition<U>;
 
@@ -33,7 +33,7 @@ pub trait CompareQueryColumn<T: ToSql, U: Entity<U>> {
 
 macro_rules! impl_compare_entity_column {
     ($column_type:ty) => {
-        impl<U: Entity<U>, R: Column<$column_type, U>> CompareQueryColumn<$column_type, U> for R {
+        impl<U: Entity, R: Column<$column_type, U>> CompareQueryColumn<$column_type, U> for R {
             fn greater_than(
                 &self,
                 other: impl IntoSql<$column_type>,

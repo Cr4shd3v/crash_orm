@@ -6,7 +6,7 @@ use crate::prelude::{DatabaseConnection, Entity, EntityColumn, QueryCondition};
 
 /// Trait implementing the min functions for columns
 #[async_trait]
-pub trait MinColumn<T: ToSql, U: Entity<U>> {
+pub trait MinColumn<T: ToSql, U: Entity> {
     /// Return the minimum value of this column
     async fn min(&self, connection: &impl DatabaseConnection) -> crate::Result<T>;
 
@@ -21,7 +21,7 @@ pub trait MinColumn<T: ToSql, U: Entity<U>> {
 macro_rules! impl_min_column {
     ($column_type:ty) => {
         #[async_trait]
-        impl<U: Entity<U> + Sync> MinColumn<$column_type, U> for EntityColumn<$column_type, U> {
+        impl<U: Entity + Sync> MinColumn<$column_type, U> for EntityColumn<$column_type, U> {
             async fn min(
                 &self,
                 connection: &impl DatabaseConnection,
@@ -68,7 +68,7 @@ macro_rules! impl_min_column {
         }
 
         #[async_trait]
-        impl<U: Entity<U> + Sync> MinColumn<Option<$column_type>, U>
+        impl<U: Entity + Sync> MinColumn<Option<$column_type>, U>
             for EntityColumn<Option<$column_type>, U>
         {
             async fn min(

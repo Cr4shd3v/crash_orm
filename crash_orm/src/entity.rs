@@ -241,8 +241,8 @@ use std::fmt::Debug;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
+use tokio_postgres::Row;
 
 use crate::prelude::*;
 
@@ -259,7 +259,7 @@ use crate::prelude::*;
 /// }
 /// ```
 #[async_trait]
-pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
+pub trait Entity: Send + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
@@ -305,7 +305,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Creates a [Query] for this Entity.
     ///
     /// See [Query] for more details on how to build a query.
-    fn query() -> Query<T> {
+    fn query() -> Query<Self> where Self: Sized {
         Query::new(BoxedSql::new(
             format!("SELECT * FROM {}", Self::TABLE_NAME),
             vec![],
@@ -315,8 +315,8 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Count the entries based on a [QueryCondition].
     async fn count_query(
         connection: &impl DatabaseConnection,
-        condition: QueryCondition<T>,
-    ) -> Result<i64> {
+        condition: QueryCondition<Self>,
+    ) -> Result<i64> where Self: Sized {
         let (query, values, _) = condition.resolve(1);
 
         let row = connection
@@ -334,7 +334,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
     /// Select specific columns ([EntityColumn] or [VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query(columns: &[&(dyn UntypedColumn<T>)]) -> SelectQuery<T> {
+    fn select_query(columns: &[&(dyn UntypedColumn<Self>)]) -> SelectQuery<Self> where Self: Sized {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())
@@ -359,7 +359,7 @@ pub trait Entity<T: Entity<T>>: Send + Debug + 'static {
 
 /// Contains all primary key related functions of an entity.
 #[async_trait]
-pub trait PrimaryKeyEntity<T: Entity<T>, P: ColumnType>: Entity<T> {
+pub trait PrimaryKeyEntity<P: ColumnType>: Entity {
     /// Returns the id of the entity.
     ///
     /// Used internally by the ORM

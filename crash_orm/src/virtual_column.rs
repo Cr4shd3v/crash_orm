@@ -22,13 +22,13 @@ mod text_cast_column;
 ///
 /// This also means, that you cannot add your own virtual columns.
 /// If you need more virtual columns, please [open an issue at the repository](https://github.com/Cr4shd3v/crash_orm/issues/new/choose).
-pub struct VirtualColumn<T: ToSql, U: Entity<U>> {
+pub struct VirtualColumn<T: ToSql, U: Entity> {
     sql: BoxedSql,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
 }
 
-impl<T: ToSql, U: Entity<U>> VirtualColumn<T, U> {
+impl<T: ToSql, U: Entity> VirtualColumn<T, U> {
     /// Creates a virtual column with a [BoxedSql]
     pub(crate) fn new(sql: BoxedSql) -> VirtualColumn<T, U> {
         VirtualColumn {

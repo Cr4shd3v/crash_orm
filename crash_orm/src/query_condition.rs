@@ -22,13 +22,13 @@ mod bool_condition;
 mod in_condition;
 
 /// Query condition for entity
-pub struct QueryCondition<T: Entity<T>> {
+pub struct QueryCondition<T: Entity> {
     /// [BoxedSql] of this query condition
     pub boxed: BoxedSql,
     phantom: PhantomData<T>,
 }
 
-impl<T: Entity<T>> QueryCondition<T> {
+impl<T: Entity> QueryCondition<T> {
     pub(crate) fn new(boxed: BoxedSql) -> Self {
         Self {
             boxed,

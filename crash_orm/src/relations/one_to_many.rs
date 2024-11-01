@@ -9,13 +9,13 @@ use crate::relations::macros::{default_relation_function, sql_impl_for_relation}
 ///
 /// The counterpart for [ManyToOne] is [OneToMany].
 #[derive(Debug)]
-pub struct ManyToOne<T: PrimaryKeyEntity<T, P>, P: ColumnType> {
+pub struct ManyToOne<T: PrimaryKeyEntity<P>, P: ColumnType> {
     _p: PhantomData<T>,
     /// Raw id of the relation
     pub target_id: P,
 }
 
-impl<T: PrimaryKeyEntity<T, P>, P: ColumnType> ManyToOne<T, P> {
+impl<T: PrimaryKeyEntity<P>, P: ColumnType> ManyToOne<T, P> {
     default_relation_function!(ManyToOne);
 }
 
@@ -44,12 +44,12 @@ sql_impl_for_relation!(ManyToOne);
 /// }
 /// ```
 #[derive(Debug)]
-pub struct OneToMany<T: PrimaryKeyEntity<T, P>, P: ColumnType> {
+pub struct OneToMany<T: PrimaryKeyEntity<P>, P: ColumnType> {
     _p: PhantomData<T>,
     _p1: PhantomData<P>,
 }
 
-impl<T: PrimaryKeyEntity<T, P>, P: ColumnType> OneToMany<T, P> {
+impl<T: PrimaryKeyEntity<P>, P: ColumnType> OneToMany<T, P> {
     /// Constructs a 1:n relation
     pub fn new() -> OneToMany<T, P> {
         OneToMany { _p: PhantomData, _p1: PhantomData }

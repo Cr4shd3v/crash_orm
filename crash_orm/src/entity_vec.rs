@@ -26,7 +26,7 @@ pub trait EntityVec<P> {
 }
 
 #[async_trait]
-impl<T: PrimaryKeyEntity<T, P> + Sync, P: ColumnType + ToSql> EntityVec<P> for Vec<T> {
+impl<T: PrimaryKeyEntity<P> + Sync, P: ColumnType + ToSql> EntityVec<P> for Vec<T> {
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         for entity in self {
             entity.persist(connection).await?;

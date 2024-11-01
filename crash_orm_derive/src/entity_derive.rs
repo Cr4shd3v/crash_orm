@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 
 use quote::quote;
-use syn::{Attribute, Data, DeriveInput, Ident, parse_macro_input};
 use syn::__private::Span;
+use syn::{parse_macro_input, Attribute, Data, DeriveInput, Ident};
 
 use crate::util::{extract_generic_type, extract_generic_type_ignore_option, get_attribute_by_name, get_type_string, ident_to_table_name, is_relation, is_relation_value_holder, string_to_table_name};
 
@@ -114,7 +114,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "ManyToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::prelude::PrimaryKeyEntity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::prelude::PrimaryKeyEntity<#entity_primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::prelude::ManyToOne::from(#field_ident.unwrap())?)
                             } else {
@@ -135,7 +135,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::prelude::PrimaryKeyEntity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::prelude::PrimaryKeyEntity<#entity_primary_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::prelude::ManyToOne::from(#field_ident)?;
 
                             Ok(())
@@ -150,7 +150,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             } else if field_type_name == "OneToOne" {
                 if is_option {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::prelude::PrimaryKeyEntity<#entity_type, #entity_primary_type>>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: Option<&impl crash_orm::prelude::PrimaryKeyEntity<#entity_primary_type>>) -> crash_orm::Result<()> {
                             self.#field_ident = if #field_ident.is_some() {
                                 Some(crash_orm::prelude::OneToOne::from(#field_ident.unwrap())?)
                             } else {
@@ -171,7 +171,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     });
                 } else {
                     functions.extend(quote! {
-                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::prelude::PrimaryKeyEntity<#entity_type, #entity_primary_type>) -> crash_orm::Result<()> {
+                        fn #set_function_ident(&mut self, #field_ident: &impl crash_orm::prelude::PrimaryKeyEntity<#entity_primary_type>) -> crash_orm::Result<()> {
                             self.#field_ident = crash_orm::prelude::OneToOne::from(#field_ident)?;
 
                             Ok(())
@@ -318,7 +318,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         }
 
         #[crash_orm::async_trait::async_trait]
-        impl crash_orm::prelude::Entity<#ident> for #ident {
+        impl crash_orm::prelude::Entity for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
             const __INSERT_FIELD_NAMES: &'static str = #insert_field_names;
@@ -384,7 +384,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         }
 
         #[crash_orm::async_trait::async_trait]
-        impl crash_orm::prelude::PrimaryKeyEntity<#ident, #primary_type> for #ident {
+        impl crash_orm::prelude::PrimaryKeyEntity<#primary_type> for #ident {
             fn get_primary(&self) -> Option<#primary_type> {
                 self.#primary_key_ident
             }
