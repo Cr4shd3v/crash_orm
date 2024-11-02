@@ -103,7 +103,7 @@ use crate::prelude::{BoxedSql, DatabaseConnection, Entity, QueryCondition, Untyp
 use crate::result_mapping::ResultMapping;
 
 /// Direction of the Order
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum OrderDirection {
     /// ASC
     ASC,
@@ -163,8 +163,7 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
         order: &(dyn UntypedColumn<T>),
         order_direction: OrderDirection,
     ) -> Query<T, R> {
-        self.order.clear();
-        self.order.push((order.get_sql(), order_direction));
+        self.order = vec![(order.get_sql(), order_direction)];
         self
     }
 
