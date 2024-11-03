@@ -1,4 +1,4 @@
-use crash_orm::prelude::{Entity, EntityVec, NullQueryColumn, Schema};
+use crash_orm::prelude::*;
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
@@ -27,6 +27,15 @@ impl TestItem6 {
             number: None,
         }
     }
+
+    fn test3() -> Self {
+        Self {
+            id: None,
+            name1: Some(String::from("test1234")),
+            name2: Some(String::from("1234")),
+            number: None,
+        }
+    }
 }
 
 #[tokio::test]
@@ -39,34 +48,26 @@ async fn test_count() {
         assert!(TestItem6::truncate_table(&conn).await.is_ok());
     }
 
-    assert!(vec![TestItem6::test(), TestItem6::test2()]
+    assert!(vec![TestItem6::test(), TestItem6::test2(), TestItem6::test3()]
         .persist_all(&conn)
         .await
         .is_ok());
 
-    let result = TestItem6::count_query(&conn, TestItem6Column::NUMBER.is_null()).await;
+    let result = TestItem6::select_query(&[&TestItem6Column::NAME2.count_column(false)])
+        .condition(TestItem6Column::NUMBER.is_null())
+        .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap(), 1);
+    assert_eq!(result.unwrap().get::<usize, i64>(0), 2);
+
+    let result = TestItem6::select_query(&[&TestItem6Column::NAME2.count_column(true)])
+        .condition(TestItem6Column::NUMBER.is_null())
+        .fetch_single(&conn).await;
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap().get::<usize, i64>(0), 1);
 
     let result = TestItem6::count(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap(), 2);
-
-    let result = TestItem6Column::NAME1
-        .count_query(&conn, true, TestItem6Column::NAME1.is_not_null())
-        .await;
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), 1);
-
-    let result = TestItem6Column::NAME1
-        .count_query(&conn, false, TestItem6Column::NAME1.is_not_null())
-        .await;
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), 2);
-
-    let result = TestItem6Column::NUMBER.count(&conn, false).await;
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), 1);
+    assert_eq!(result.unwrap(), 3);
 
     assert!(TestItem6::drop_table(&conn).await.is_ok());
 }

@@ -312,25 +312,6 @@ pub trait Entity: Send + Debug + 'static {
         ))
     }
 
-    /// Count the entries based on a [QueryCondition].
-    async fn count_query(
-        connection: &impl DatabaseConnection,
-        condition: QueryCondition<Self>,
-    ) -> Result<i64> where Self: Sized {
-        let (query, values, _) = condition.resolve(1);
-
-        let row = connection
-            .query_single(
-                &*format!("SELECT COUNT(*) FROM {} WHERE {}", Self::TABLE_NAME, query),
-                slice_query_value_iter(values.as_slice())
-                    .collect::<Vec<&(dyn ToSql + Sync)>>()
-                    .as_slice(),
-            )
-            .await?;
-
-        Ok(row.get(0))
-    }
-
     /// Select specific columns ([EntityColumn] or [VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
