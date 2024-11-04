@@ -245,6 +245,7 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::Row;
 
 use crate::prelude::*;
+use crate::result_mapping::ResultMapping;
 
 /// Trait implemented for all database entities.
 ///
@@ -315,7 +316,7 @@ pub trait Entity: Send + Debug + 'static {
     /// Select specific columns ([EntityColumn] or [VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query(columns: &[&(dyn UntypedColumn<Self>)]) -> Query<Self, Row> where Self: Sized {
+    fn select_query<R: ResultMapping>(columns: &[&(dyn UntypedColumn<Self>)]) -> Query<Self, R> where Self: Sized {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())

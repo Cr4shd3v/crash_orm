@@ -124,6 +124,7 @@ impl Display for OrderDirection {
 pub struct Query<T: Entity, R: ResultMapping> {
     base_query: BoxedSql,
     condition: Option<QueryCondition<T>>,
+    group_by: Vec<BoxedSql>,
     order: Vec<(BoxedSql, OrderDirection)>,
     phantom: PhantomData<R>,
 }
@@ -134,6 +135,7 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
         Self {
             base_query,
             condition: None,
+            group_by: vec![],
             order: vec![],
             phantom: PhantomData,
         }
@@ -166,6 +168,26 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
         self.order = vec![(order.get_sql(), order_direction)];
         self
     }
+    
+    /// Add a group by to this query
+    pub fn add_group_by(
+        mut self,
+        group_by: &(dyn UntypedColumn<T>),
+    ) -> Query<T, R> {
+        self.group_by.push(group_by.get_sql());
+        self
+    }
+
+    /// Set the order for this query.
+    ///
+    /// This will OVERRIDE all previous orders.
+    pub fn group_by(
+        mut self,
+        group_by: &(dyn UntypedColumn<T>),
+    ) -> Query<T, R> {
+        self.group_by = vec![group_by.get_sql()];
+        self
+    }
 
     fn get_raw_query(self) -> (String, Vec<Arc<Box<dyn ToSql + Send + Sync>>>) {
         let (mut query, mut values, mut index) = self.base_query.resolve(1);
@@ -177,6 +199,18 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
             values = condition_values;
             query.push_str(" WHERE ");
             query.push_str(&*condition_query);
+        }
+        
+        if !self.group_by.is_empty() {
+            query.push_str(" GROUP BY ");
+            
+            let mut grouped_by = vec![];
+
+            for x in self.group_by {
+                grouped_by.push(x.sql);
+            }
+            
+            query.push_str(&*grouped_by.join(","));
         }
 
         if !self.order.is_empty() {

@@ -1,5 +1,6 @@
 use crash_orm::prelude::*;
 use crash_orm_test::setup_test_connection;
+use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem6 {
@@ -53,13 +54,13 @@ async fn test_count() {
         .await
         .is_ok());
 
-    let result = TestItem6::select_query(&[&TestItem6Column::NAME2.count_column(false)])
+    let result = TestItem6::select_query::<Row>(&[&TestItem6Column::NAME2.count_column(false)])
         .condition(TestItem6Column::NUMBER.is_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap().get::<usize, i64>(0), 2);
 
-    let result = TestItem6::select_query(&[&TestItem6Column::NAME2.count_column(true)])
+    let result = TestItem6::select_query::<Row>(&[&TestItem6Column::NAME2.count_column(true)])
         .condition(TestItem6Column::NUMBER.is_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());

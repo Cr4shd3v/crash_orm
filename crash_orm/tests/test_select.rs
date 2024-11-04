@@ -2,6 +2,7 @@ use crash_orm::prelude::{
     BoolQueryColumn, Entity, EntityVec, Schema, StringVirtualColumn,
 };
 use crash_orm_test::setup_test_connection;
+use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem16 {
@@ -46,7 +47,7 @@ async fn test_select() {
         .await
         .unwrap();
 
-    let results = TestItem16::select_query(&[&TestItem16Column::NUMBER])
+    let results = TestItem16::select_query::<Row>(&[&TestItem16Column::NUMBER])
         .fetch(&conn)
         .await;
     println!("{:?}", results);
@@ -55,7 +56,7 @@ async fn test_select() {
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 1);
 
-    let results = TestItem16::select_query(&[
+    let results = TestItem16::select_query::<Row>(&[
         &TestItem16Column::NUMBER,
         &TestItem16Column::NAME1,
         &TestItem16Column::ACTIVE,
@@ -68,7 +69,7 @@ async fn test_select() {
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].len(), 3);
 
-    let results = TestItem16::select_query(&[
+    let results = TestItem16::select_query::<Row>(&[
         &TestItem16Column::NUMBER,
         &TestItem16Column::NAME1.reverse(),
     ])
