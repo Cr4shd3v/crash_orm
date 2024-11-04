@@ -169,7 +169,7 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
         self
     }
     
-    /// Add a group by to this query
+    /// Add a grouping to this query
     pub fn add_group_by<U: ToSql>(
         mut self,
         group_by: &EntityColumn<U ,T>,
@@ -178,9 +178,9 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
         self
     }
 
-    /// Set the order for this query.
+    /// Set the grouping for this query.
     ///
-    /// This will OVERRIDE all previous orders.
+    /// This will OVERRIDE all previous grouping.
     pub fn group_by<U: ToSql>(
         mut self,
         group_by: &EntityColumn<U ,T>,
