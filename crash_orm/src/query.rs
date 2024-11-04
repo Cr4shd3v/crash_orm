@@ -99,7 +99,7 @@ use std::sync::Arc;
 use tokio_postgres::types::ToSql;
 
 use crate::entity::slice_query_value_iter;
-use crate::prelude::{BoxedSql, DatabaseConnection, Entity, QueryCondition, UntypedColumn};
+use crate::prelude::{BoxedSql, DatabaseConnection, Entity, EntityColumn, QueryCondition, UntypedColumn};
 use crate::result_mapping::ResultMapping;
 
 /// Direction of the Order
@@ -170,9 +170,9 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
     }
     
     /// Add a group by to this query
-    pub fn add_group_by(
+    pub fn add_group_by<U: ToSql>(
         mut self,
-        group_by: &(dyn UntypedColumn<T>),
+        group_by: &EntityColumn<U ,T>,
     ) -> Query<T, R> {
         self.group_by.push(group_by.get_sql());
         self
@@ -181,9 +181,9 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
     /// Set the order for this query.
     ///
     /// This will OVERRIDE all previous orders.
-    pub fn group_by(
+    pub fn group_by<U: ToSql>(
         mut self,
-        group_by: &(dyn UntypedColumn<T>),
+        group_by: &EntityColumn<U ,T>,
     ) -> Query<T, R> {
         self.group_by = vec![group_by.get_sql()];
         self
