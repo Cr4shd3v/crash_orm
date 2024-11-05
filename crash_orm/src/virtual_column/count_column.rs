@@ -4,6 +4,8 @@ use postgres::types::ToSql;
 /// Trait implementing the count function for a column.
 ///
 /// **NOTE:** This only works on raw [EntityColumn]s! Just as in plain sql.
+/// 
+/// Also note, that aggregated values like this cannot be used in where statements.
 pub trait CountColumn<T: ToSql, U: Entity> {
     /// Count function
     fn count_column(&self, distinct: bool) -> VirtualColumn<T, U>;

@@ -4,6 +4,7 @@ use std::marker::PhantomData;
 
 use tokio_postgres::types::ToSql;
 
+pub use avg_column::*;
 pub use count_column::*;
 pub use round_column::*;
 pub use sqrt_column::*;
@@ -17,6 +18,7 @@ mod round_column;
 mod sqrt_column;
 mod text_cast_column;
 mod count_column;
+mod avg_column;
 
 /// Struct holding information about a non-existing column. This can be for example SQRT(number).
 ///
