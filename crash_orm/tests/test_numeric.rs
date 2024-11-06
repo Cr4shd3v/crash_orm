@@ -1,7 +1,7 @@
-use rust_decimal::Decimal;
-
 use crash_orm::prelude::{Entity, EntityVec, MaxColumn, MinColumn, Schema};
 use crash_orm_test::setup_test_connection;
+use rust_decimal::Decimal;
+use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem9 {
@@ -46,13 +46,15 @@ async fn test_decimal() {
         .await
         .unwrap();
 
-    let result = TestItem9Column::NUMBER.max(&conn).await;
+    let result = TestItem9::select_query::<Row>(&[&TestItem9Column::NUMBER.max()])
+        .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().unwrap(), Decimal::new(3200, 3));
+    assert_eq!(result.unwrap().get::<_, Decimal>(0), Decimal::new(3200, 3));
 
-    let result = TestItem9Column::NUMBER.min(&conn).await;
+    let result = TestItem9::select_query::<Row>(&[&TestItem9Column::NUMBER.min()])
+        .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().unwrap(), Decimal::new(800, 3));
+    assert_eq!(result.unwrap().get::<_, Decimal>(0), Decimal::new(800, 3));
 
     assert!(TestItem9::drop_table(&conn).await.is_ok());
 }

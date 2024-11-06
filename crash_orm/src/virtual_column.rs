@@ -6,6 +6,8 @@ use tokio_postgres::types::ToSql;
 
 pub use avg_column::*;
 pub use count_column::*;
+pub use max_column::*;
+pub use min_column::*;
 pub use round_column::*;
 pub use sqrt_column::*;
 pub use string_column::*;
@@ -21,6 +23,8 @@ mod text_cast_column;
 mod count_column;
 mod avg_column;
 mod sum_column;
+mod min_column;
+mod max_column;
 
 /// Struct holding information about a non-existing column. This can be for example SQRT(number).
 ///

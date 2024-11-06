@@ -6,13 +6,7 @@ use std::marker::PhantomData;
 
 use tokio_postgres::types::ToSql;
 
-pub use max_column::*;
-pub use min_column::*;
-
 use crate::prelude::{BoxedSql, Entity};
-
-mod min_column;
-mod max_column;
 
 /// Struct holding information about a column of an entity.
 ///
