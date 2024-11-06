@@ -40,7 +40,7 @@ pub struct VirtualColumn<T: ToSql, U: Entity> {
 
 impl<T: ToSql, U: Entity> VirtualColumn<T, U> {
     /// Creates a virtual column with a [BoxedSql]
-    pub(crate) fn new(sql: BoxedSql) -> VirtualColumn<T, U> {
+    pub fn new(sql: BoxedSql) -> VirtualColumn<T, U> {
         VirtualColumn {
             sql,
             phantom_1: PhantomData,

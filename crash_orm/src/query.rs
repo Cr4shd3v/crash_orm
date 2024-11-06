@@ -95,7 +95,6 @@
 use std::fmt::Display;
 use std::marker::PhantomData;
 use std::sync::Arc;
-
 use tokio_postgres::types::ToSql;
 
 use crate::entity::slice_query_value_iter;
@@ -131,7 +130,7 @@ pub struct Query<T: Entity, R: ResultMapping> {
 
 impl<T: Entity, R: ResultMapping> Query<T, R> {
     /// Create a new query from a [BoxedSql]
-    pub(crate) fn new(base_query: BoxedSql) -> Query<T, R> {
+    pub fn new(base_query: BoxedSql) -> Query<T, R> {
         Self {
             base_query,
             condition: None,

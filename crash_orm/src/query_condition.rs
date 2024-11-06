@@ -29,7 +29,8 @@ pub struct QueryCondition<T: Entity> {
 }
 
 impl<T: Entity> QueryCondition<T> {
-    pub(crate) fn new(boxed: BoxedSql) -> Self {
+    /// Create a new query condition from a [BoxedSql]
+    pub fn new(boxed: BoxedSql) -> Self {
         Self {
             boxed,
             phantom: PhantomData,
