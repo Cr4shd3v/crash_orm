@@ -1,5 +1,6 @@
 use crash_orm::prelude::{Entity, EntityVec, NullQueryColumn, Schema, SumColumn};
 use crash_orm_test::setup_test_connection;
+use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem7 {
@@ -44,15 +45,16 @@ async fn test_sum() {
         .await
         .unwrap();
 
-    let result = TestItem7Column::NUMBER.sum(&conn, true).await;
+    let result = TestItem7::select_query::<Row>(&[&TestItem7Column::NUMBER.sum(true)])
+        .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap(), 17);
+    assert_eq!(result.unwrap().get::<_, i64>(0), 17);
 
-    let result = TestItem7Column::NUMBER
-        .sum_query(&conn, true, TestItem7Column::NAME2.is_not_null())
-        .await;
+    let result = TestItem7::select_query::<Row>(&[&TestItem7Column::NUMBER.sum(true)])
+        .condition(TestItem7Column::NAME2.is_not_null())
+        .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap(), 15);
+    assert_eq!(result.unwrap().get::<_, i64>(0), 15);
 
     assert!(TestItem7::drop_table(&conn).await.is_ok());
 }

@@ -8,11 +8,9 @@ use tokio_postgres::types::ToSql;
 
 pub use max_column::*;
 pub use min_column::*;
-pub use sum_column::*;
 
 use crate::prelude::{BoxedSql, Entity};
 
-mod sum_column;
 mod min_column;
 mod max_column;
 

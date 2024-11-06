@@ -9,6 +9,7 @@ pub use count_column::*;
 pub use round_column::*;
 pub use sqrt_column::*;
 pub use string_column::*;
+pub use sum_column::*;
 pub use text_cast_column::*;
 
 use crate::prelude::{BoxedSql, Entity};
@@ -19,6 +20,7 @@ mod sqrt_column;
 mod text_cast_column;
 mod count_column;
 mod avg_column;
+mod sum_column;
 
 /// Struct holding information about a non-existing column. This can be for example SQRT(number).
 ///
