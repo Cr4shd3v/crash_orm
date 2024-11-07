@@ -260,7 +260,7 @@ use crate::result_mapping::ResultMapping;
 /// }
 /// ```
 #[async_trait]
-pub trait Entity: Send + Debug + 'static {
+pub trait Entity: Send + Sync + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
