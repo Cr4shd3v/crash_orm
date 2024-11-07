@@ -18,10 +18,10 @@ pub trait CrashOrmMigrationManager {
         let local_migrations = Self::get_migrations();
 
         for local_migration in local_migrations {
-            let name = local_migration.get_name().to_string();
+            let name = local_migration.get_name();
 
             let migration_in_db = CrashOrmMigrationRecord::query()
-                .condition(CrashOrmMigrationRecordColumn::NAME.equals(&name))
+                .condition(CrashOrmMigrationRecordColumn::NAME.equals(name))
                 .fetch(conn)
                 .await?;
 
@@ -30,7 +30,7 @@ pub trait CrashOrmMigrationManager {
 
                 let mut migration_entry = CrashOrmMigrationRecord {
                     id: None,
-                    name,
+                    name: name.to_string(),
                     executed_at: Utc::now(),
                 };
 

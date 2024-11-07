@@ -6,7 +6,7 @@
 //! cargo new migration --lib
 //! ```
 //! 
-//! Next, add crash_orm_migration and crash_orm as dependency for this new crate and reexport crash_orm_migration::CrashOrmMigrationManager.
+//! Next, add crash_orm as dependency for this new crate.
 //! 
 //! Inside the lib.rs, create your migration manager:
 //! 
@@ -47,8 +47,8 @@
 //!         Ok(())
 //!     }
 //! 
-//!     fn get_name(&self) -> String {
-//!         String::from("ExampleMigration") // The name MUST ALWAYS be UNIQUE
+//!     fn get_name(&self) -> &str {
+//!         "ExampleMigration" // The name MUST ALWAYS be UNIQUE
 //!     }
 //! }
 //! ```

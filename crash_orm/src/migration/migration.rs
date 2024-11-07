@@ -12,5 +12,5 @@ pub trait Migration<T: DatabaseConnection>: Send + Sync {
     async fn down(&self, conn: &T) -> crate::Result<()>;
 
     /// Name of the migration.
-    fn get_name(&self) -> String;
+    fn get_name(&self) -> &str;
 }
