@@ -87,7 +87,7 @@ pub mod column_type;
 #[cfg_attr(docsrs, doc(cfg(feature = "migration")))]
 pub mod migration;
 pub mod boxed_sql;
-mod result_mapping;
+pub mod result_mapping;
 
 pub mod prelude {
     //! Reexports all required modules and crates
@@ -109,6 +109,7 @@ pub mod prelude {
     pub use crate::query::*;
     pub use crate::query_condition::*;
     pub use crate::relations::*;
+    pub use crate::result_mapping::*;
     pub use crate::schema::*;
     pub use crate::virtual_column::*;
 

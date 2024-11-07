@@ -1,7 +1,6 @@
-use crash_orm::prelude::{AvgColumn, Entity, EntityVec, NullQueryColumn, Schema};
+use crash_orm::prelude::{AvgColumn, Entity, EntityVec, NullQueryColumn, Schema, SingleResult};
 use crash_orm_test::setup_test_connection;
 use rust_decimal::Decimal;
-use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem10 {
@@ -46,16 +45,16 @@ async fn test_avg() {
         .await
         .unwrap();
 
-    let result = TestItem10::select_query::<Row>(&[&TestItem10Column::NUMBER.avg(true)])
+    let result = TestItem10::select_query::<SingleResult<Decimal>>(&[&TestItem10Column::NUMBER.avg(true)])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, Decimal>(0), Decimal::from(2));
+    assert_eq!(*result.unwrap(), Decimal::from(2));
 
-    let result = TestItem10::select_query::<Row>(&[&TestItem10Column::NUMBER.avg(true)])
+    let result = TestItem10::select_query::<SingleResult<Decimal>>(&[&TestItem10Column::NUMBER.avg(true)])
         .condition(TestItem10Column::NAME2.is_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, Decimal>(0), Decimal::new(3200, 3));
+    assert_eq!(*result.unwrap(), Decimal::new(3200, 3));
 
     assert!(TestItem10::drop_table(&conn).await.is_ok());
 }

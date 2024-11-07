@@ -1,7 +1,6 @@
-use std::env;
-
-use crash_orm::postgres::NoTls;
 use crash_orm::prelude::CrashOrmDatabaseConnection;
+use std::env;
+use tokio_postgres::NoTls;
 
 pub async fn setup_test_connection() -> CrashOrmDatabaseConnection {
     CrashOrmDatabaseConnection::new(

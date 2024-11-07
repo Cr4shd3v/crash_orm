@@ -1,8 +1,5 @@
-use crash_orm::prelude::{
-    Entity, EntityVec, MaxColumn, MinColumn, NullQueryColumn, Schema,
-};
+use crash_orm::prelude::{Entity, EntityVec, MaxColumn, MinColumn, NullQueryColumn, Schema, SingleResult};
 use crash_orm_test::setup_test_connection;
-use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem8 {
@@ -47,27 +44,27 @@ async fn test_min_max() {
         .await
         .unwrap();
 
-    let result = TestItem8::select_query::<Row>(&[&TestItem8Column::NUMBER.min()])
+    let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.min()])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, i32>(0), 2);
+    assert_eq!(*result.unwrap(), 2);
 
-    let result = TestItem8::select_query::<Row>(&[&TestItem8Column::NUMBER.min()])
+    let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.min()])
         .condition(TestItem8Column::NAME2.is_not_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, i32>(0), 15);
+    assert_eq!(*result.unwrap(), 15);
 
-    let result = TestItem8::select_query::<Row>(&[&TestItem8Column::NUMBER.max()])
+    let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.max()])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, i32>(0), 15);
+    assert_eq!(*result.unwrap(), 15);
 
-    let result = TestItem8::select_query::<Row>(&[&TestItem8Column::NUMBER.max()])
+    let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.max()])
         .condition(TestItem8Column::NAME2.is_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, i32>(0), 2);
+    assert_eq!(*result.unwrap(), 2);
 
     assert!(TestItem8::drop_table(&conn).await.is_ok());
 }

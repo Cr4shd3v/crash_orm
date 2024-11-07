@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 crash_orm = { path = "../crash_orm" }
+tokio-postgres = { workspace = true }
