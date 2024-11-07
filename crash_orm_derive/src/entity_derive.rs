@@ -15,8 +15,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let ident = derive_input.ident;
     let ident_str = ident_to_table_name(&ident);
     let vis = derive_input.vis;
-
-    let mut select_fields = quote!();
+    
     let mut all_field_self_values_format = String::new();
     let mut insert_field_names = quote!();
     let mut insert_field_self_values = quote!();
@@ -90,10 +89,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     panic!("The attribute \"mapped_by\" is required on OneToMany objects");
                 }
 
-                select_fields.extend(quote! {
-                    #field_ident: crash_orm::prelude::OneToMany::new(),
-                });
-
                 let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
 
                 let query = format!(
@@ -104,8 +99,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
                         let rows = connection.query_many(#query, &[&self.#primary_key_ident]).await?;
-                        use crash_orm::prelude::Entity;
-                        Ok(rows.iter().map(|v| #entity_type::load_from_row(v)).collect::<Vec<#entity_type>>())
+                        use crash_orm::prelude::{Entity, ResultMapping};
+                        Ok(rows.into_iter().map(|v| #entity_type::from_row(v)).collect::<Vec<#entity_type>>())
                     }
                 });
 
@@ -189,10 +184,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     panic!("The attribute \"mapped_by\" is required on OneToOneRef objects");
                 }
 
-                select_fields.extend(quote! {
-                    #field_ident: crash_orm::prelude::OneToOneRef::new(),
-                });
-
                 let mapped_by = parse_mapped_by_arg(mapped_by.unwrap());
                 let query = format!(
                     "SELECT * FROM {} WHERE {} = $1",
@@ -201,19 +192,15 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
                 functions.extend(quote! {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#entity_type> {
-                        use crash_orm::prelude::Entity;
+                        use crash_orm::prelude::{Entity, ResultMapping};
                         let row = connection.query_single(#query, &[&self.#primary_key_ident]).await?;
-                        Ok(#entity_type::load_from_row(&row))
+                        Ok(#entity_type::from_row(row))
                     }
                 });
 
                 continue;
             }
         }
-
-        select_fields.extend(quote! {
-            #field_ident: row.get(#all_index),
-        });
 
         all_index += 1;
 
@@ -330,15 +317,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 ]
             }
 
-            fn load_from_row(row: &crash_orm::postgres::Row) -> #ident {
-                #ident {
-                    #select_fields
-                }
-            }
-
             async fn get_all(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
                 let rows = connection.query_many(#select_all_string, &[]).await?;
-                Ok(rows.iter().map(|v| Self::load_from_row(v)).collect::<Vec<Self>>())
+                use crash_orm::prelude::ResultMapping;
+                Ok(rows.into_iter().map(|v| Self::from_row(v)).collect::<Vec<Self>>())
             }
 
             async fn count(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<i64> {
@@ -390,8 +372,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             async fn get_by_primary(connection: &impl crash_orm::prelude::DatabaseConnection, #primary_key_ident: #primary_type) -> crash_orm::Result<#ident> {
                 let row = connection.query_single(#select_by_id_string, &[&#primary_key_ident]).await?;
-                use crash_orm::prelude::Entity;
-                Ok(Self::load_from_row(&row))
+                use crash_orm::prelude::{Entity, ResultMapping};
+                Ok(Self::from_row(row))
             }
 
             async fn insert_get_id(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#primary_type> {

@@ -242,7 +242,6 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use tokio_postgres::types::ToSql;
-use tokio_postgres::Row;
 
 use crate::prelude::*;
 use crate::result_mapping::ResultMapping;
@@ -260,7 +259,7 @@ use crate::result_mapping::ResultMapping;
 /// }
 /// ```
 #[async_trait]
-pub trait Entity: Send + Sync + Debug + 'static {
+pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
@@ -270,9 +269,6 @@ pub trait Entity: Send + Sync + Debug + 'static {
 
     /// This type references the column struct of this entity
     type ColumnType;
-
-    /// Parses a [`Row`] into self
-    fn load_from_row(row: &Row) -> Self where Self: Sized;
 
     /// Get all values of this entity as vector for database insertion.
     ///

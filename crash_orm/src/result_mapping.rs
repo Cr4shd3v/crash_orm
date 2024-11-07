@@ -2,7 +2,7 @@
 //!
 //! Also contains the wrapper struct [SingleResult] for easy parsing of a single column result.
 
-use crate::prelude::{ColumnType, Entity};
+use crate::prelude::ColumnType;
 use postgres::Row;
 use std::ops::{Deref, DerefMut};
 
@@ -20,15 +20,6 @@ impl ResultMapping for Row {
         Self: Sized
     {
         row
-    }
-}
-
-impl<T: Entity> ResultMapping for T {
-    fn from_row(row: Row) -> Self
-    where
-        Self: Sized
-    {
-        T::load_from_row(&row)
     }
 }
 
