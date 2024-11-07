@@ -29,21 +29,19 @@
 
 use std::sync::Arc;
 
-use tokio_postgres::types::ToSql;
-
 use crate::prelude::*;
 
 /// Trait implemented on all values
 ///
 /// This value trait is typed. For untyped values use [`UntypedColumnValue`].
-pub trait TypedColumnValue<T: ToSql>: UntypedColumnValue {}
+pub trait TypedColumnValue<T: ColumnType>: UntypedColumnValue {}
 
-impl<T: ToSql, U: Entity> TypedColumnValue<T> for VirtualColumn<T, U> {}
-impl<T: ToSql, U: Entity> TypedColumnValue<T> for VirtualColumn<Option<T>, U> {}
-impl<T: ToSql, U: Entity> TypedColumnValue<T> for EntityColumn<T, U> {}
-impl<T: ToSql, U: Entity> TypedColumnValue<T> for EntityColumn<Option<T>, U> {}
+impl<T: ColumnType, U: Entity> TypedColumnValue<T> for VirtualColumn<T, U> {}
+impl<T: ColumnType, U: Entity> TypedColumnValue<T> for VirtualColumn<Option<T>, U> {}
+impl<T: ColumnType, U: Entity> TypedColumnValue<T> for EntityColumn<T, U> {}
+impl<T: ColumnType, U: Entity> TypedColumnValue<T> for EntityColumn<Option<T>, U> {}
 
-impl<R: UntypedColumnValue + ToSql> TypedColumnValue<R> for R {}
+impl<R: UntypedColumnValue + ColumnType> TypedColumnValue<R> for R {}
 
 /// Trait implemented on all values
 ///
@@ -107,13 +105,13 @@ simple_column_value!(geo_types::Rect);
 #[cfg(feature = "with-geo-types")]
 simple_column_value!(geo_types::LineString);
 
-impl<T: ToSql, U: Entity> UntypedColumnValue for VirtualColumn<T, U> {
+impl<T: ColumnType, U: Entity> UntypedColumnValue for VirtualColumn<T, U> {
     fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }
 }
 
-impl<T: ToSql, U: Entity> UntypedColumnValue for EntityColumn<T, U> {
+impl<T: ColumnType, U: Entity> UntypedColumnValue for EntityColumn<T, U> {
     fn get_sql(&self) -> BoxedSql {
         self.get_sql()
     }

@@ -1,11 +1,9 @@
-use crate::entity::Entity;
-use crate::prelude::{BoxedSql, Column, VirtualColumn};
-use postgres::types::ToSql;
+use crate::prelude::{BoxedSql, Column, ColumnType, Entity, VirtualColumn};
 
 /// Trait implementing the max function for a column.
 ///
 /// Note, that aggregated values like this cannot be used in where statements.
-pub trait MaxColumn<T: ToSql, U: Entity> {
+pub trait MaxColumn<T: ColumnType, U: Entity> {
     /// Max function
     fn max(&self) -> VirtualColumn<T, U>;
 }

@@ -1,9 +1,7 @@
-use tokio_postgres::types::ToSql;
-
-use crate::prelude::{BoxedSql, Column, Entity, IntoSql, QueryCondition};
+use crate::prelude::{BoxedSql, Column, ColumnType, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing IN operator [QueryCondition]
-pub trait InQueryColumn<T: ToSql, U: Entity> {
+pub trait InQueryColumn<T: ColumnType, U: Entity> {
     /// Creates [QueryCondition::In] from self and other
     fn in_vec(&self, other: Vec<impl IntoSql<T>>) -> QueryCondition<U>;
 

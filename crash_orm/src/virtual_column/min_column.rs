@@ -1,11 +1,10 @@
 use crate::entity::Entity;
-use crate::prelude::{BoxedSql, Column, VirtualColumn};
-use postgres::types::ToSql;
+use crate::prelude::{BoxedSql, Column, ColumnType, VirtualColumn};
 
 /// Trait implementing the min function for a column.
 ///
 /// Note, that aggregated values like this cannot be used in where statements.
-pub trait MinColumn<T: ToSql, U: Entity> {
+pub trait MinColumn<T: ColumnType, U: Entity> {
     /// Min function
     fn min(&self) -> VirtualColumn<T, U>;
 }

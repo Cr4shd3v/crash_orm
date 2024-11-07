@@ -10,7 +10,7 @@ use crate::prelude::{ColumnType, DatabaseConnection};
 ///
 /// Requires [Sync] on the entity.
 #[async_trait]
-pub trait EntityVec<P> {
+pub trait EntityVec<P: ColumnType> {
     /// Shortcut function to call [Entity::persist] on every entity in this vector.
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 
@@ -26,7 +26,7 @@ pub trait EntityVec<P> {
 }
 
 #[async_trait]
-impl<T: PrimaryKeyEntity<P> + Sync, P: ColumnType + ToSql> EntityVec<P> for Vec<T> {
+impl<T: PrimaryKeyEntity<P> + Sync, P: ColumnType> EntityVec<P> for Vec<T> {
     async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         for entity in self {
             entity.persist(connection).await?;

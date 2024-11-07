@@ -98,7 +98,7 @@ use std::sync::Arc;
 use tokio_postgres::types::ToSql;
 
 use crate::entity::slice_query_value_iter;
-use crate::prelude::{BoxedSql, DatabaseConnection, Entity, EntityColumn, QueryCondition, UntypedColumn};
+use crate::prelude::{BoxedSql, ColumnType, DatabaseConnection, Entity, EntityColumn, QueryCondition, UntypedColumn};
 use crate::result_mapping::ResultMapping;
 
 /// Direction of the Order
@@ -169,7 +169,7 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
     }
     
     /// Add a grouping to this query
-    pub fn add_group_by<U: ToSql>(
+    pub fn add_group_by<U: ColumnType>(
         mut self,
         group_by: &EntityColumn<U ,T>,
     ) -> Query<T, R> {
@@ -180,7 +180,7 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
     /// Set the grouping for this query.
     ///
     /// This will OVERRIDE all previous grouping.
-    pub fn group_by<U: ToSql>(
+    pub fn group_by<U: ColumnType>(
         mut self,
         group_by: &EntityColumn<U ,T>,
     ) -> Query<T, R> {

@@ -2,8 +2,6 @@
 
 use std::marker::PhantomData;
 
-use tokio_postgres::types::ToSql;
-
 pub use avg_column::*;
 pub use count_column::*;
 pub use max_column::*;
@@ -14,7 +12,7 @@ pub use string_column::*;
 pub use sum_column::*;
 pub use text_cast_column::*;
 
-use crate::prelude::{BoxedSql, Entity};
+use crate::prelude::{BoxedSql, ColumnType, Entity};
 
 mod string_column;
 mod round_column;
@@ -32,13 +30,13 @@ mod max_column;
 ///
 /// This also means, that you cannot add your own virtual columns.
 /// If you need more virtual columns, please [open an issue at the repository](https://github.com/Cr4shd3v/crash_orm/issues/new/choose).
-pub struct VirtualColumn<T: ToSql, U: Entity> {
+pub struct VirtualColumn<T: ColumnType, U: Entity> {
     sql: BoxedSql,
     phantom_1: PhantomData<T>,
     phantom_2: PhantomData<U>,
 }
 
-impl<T: ToSql, U: Entity> VirtualColumn<T, U> {
+impl<T: ColumnType, U: Entity> VirtualColumn<T, U> {
     /// Creates a virtual column with a [BoxedSql]
     pub fn new(sql: BoxedSql) -> VirtualColumn<T, U> {
         VirtualColumn {

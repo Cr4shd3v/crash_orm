@@ -1,10 +1,9 @@
-use crate::prelude::{BoxedSql, Column, Entity, VirtualColumn};
-use postgres::types::ToSql;
+use crate::prelude::{BoxedSql, Column, ColumnType, Entity, VirtualColumn};
 
 /// Trait implementing the count function for a column.
 ///
 /// Note, that aggregated values like this cannot be used in where statements.
-pub trait AvgColumn<T: ToSql, R: ToSql, U: Entity> {
+pub trait AvgColumn<T: ColumnType, R: ColumnType, U: Entity> {
     /// Avg function
     fn avg(&self, distinct: bool) -> VirtualColumn<R, U>;
 }

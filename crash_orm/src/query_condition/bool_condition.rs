@@ -1,9 +1,7 @@
-use tokio_postgres::types::ToSql;
-
-use crate::prelude::{Column, Entity, QueryCondition};
+use crate::prelude::{Column, ColumnType, Entity, QueryCondition};
 
 /// Trait implementing true/false checks
-pub trait BoolQueryColumn<T: ToSql, U: Entity> {
+pub trait BoolQueryColumn<T: ColumnType, U: Entity> {
     /// Check if this column is TRUE
     fn is_true(&self) -> QueryCondition<U>;
     /// Check if this column is FALSE

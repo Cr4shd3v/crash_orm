@@ -1,9 +1,7 @@
-use tokio_postgres::types::ToSql;
-
-use crate::prelude::{Column, Entity, IntoSql, QueryCondition};
+use crate::prelude::{Column, ColumnType, Entity, IntoSql, QueryCondition};
 
 /// Trait implementing like operator [QueryCondition]
-pub trait LikeQueryColumn<T: ToSql, U: Entity> {
+pub trait LikeQueryColumn<T: ColumnType, U: Entity> {
     /// Creates [QueryCondition::Like] from self and other
     fn like(&self, like: impl IntoSql<String>) -> QueryCondition<U>;
 

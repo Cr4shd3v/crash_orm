@@ -1,9 +1,7 @@
-use tokio_postgres::types::ToSql;
-
-use crate::prelude::{BoxedSql, Column, Entity, VirtualColumn};
+use crate::prelude::{BoxedSql, Column, ColumnType, Entity, VirtualColumn};
 
 /// Trait implementing cast to text database functions to create [VirtualColumn]s for all sort of columns
-pub trait TextCastVirtualColumn<T: ToSql, U: Entity> {
+pub trait TextCastVirtualColumn<T: ColumnType, U: Entity> {
     /// Cast self to text (string)
     fn cast_to_text(&self) -> VirtualColumn<String, U>;
 }

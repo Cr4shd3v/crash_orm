@@ -7,6 +7,7 @@ use std::sync::Arc;
 use postgres::types::ToSql;
 
 use crate::column_value::UntypedColumnValue;
+use crate::prelude::ColumnType;
 
 /// Struct containing a part of a query with raw sql and values prepared for tokio-postgres.
 #[derive(Clone)]
@@ -48,20 +49,20 @@ impl BoxedSql {
     }
 }
 
-/// Trait for converting any type that implements [ToSql] and [UntypedColumnValue] into a [BoxedSql].
+/// Trait for converting any type that implements [ColumnType] and [UntypedColumnValue] into a [BoxedSql].
 #[allow(clippy::wrong_self_convention)]
 pub trait IntoSql<T> {
     /// Convert self into a [BoxedSql]
     fn into_boxed_sql(&self) -> BoxedSql;
 }
 
-impl<T: ToSql + UntypedColumnValue> IntoSql<T> for T {
+impl<T: ColumnType + UntypedColumnValue> IntoSql<T> for T {
     fn into_boxed_sql(&self) -> BoxedSql {
         self.get_sql()
     }
 }
 
-impl<T: ToSql + UntypedColumnValue> IntoSql<T> for &T {
+impl<T: ColumnType + UntypedColumnValue> IntoSql<T> for &T {
     fn into_boxed_sql(&self) -> BoxedSql {
         self.get_sql()
     }
