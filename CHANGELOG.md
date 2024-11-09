@@ -1,3 +1,21 @@
+# v0.5.0
+- feat: Allow &str for string comparisons (#88)
+- feat: QueryCondition to trait based system (#87)
+- feat: Primary key dependent methods into PrimaryKeyEntity (#89)
+- feat: ColumnType trait
+- feat: Removed unneeded generic from entity
+- feat(migration): Removed unneeded generic from migration manager
+- feat(schema): edit_column now returns result
+- feat: Added ResultMapping to queries
+- feat: relation functions only accept correct type
+- perf: count by primary key
+- feat: Improved order function, order direction cloneable
+- feat: Reworked entity_column implementation for count, avg, sum, min, max to virtual columns
+- feat: moved Sync constraint to entity
+- feat: SingleResult struct for simple result mapping
+- feat(migration): get_name now returns &str
+- feat: derive result mapping for custom structs
+
 # v0.4.2
 - doc: fix doc not building
 
