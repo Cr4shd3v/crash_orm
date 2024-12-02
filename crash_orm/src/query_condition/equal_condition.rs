@@ -36,6 +36,7 @@ macro_rules! impl_equal_entity_column {
     };
 }
 
+#[cfg(feature = "with-geo-types")]
 macro_rules! impl_equal_entity_column_geo {
     ($column_type:ty) => {
         impl<T: Entity, U: Column<$column_type, T>> EqualQueryColumn<$column_type, T> for U {

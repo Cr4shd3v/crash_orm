@@ -85,9 +85,11 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "Decimal" => "numeric",
         "OneToOne" => {
             let target_entity = extract_generic_type(field_type, 1).unwrap();
+            let (target_type, _) = _rust_to_postgres_type(&extract_generic_type(field_type, 2).unwrap()).unwrap();
             return Some((
                 format!(
-                    "oid REFERENCES {}(id)",
+                    "{} REFERENCES {}(id)",
+                    target_type,
                     string_to_table_name(target_entity.into_token_stream().to_string())
                 ),
                 false,
@@ -95,9 +97,11 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         }
         "ManyToOne" => {
             let target_entity = extract_generic_type(field_type, 1).unwrap();
+            let (target_type, _) = _rust_to_postgres_type(&extract_generic_type(field_type, 2).unwrap()).unwrap();
             return Some((
                 format!(
-                    "oid REFERENCES {}(id)",
+                    "{} REFERENCES {}(id)",
+                    target_type,
                     string_to_table_name(target_entity.into_token_stream().to_string())
                 ),
                 false,
