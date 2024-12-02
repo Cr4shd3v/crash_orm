@@ -43,17 +43,17 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItem {
+//! # struct TestItemInsert {
 //! #    id: Option<u32>,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! let mut entity = TestItem { id: None };
+//! # TestItemInsert::create_table_if_not_exists(&conn).await.unwrap();
+//! let mut entity = TestItemInsert { id: None };
 //! entity.insert_set_id(&conn).await.unwrap();
 //!
-//! let entity2 = TestItem { id: None };
+//! let entity2 = TestItemInsert { id: None };
 //! let id = entity.insert_get_id(&conn).await.unwrap();
 //! # });
 //! ```
@@ -72,16 +72,16 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItem {
+//! # struct TestItemUpdate {
 //! #    id: Option<u32>,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItem { id: None };
+//! # TestItemUpdate::create_table_if_not_exists(&conn).await.unwrap();
+//! # let entity2 = TestItemUpdate { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let entity = TestItem::get_by_primary(&conn, id).await.unwrap();
+//! let entity = TestItemUpdate::get_by_primary(&conn, id).await.unwrap();
 //! // Modify entity properties
 //! entity.update(&conn).await.unwrap();
 //! # });
@@ -101,16 +101,16 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItem {
+//! # struct TestItemPersist {
 //! #    id: Option<u32>,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItem { id: None };
+//! # TestItemPersist::create_table_if_not_exists(&conn).await.unwrap();
+//! # let entity2 = TestItemPersist { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let mut entity = TestItem::get_by_primary(&conn, id).await.unwrap();
+//! let mut entity = TestItemPersist::get_by_primary(&conn, id).await.unwrap();
 //! // Modify entity properties
 //! entity.persist(&conn).await.unwrap();
 //! # });
@@ -131,16 +131,16 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItem {
+//! # struct TestItemGetById {
 //! #    id: Option<u32>,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItem { id: None };
+//! # TestItemGetById::create_table_if_not_exists(&conn).await.unwrap();
+//! # let entity2 = TestItemGetById { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let entity = TestItem::get_by_primary(&conn, id).await.unwrap();
+//! let entity = TestItemGetById::get_by_primary(&conn, id).await.unwrap();
 //! # });
 //! ```
 //!
@@ -155,14 +155,14 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItem {
+//! # struct TestItemGetAll {
 //! #    id: Option<u32>,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! let entity = TestItem::get_all(&conn).await.unwrap();
+//! # TestItemGetAll::create_table_if_not_exists(&conn).await.unwrap();
+//! let entity = TestItemGetAll::get_all(&conn).await.unwrap();
 //! # });
 //! ```
 //!
@@ -174,16 +174,16 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItem {
+//! # struct TestItemRemove {
 //! #    id: Option<u32>,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItem { id: None };
+//! # TestItemRemove::create_table_if_not_exists(&conn).await.unwrap();
+//! # let entity2 = TestItemRemove { id: None };
 //! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let mut entity = TestItem::get_by_primary(&conn, id).await.unwrap();
+//! let mut entity = TestItemRemove::get_by_primary(&conn, id).await.unwrap();
 //! entity.remove(&conn).await.unwrap();
 //! # });
 //! ```
@@ -201,15 +201,15 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItem {
+//! # struct TestItemPersist {
 //! #    id: Option<u32>,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity_1 = TestItem { id: None };
-//! # let entity_n = TestItem { id: None };
+//! # TestItemPersist::create_table_if_not_exists(&conn).await.unwrap();
+//! # let entity_1 = TestItemPersist { id: None };
+//! # let entity_n = TestItemPersist { id: None };
 //! let mut entities = vec![entity_1, /*...,*/ entity_n];
 //! entities.persist_all(&conn).await.unwrap();
 //! # });
