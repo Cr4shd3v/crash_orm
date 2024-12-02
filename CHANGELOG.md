@@ -1,3 +1,7 @@
+# v0.5.1
+- fix: fix other type of foreign key than u32 table creation
+- fix: gated geo macro in equal condition behind geo types feature
+
 # v0.5.0
 - feat: Allow &str for string comparisons (#88)
 - feat: QueryCondition to trait based system (#87)
