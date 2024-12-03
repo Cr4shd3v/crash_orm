@@ -66,6 +66,26 @@ macro_rules! sql_impl_for_relation {
                 <P as tokio_postgres::types::FromSql>::accepts(ty)
             }
         }
+
+        #[cfg(feature = "serde")]
+        impl<'a, T: PrimaryKeyEntity<P>, P: ColumnType + serde::Deserialize<'a>> serde::Deserialize<'a> for $rel_type<T, P> {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'a>
+            {
+                P::deserialize(deserializer).map(|v| $rel_type::new(v))
+            }
+        }
+
+        #[cfg(feature = "serde")]
+        impl<T: PrimaryKeyEntity<P>, P: ColumnType + serde::Serialize> serde::Serialize for $rel_type<T, P> {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer
+            {
+                P::serialize(&self.target_id, serializer)
+            }
+        }
     };
 }
 
