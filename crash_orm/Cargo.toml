@@ -43,7 +43,7 @@ geo-types = { workspace = true, optional = true }
 [dev-dependencies]
 crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "with-serde", "with-eui48", "with-bit-vec", "with-time", "with-geo-types", "migration"] }
 tokio-test = { workspace = true }
-crash_orm_test = { path = "../crash_orm_test" }
+crash_orm_test = { workspace = true }
 uuid = { workspace = true, features = ["v7"] }
 
 [package.metadata.docs.rs]

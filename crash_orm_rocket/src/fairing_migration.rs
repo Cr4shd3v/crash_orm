@@ -8,16 +8,16 @@ use crate::conn::init_connection;
 ///
 /// You can access the connection with the request guard `&State<CrashOrmDatabaseConnection>`.
 ///
-/// If no url is configured through [CrashOrmDatabaseFairing::from_url], the environment variable `DATABASE_URL` will be used.
+/// If no url is configured through [CrashOrmDatabaseMigrationFairing::from_url], the environment variable `DATABASE_URL` will be used.
 ///
 /// This version includes migrations. Provide your migration manager as generic parameter.
 #[derive(Default)]
-pub struct CrashOrmDatabaseFairing<M: CrashOrmMigrationManager> {
+pub struct CrashOrmDatabaseMigrationFairing<M: CrashOrmMigrationManager> {
     url: Option<String>,
     phantom: PhantomData<M>,
 }
 
-impl<M: CrashOrmMigrationManager> CrashOrmDatabaseFairing<M> {
+impl<M: CrashOrmMigrationManager> CrashOrmDatabaseMigrationFairing<M> {
     /// Creates the fairing from the desired database URL.
     pub fn from_url(url: impl Into<String>) -> Self {
         Self {
@@ -28,7 +28,7 @@ impl<M: CrashOrmMigrationManager> CrashOrmDatabaseFairing<M> {
 }
 
 #[async_trait]
-impl<M: CrashOrmMigrationManager> Fairing for CrashOrmDatabaseFairing<M> {
+impl<M: CrashOrmMigrationManager> Fairing for CrashOrmDatabaseMigrationFairing<M> {
     fn info(&self) -> Info {
         Info {
             name: "CrashORM",

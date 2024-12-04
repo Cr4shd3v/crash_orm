@@ -31,7 +31,9 @@ impl Fairing for CrashOrmDatabaseFairing {
     }
 
     async fn on_ignite(&self, rocket: Rocket<Build>) -> rocket::fairing::Result {
-        let conn = init_connection(self.url.as_ref().unwrap_or(&std::env::var("DATABASE_URL").unwrap())).await;
+        let conn = init_connection(&*self.url.clone().unwrap_or_else(|| {
+            std::env::var("DATABASE_URL").unwrap()
+        })).await;
 
         Ok(rocket.manage(conn))
     }

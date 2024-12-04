@@ -96,7 +96,7 @@ WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
     }
 
     /// Edit a column
-    pub fn edit_column<T: FnOnce(&mut ColumnDefinition)>(&mut self, name: &str, edit_fn: T) -> crate::Result<()> {
+    pub fn edit_column<T: FnOnce(&mut ColumnDefinition)>(mut self, name: &str, edit_fn: T) -> crate::Result<TableDefinition> {
         let Some(definition) = self.columns.iter_mut()
             .find(|column| column.name == name) else {
             return Err(crate::Error::String(format!("Tried to edit non existing column {}", name)));
@@ -104,29 +104,29 @@ WHERE r.conrelid = '{}'::regclass AND r.contype = 'f'", name);
         
         edit_fn(definition);
         
-        Ok(())
+        Ok(self)
     }
 
     /// Add a new column
-    pub fn add_column(&mut self, column_definition: ColumnDefinition) -> crate::Result<()> {
+    pub fn add_column(mut self, column_definition: ColumnDefinition) -> crate::Result<TableDefinition> {
         if self.columns.iter().find(|column| column.name == column_definition.name).is_some() {
             return Err(crate::Error::String(String::from("Can't add another column with the same name")));
         }
 
         self.columns.push(column_definition);
 
-        Ok(())
+        Ok(self)
     }
 
     /// Drop a column
-    pub fn drop_column(&mut self, name: &str) -> crate::Result<()> {
+    pub fn drop_column(mut self, name: &str) -> crate::Result<TableDefinition> {
         self.dropped_columns.push(name.to_string());
         let Some((index, _)) = self.columns.iter().enumerate().find(|(_, v)| v.name == name && v.old_name.is_some()) else {
             return Err(crate::Error::String(format!("Tried to remove non existing column {}", name)));
         };
         self.columns.remove(index);
 
-        Ok(())
+        Ok(self)
     }
 
     /// Returns the diff in sql statements

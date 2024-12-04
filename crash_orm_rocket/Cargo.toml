@@ -7,6 +7,11 @@ edition = "2021"
 crash_orm = { workspace = true }
 rocket = { workspace = true }
 
+[dev-dependencies]
+crash_orm_rocket = { path = ".", features = ["migration"] }
+crash_orm_test = { workspace = true }
+tokio = { workspace = true }
+
 [features]
 default = []
 migration = ["crash_orm/migration"]
