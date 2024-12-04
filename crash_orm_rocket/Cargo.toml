@@ -1,0 +1,12 @@
+[package]
+name = "crash_orm_rocket"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crash_orm = { workspace = true }
+rocket = { workspace = true }
+
+[features]
+default = []
+migration = ["crash_orm/migration"]

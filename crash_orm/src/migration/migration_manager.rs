@@ -7,7 +7,7 @@ use crate::prelude::{DatabaseConnection, Entity, EqualQueryColumn, Schema};
 
 /// Trait to be implemented for a migration manager as documented [here](crate::migration).
 #[async_trait]
-pub trait CrashOrmMigrationManager {
+pub trait CrashOrmMigrationManager: Sync + Send + 'static {
     /// Specifies the migrations for this manager.
     fn get_migrations<T: DatabaseConnection>() -> Vec<Box<dyn Migration<T>>>;
 

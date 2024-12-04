@@ -1,12 +1,13 @@
 [workspace]
 members = [
     "crash_orm",
-    "crash_orm_derive",
+    "crash_orm_derive", "crash_orm_rocket",
     "crash_orm_test",
 ]
 resolver = "2"
 
 [workspace.dependencies]
+# Core
 tokio-postgres = "^0.7"
 syn = "^2.0"
 quote = "^1.0"
@@ -15,6 +16,7 @@ tokio-test = "^0.4"
 async-trait = "^0.1"
 convert_case = "^0.6.0"
 
+# Optional
 rust_decimal = "^1"
 chrono = "^0.4"
 uuid = "^1.8"
@@ -25,5 +27,9 @@ bit-vec = "^0.6"
 time = "^0.3"
 geo-types = "^0.7"
 
+# Rocket Integration
+rocket = "^0.5"
+
+# Own crates
 crash_orm = { path = "crash_orm", version = "0.6.1" }
 crash_orm_derive = { path = "crash_orm_derive", version = "0.6.1" }
