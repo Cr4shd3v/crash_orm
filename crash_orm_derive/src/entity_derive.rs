@@ -20,7 +20,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut insert_field_names = vec![];
     let mut insert_field_self_values = quote!();
     let mut insert_field_self_values_format = String::new();
-    let mut update_fields = String::new();
+    let mut update_fields = vec![];
     let mut column_consts = quote!();
     let mut functions = quote!();
 
@@ -235,7 +235,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             });
 
             update_index += 1;
-            update_fields.push_str(&*format!("{} = ${}", field_ident_str, update_index));
+            update_fields.push(format!("{} = ${}", field_ident_str, update_index));
 
             insert_index += 1;
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
@@ -279,7 +279,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     } else {
         let update_string = format!(
             "UPDATE {} SET {} WHERE {} = ${}",
-            ident_str, update_fields, primary_field_name, insert_index
+            ident_str, update_fields.join(","), primary_field_name, insert_index
         );
         quote! {
             connection.execute_query(#update_string,&[#insert_field_self_values &self.#primary_key_ident]).await?;
