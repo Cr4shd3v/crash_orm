@@ -9,6 +9,7 @@ mod entity_derive;
 mod schema_derive;
 mod util;
 mod result_mapping_derive;
+mod reserved_keywords;
 
 #[proc_macro_derive(Entity, attributes(mapped_by, primary_key))]
 pub fn derive_entity(input: TokenStream) -> TokenStream {

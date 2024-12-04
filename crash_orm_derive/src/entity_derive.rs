@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::__private::Span;
 use syn::{parse_macro_input, Attribute, Data, DeriveInput, Ident};
-
+use crate::reserved_keywords::escape_reserved_keywords;
 use crate::util::{extract_generic_type, extract_generic_type_ignore_option, get_attribute_by_name, get_type_string, ident_to_table_name, is_relation, is_relation_value_holder, string_to_table_name};
 
 pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
@@ -17,7 +17,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let vis = derive_input.vis;
     
     let mut all_field_self_values_format = String::new();
-    let mut insert_field_names = quote!();
+    let mut insert_field_names = vec![];
     let mut insert_field_self_values = quote!();
     let mut insert_field_self_values_format = String::new();
     let mut update_fields = String::new();
@@ -230,10 +230,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 });
             }
 
-            insert_field_names.extend(quote! {
-                #field_ident_str,
-            });
-
             insert_field_self_values.extend(quote! {
                 &self.#field_ident,
             });
@@ -243,10 +239,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             insert_index += 1;
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
+            insert_field_names.push(escape_reserved_keywords(&field_ident_str));
         } else if primary_type_str == "Uuid" {
-            insert_field_names.extend(quote! {
-                #field_ident_str,
-            });
+            insert_field_names.push(escape_reserved_keywords(&field_ident_str));
 
             insert_field_self_values.extend(quote! {
                 &self.#field_ident,
@@ -262,8 +257,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     insert_index += 1;
 
-    let insert_field_names = insert_field_names.to_string();
-    let insert_field_names = insert_field_names.strip_suffix(",").unwrap_or("");
+    let insert_field_names = insert_field_names.join(",");
     let insert_field_self_values_format =
         insert_field_self_values_format.strip_suffix(",").unwrap_or("");
 

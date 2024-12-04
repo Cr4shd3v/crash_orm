@@ -1,9 +1,9 @@
 use proc_macro::TokenStream;
 
-use quote::quote;
-use syn::{Data, DeriveInput, parse_macro_input};
-
+use crate::reserved_keywords::escape_reserved_keywords;
 use crate::util::{extract_generic_type, get_attribute_by_name, get_type_string, ident_to_table_name, rust_to_postgres_type};
+use quote::quote;
+use syn::{parse_macro_input, Data, DeriveInput};
 
 pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -48,7 +48,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
         }
         let column_type = column_type.unwrap();
 
-        create_fields_string.push_str(&*format!("{} {}", field_name, column_type));
+        create_fields_string.push_str(&*format!("{} {}", escape_reserved_keywords(&field_name), column_type));
 
         if &*field_name == primary_field_name {
             let Some(field_type) = extract_generic_type(&field.ty, 1) else {
