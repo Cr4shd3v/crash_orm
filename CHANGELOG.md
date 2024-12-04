@@ -1,3 +1,6 @@
+# v0.6.1
+- fix: allow reserved keywords as entity names (#90)
+
 # v0.6.0
 - feat: added serde support for relation types (#91)
 
