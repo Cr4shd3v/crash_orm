@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "crash_orm",
-    "crash_orm_derive", "crash_orm_rocket",
+    "crash_orm_derive", "crash_orm_rocket", "crash_orm_rocket_derive",
     "crash_orm_test",
 ]
 resolver = "2"
@@ -33,5 +33,7 @@ rocket = "^0.5"
 # Own crates
 crash_orm = { path = "crash_orm", version = "0.6.1" }
 crash_orm_derive = { path = "crash_orm_derive", version = "0.6.1" }
+crash_orm_rocket = { path = "crash_orm_rocket", version = "0.6.1" }
+crash_orm_rocket_derive = { path = "crash_orm_rocket_derive", version = "0.6.1" }
 
 crash_orm_test = { path = "crash_orm_test" }

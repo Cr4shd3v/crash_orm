@@ -17,3 +17,5 @@ pub use fairing::*;
 
 #[cfg(feature = "migration")]
 pub use fairing_migration::*;
+
+pub use crash_orm_rocket_derive::*;
