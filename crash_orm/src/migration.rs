@@ -16,7 +16,7 @@
 //! pub struct MigrationManager;
 //! 
 //! impl CrashOrmMigrationManager for MigrationManager {
-//!     fn get_migrations<T: DatabaseConnection>() -> Vec<Box<dyn Migration<T>>> {
+//!     fn get_migrations() -> Vec<Box<dyn Migration>> {
 //!         vec![
 //!             
 //!         ]
@@ -30,23 +30,23 @@
 //! 
 //! ```
 //! use crash_orm::async_trait::async_trait;
-//! use crash_orm::prelude::{DatabaseConnection, Schema};
+//! use crash_orm::prelude::{CrashOrmDatabaseConnection, DatabaseConnection, Schema};
 //! use crash_orm::migration::Migration;
-//! 
+//!
 //! pub struct ExampleMigration;
-//! 
+//!
 //! #[async_trait]
-//! impl<T: DatabaseConnection> Migration<T> for ExampleMigration {
-//!     async fn up(&self, conn: &T) -> crash_orm::Result<()> {
+//! impl Migration for ExampleMigration {
+//!     async fn up(&self, conn: &CrashOrmDatabaseConnection) -> crash_orm::Result<()> {
 //!         // UP, like User::create_table_if_not_exists(conn).await?;
 //!         Ok(())
 //!     }
-//! 
-//!     async fn down(&self, conn: &T) -> crash_orm::Result<()> {
+//!
+//!     async fn down(&self, conn: &CrashOrmDatabaseConnection) -> crash_orm::Result<()> {
 //!         // DOWN, like User::drop_table(conn).await?;
 //!         Ok(())
 //!     }
-//! 
+//!
 //!     fn get_name(&self) -> &str {
 //!         "ExampleMigration" // The name MUST ALWAYS be UNIQUE
 //!     }
@@ -65,7 +65,7 @@
 //! pub struct MigrationManager;
 //!
 //! impl CrashOrmMigrationManager for MigrationManager {
-//!     fn get_migrations<T: DatabaseConnection>() -> Vec<Box<dyn Migration<T>>> {
+//!     fn get_migrations() -> Vec<Box<dyn Migration>> {
 //!         vec![
 //!
 //!         ]

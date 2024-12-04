@@ -12,6 +12,10 @@ async fn test_migration_fairing() {
     assert!(conn.is_some());
     let conn = conn.unwrap();
     assert_eq!(conn.is_closed(), false);
+
+    assert!(TableDefinition::load_from_database(conn, "test_rocket_integration").await.is_ok());
+    ExampleMigration.down(conn).await.unwrap();
+    assert!(TableDefinition::load_from_database(conn, "test_rocket_integration").await.is_err());
 }
 
 struct MigrationManager;
@@ -19,7 +23,7 @@ struct MigrationManager;
 #[async_trait]
 impl CrashOrmMigrationManager for MigrationManager
 {
-    fn get_migrations<T: DatabaseConnection>() -> Vec<Box<dyn Migration<T>>> {
+    fn get_migrations() -> Vec<Box<dyn Migration>> {
         vec![
             Box::new(ExampleMigration),
         ]
@@ -29,7 +33,7 @@ impl CrashOrmMigrationManager for MigrationManager
 struct ExampleMigration;
 
 #[async_trait]
-impl Migration<CrashOrmDatabaseConnection> for ExampleMigration {
+impl Migration for ExampleMigration {
     async fn up(&self, conn: &CrashOrmDatabaseConnection) -> Result<()> {
         TableDefinition::new("test_rocket_integration")
             .add_column(ColumnDefinition::new("id", Type::INT4, false).primary())?
