@@ -121,7 +121,7 @@ fn _rust_to_postgres_type(field_type: &Type) -> Option<(String, bool)> {
         "NaiveDate" => "date",
         "NaiveTime" => "time",
         "Uuid" => "uuid",
-        "Json" => "json",
+        "Json" => "jsonb",
         "Value" => "jsonb",
         "MacAddress" => "macaddr",
         "BitVec" => "varbit",
