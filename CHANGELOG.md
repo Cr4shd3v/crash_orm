@@ -1,3 +1,6 @@
+# v0.6.0
+- feat: added serde support for relation types (#91)
+
 # v0.5.1
 - fix: fix other type of foreign key than u32 table creation
 - fix: gated geo macro in equal condition behind geo types feature
