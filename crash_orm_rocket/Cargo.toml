@@ -9,7 +9,7 @@ rocket = { workspace = true, features = ["json"] }
 crash_orm_rocket_derive = { workspace = true }
 
 [dev-dependencies]
-crash_orm_rocket = { path = ".", features = ["migration"] }
+crash_orm_rocket = { path = ".", features = ["migration", "crud"] }
 crash_orm_test = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
@@ -17,3 +17,4 @@ serde = { workspace = true, features = ["derive"] }
 [features]
 default = []
 migration = ["crash_orm/migration"]
+crud = ["crash_orm_rocket_derive/crud"]
