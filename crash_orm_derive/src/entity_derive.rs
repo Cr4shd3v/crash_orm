@@ -235,7 +235,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             });
 
             update_index += 1;
-            update_fields.push(format!("{} = ${}", field_ident_str, update_index));
+            update_fields.push(format!("{} = ${}", escape_reserved_keywords(&field_ident_str), update_index));
 
             insert_index += 1;
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));

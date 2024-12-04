@@ -1,3 +1,9 @@
+# v0.6.3
+- fix: fix not escaped update statement
+
+# v0.6.2
+- fix: fix wrong update statement
+
 # v0.6.1
 - fix: allow reserved keywords as entity names (#90)
 
