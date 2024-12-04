@@ -85,7 +85,7 @@ impl_equal_entity_column!(chrono::NaiveTime);
 #[cfg(feature = "with-uuid")]
 impl_equal_entity_column!(uuid::Uuid);
 impl_equal_entity_column!(Vec<u8>);
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "json")]
 impl_equal_entity_column!(serde_json::Value);
 #[cfg(feature = "with-eui48")]
 impl_equal_entity_column!(eui48::MacAddress);

@@ -12,6 +12,8 @@
       <sourceFolder url="file://$MODULE_DIR$/crash_orm_migration/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crash_orm_test/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crash_orm_rocket/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crash_orm_rocket/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crash_orm_rocket_derive/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

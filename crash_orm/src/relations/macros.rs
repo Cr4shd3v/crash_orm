@@ -67,7 +67,7 @@ macro_rules! sql_impl_for_relation {
             }
         }
 
-        #[cfg(feature = "serde")]
+        #[cfg(feature = "serialize")]
         impl<'a, T: PrimaryKeyEntity<P>, P: ColumnType + serde::Deserialize<'a>> serde::Deserialize<'a> for $rel_type<T, P> {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
@@ -77,7 +77,7 @@ macro_rules! sql_impl_for_relation {
             }
         }
 
-        #[cfg(feature = "serde")]
+        #[cfg(feature = "serialize")]
         impl<T: PrimaryKeyEntity<P>, P: ColumnType + serde::Serialize> serde::Serialize for $rel_type<T, P> {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where

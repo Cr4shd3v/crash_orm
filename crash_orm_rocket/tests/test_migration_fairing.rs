@@ -13,9 +13,9 @@ async fn test_migration_fairing() {
     let conn = conn.unwrap();
     assert_eq!(conn.is_closed(), false);
 
-    assert!(TableDefinition::load_from_database(conn, "test_rocket_integration").await.is_ok());
+    TableDefinition::load_from_database(conn, "test_rocket_integration").await.unwrap();
     ExampleMigration.down(conn).await.unwrap();
-    assert!(TableDefinition::load_from_database(conn, "test_rocket_integration").await.is_err());
+    TableDefinition::load_from_database(conn, "test_rocket_integration").await.unwrap();
 }
 
 struct MigrationManager;
