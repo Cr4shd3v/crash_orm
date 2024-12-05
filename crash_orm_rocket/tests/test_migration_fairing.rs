@@ -18,9 +18,9 @@ async fn test_migration_fairing() {
     TableDefinition::load_from_database(conn, MIGRATION_TABLE_NAME).await.unwrap();
     ExampleMigration.down(conn).await.unwrap();
     assert!(TableDefinition::load_from_database(conn, MIGRATION_TABLE_NAME).await.is_err());
-    CrashOrmMigrationRecord::query()
+    CrashOrmMigrationRecord::delete()
         .condition(CrashOrmMigrationRecordColumn::NAME.equals(MIGRATION_TABLE_NAME))
-        .fetch_single(conn).await.unwrap().remove(conn).await.unwrap();
+        .execute(conn).await.unwrap();
 }
 
 struct MigrationManager;

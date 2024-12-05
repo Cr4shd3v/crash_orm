@@ -58,9 +58,9 @@ pub trait CrashOrmMigrationManager: Sync + Send + 'static {
             if started {
                 migration.down(conn).await?;
 
-                CrashOrmMigrationRecord::query()
+                CrashOrmMigrationRecord::delete()
                     .condition(CrashOrmMigrationRecordColumn::NAME.equals(migration.get_name()))
-                    .fetch_single(conn).await?.remove(conn).await?;
+                    .execute(conn).await?;
             }
 
             if migration.get_name() == name {
