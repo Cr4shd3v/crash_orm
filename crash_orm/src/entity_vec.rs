@@ -68,7 +68,6 @@ impl<C: CreateEntity<T>, T: PrimaryKeyEntity<P>, P: ColumnType> EntityCreateVec<
         let values = transformed.iter().map(|entity| entity.get_values()).flatten().collect::<Vec<&(dyn ToSql + Sync)>>();
 
         let query = format!("INSERT INTO {}({}) VALUES {}", T::TABLE_NAME, T::__INSERT_FIELD_NAMES, insert_values_string);
-        println!("{:?}", query);
         connection.execute_query(&*query, values.as_slice()).await?;
 
         Ok(())

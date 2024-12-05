@@ -82,35 +82,6 @@
 //! # });
 //! ```
 //!
-//! ### Persist Entity
-//! There is a way to do both insert and update depending on the entity.
-//!
-//! If the id is not yet set, the persist function will call insert_set_id.
-//! Because of that, the function requires a mutable reference to self.
-//!
-//! If the id is set, the persist function will call update.
-//!
-//! Example:
-//! ```rust
-//! use crash_orm::prelude::*;
-//! # use crash_orm_test::setup_test_connection;
-//!
-//! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItemPersist {
-//! #    id: u32,
-//! #    test: i32,
-//! # }
-//!
-//! # tokio_test::block_on(async {
-//! # let conn = setup_test_connection().await;
-//! # TestItemPersist::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItemPersistCreate { test: 1 }.insert(&conn).await.unwrap();
-//! let entity = TestItemPersist::get_by_primary(&conn, entity2.id).await.unwrap();
-//! // Modify entity properties
-//! entity.update(&conn).await.unwrap();
-//! # });
-//! ```
-//!
 //! ## Get Entity
 //! Every entity has 2 simple functions to get one or many entities.
 //!
@@ -192,16 +163,16 @@
 //! # use crash_orm_test::setup_test_connection;
 //!
 //! # #[derive(Entity, Debug, Schema)]
-//! # struct TestItemPersist {
+//! # struct TestItemInsertVec {
 //! #    id: u32,
 //! #    test: i32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
-//! # TestItemPersist::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity_1 = TestItemPersistCreate { test: 1 };
-//! # let entity_n = TestItemPersistCreate { test: 2 };
+//! # TestItemInsertVec::create_table_if_not_exists(&conn).await.unwrap();
+//! # let entity_1 = TestItemInsertVecCreate { test: 1 };
+//! # let entity_n = TestItemInsertVecCreate { test: 2 };
 //! let entities = vec![entity_1, /*...,*/ entity_n];
 //! entities.insert_all(&conn).await.unwrap();
 //! # });
