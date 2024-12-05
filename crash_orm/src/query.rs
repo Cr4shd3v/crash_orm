@@ -101,6 +101,12 @@ use crate::entity::slice_query_value_iter;
 use crate::prelude::{BoxedSql, ColumnType, DatabaseConnection, Entity, EntityColumn, QueryCondition, UntypedColumn};
 use crate::result_mapping::ResultMapping;
 
+/// Marks a query as a SELECT query.
+pub struct SelectQueryType;
+
+/// Marks a query as a DELETE query.
+pub struct DeleteQueryType;
+
 /// Direction of the Order
 #[derive(Debug, Clone)]
 pub enum OrderDirection {
@@ -120,17 +126,17 @@ impl Display for OrderDirection {
 }
 
 /// Struct representing a database query for an entity.
-pub struct Query<T: Entity, R: ResultMapping> {
+pub struct Query<T: Entity, R: ResultMapping, QT> {
     base_query: BoxedSql,
     condition: Option<QueryCondition<T>>,
     group_by: Vec<BoxedSql>,
     order: Vec<(BoxedSql, OrderDirection)>,
-    phantom: PhantomData<R>,
+    phantom: PhantomData<(R, QT)>,
 }
 
-impl<T: Entity, R: ResultMapping> Query<T, R> {
+impl<T: Entity, R: ResultMapping, QT> Query<T, R, QT> {
     /// Create a new query from a [BoxedSql]
-    pub fn new(base_query: BoxedSql) -> Query<T, R> {
+    pub fn new(base_query: BoxedSql) -> Query<T, R, QT> {
         Self {
             base_query,
             condition: None,
@@ -141,50 +147,8 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
     }
 
     /// Set the condition for this query.
-    pub fn condition(mut self, condition: QueryCondition<T>) -> Query<T, R> {
+    pub fn condition(mut self, condition: QueryCondition<T>) -> Query<T, R, QT> {
         self.condition = Some(condition);
-        self
-    }
-
-    /// Add an order to this query.
-    pub fn add_order(
-        mut self,
-        order: &(dyn UntypedColumn<T>),
-        order_direction: OrderDirection,
-    ) -> Query<T, R> {
-        self.order.push((order.get_sql(), order_direction));
-        self
-    }
-
-    /// Set the order for this query.
-    ///
-    /// This will OVERRIDE all previous orders.
-    pub fn order(
-        mut self,
-        order: &(dyn UntypedColumn<T>),
-        order_direction: OrderDirection,
-    ) -> Query<T, R> {
-        self.order = vec![(order.get_sql(), order_direction)];
-        self
-    }
-    
-    /// Add a grouping to this query
-    pub fn add_group_by<U: ColumnType>(
-        mut self,
-        group_by: &EntityColumn<U ,T>,
-    ) -> Query<T, R> {
-        self.group_by.push(group_by.get_sql());
-        self
-    }
-
-    /// Set the grouping for this query.
-    ///
-    /// This will OVERRIDE all previous grouping.
-    pub fn group_by<U: ColumnType>(
-        mut self,
-        group_by: &EntityColumn<U ,T>,
-    ) -> Query<T, R> {
-        self.group_by = vec![group_by.get_sql()];
         self
     }
 
@@ -227,6 +191,50 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
 
         (query, values)
     }
+}
+
+impl<T: Entity, R: ResultMapping> Query<T, R, SelectQueryType> {
+    /// Add an order to this query.
+    pub fn add_order(
+        mut self,
+        order: &(dyn UntypedColumn<T>),
+        order_direction: OrderDirection,
+    ) -> Query<T, R, SelectQueryType> {
+        self.order.push((order.get_sql(), order_direction));
+        self
+    }
+
+    /// Set the order for this query.
+    ///
+    /// This will OVERRIDE all previous orders.
+    pub fn order(
+        mut self,
+        order: &(dyn UntypedColumn<T>),
+        order_direction: OrderDirection,
+    ) -> Query<T, R, SelectQueryType> {
+        self.order = vec![(order.get_sql(), order_direction)];
+        self
+    }
+
+    /// Add a grouping to this query
+    pub fn add_group_by<U: ColumnType>(
+        mut self,
+        group_by: &EntityColumn<U ,T>,
+    ) -> Query<T, R, SelectQueryType> {
+        self.group_by.push(group_by.get_sql());
+        self
+    }
+
+    /// Set the grouping for this query.
+    ///
+    /// This will OVERRIDE all previous grouping.
+    pub fn group_by<U: ColumnType>(
+        mut self,
+        group_by: &EntityColumn<U ,T>,
+    ) -> Query<T, R, SelectQueryType> {
+        self.group_by = vec![group_by.get_sql()];
+        self
+    }
 
     /// Execute this query and returns the result as a vector of entities.
     pub async fn fetch(self, connection: &impl DatabaseConnection) -> crate::Result<Vec<R>> {
@@ -258,5 +266,23 @@ impl<T: Entity, R: ResultMapping> Query<T, R> {
             .await?;
 
         Ok(R::from_row(row))
+    }
+}
+
+impl<T: Entity, R: ResultMapping> Query<T, R, DeleteQueryType> {
+    /// Execute this query without a result
+    pub async fn execute(self, connection: &impl DatabaseConnection) -> crate::Result<()> {
+        let (query, values) = self.get_raw_query();
+
+        connection
+            .execute_query(
+                &*query,
+                slice_query_value_iter(values.as_slice())
+                    .collect::<Vec<&(dyn ToSql + Sync)>>()
+                    .as_slice(),
+            )
+            .await?;
+
+        Ok(())
     }
 }

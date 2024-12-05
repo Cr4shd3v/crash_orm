@@ -288,12 +288,22 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// Updates the entity in the database
     async fn update(&self, connection: &impl DatabaseConnection) -> Result<()>;
 
-    /// Creates a [Query] for this Entity.
+    /// Creates a SELECT [Query] for this entity.
     ///
     /// See [Query] for more details on how to build a query.
-    fn query() -> Query<Self, Self> where Self: Sized {
+    fn query() -> Query<Self, Self, SelectQueryType> where Self: Sized {
         Query::new(BoxedSql::new(
             format!("SELECT * FROM {}", Self::TABLE_NAME),
+            vec![],
+        ))
+    }
+
+    /// Creates a DELETE [Query] for this entity.
+    ///
+    /// See [Query] for more details on how to build a query.
+    fn delete() -> Query<Self, (), DeleteQueryType> where Self: Sized {
+        Query::new(BoxedSql::new(
+            format!("DELETE FROM {}", Self::TABLE_NAME),
             vec![],
         ))
     }
@@ -301,7 +311,7 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// Select specific columns ([EntityColumn] or [VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query<R: ResultMapping>(columns: &[&(dyn UntypedColumn<Self>)]) -> Query<Self, R> where Self: Sized {
+    fn select_query<R: ResultMapping>(columns: &[&(dyn UntypedColumn<Self>)]) -> Query<Self, R, SelectQueryType> where Self: Sized {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())

@@ -54,3 +54,12 @@ impl<T: ColumnType> ResultMapping for SingleResult<T> {
         }
     }
 }
+
+impl ResultMapping for () {
+    fn from_row(_row: Row) -> Self
+    where
+        Self: Sized
+    {
+        ()
+    }
+}
