@@ -1,18 +1,17 @@
-use crash_orm::prelude::{Entity, EntityVec, InQueryColumn, Schema};
+use crash_orm::prelude::{Entity, EntityCreateVec, InQueryColumn, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem14 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     pub number: Option<i32>,
 }
 
-impl TestItem14 {
+impl TestItem14Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test1234")),
             active: false,
             number: Some(441),
@@ -21,7 +20,6 @@ impl TestItem14 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             active: true,
             number: Some(440),
@@ -39,8 +37,8 @@ async fn test_in() {
         assert!(TestItem14::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem14::test(), TestItem14::test2()]
-        .persist_all(&conn)
+    vec![TestItem14Create::test(), TestItem14Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

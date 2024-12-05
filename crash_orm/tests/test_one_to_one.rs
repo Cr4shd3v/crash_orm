@@ -1,9 +1,10 @@
+use crash_orm::entity::CreateEntity;
 use crash_orm::prelude::{Entity, OneToOne, OneToOneRef, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem19 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     pub other: Option<OneToOne<TestItem20, u32>>,
@@ -11,17 +12,16 @@ pub struct TestItem19 {
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem20 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     #[mapped_by("other")]
     pub other: OneToOneRef<TestItem19, u32>,
 }
 
-impl TestItem19 {
+impl TestItem19Create {
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             active: true,
             other: Some(OneToOne::new(1)),
@@ -29,13 +29,11 @@ impl TestItem19 {
     }
 }
 
-impl TestItem20 {
+impl TestItem20Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("Test1234")),
             active: false,
-            other: OneToOneRef::new(),
         }
     }
 }
@@ -56,9 +54,8 @@ async fn test_one_to_one() {
         assert!(TestItem19::truncate_table(&conn).await.is_ok());
     }
 
-    let mut test_item_20 = TestItem20::test();
-    test_item_20.persist(&conn).await.unwrap();
-    TestItem19::test2().persist(&conn).await.unwrap();
+    let test_item_20 = TestItem20Create::test().insert(&conn).await.unwrap();
+    TestItem19Create::test2().insert(&conn).await.unwrap();
 
     let result = test_item_20.get_other(&conn).await;
     assert!(result.is_ok());

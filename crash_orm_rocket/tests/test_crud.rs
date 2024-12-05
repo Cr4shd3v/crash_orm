@@ -25,7 +25,7 @@ async fn test_crud_operation() {
     let id = response.into_json::<u32>().await.unwrap();
 
     let response = client.post("/test/update").json(&TestCrud {
-        id: Some(id),
+        id,
         name: "test123".to_string(),
     }).dispatch().await;
     assert_eq!(response.status(), Status::Ok);
@@ -41,6 +41,6 @@ async fn test_crud_operation() {
 
 #[derive(Entity, Schema, Debug, Serialize, Deserialize, CRUD)]
 struct TestCrud {
-    id: Option<u32>,
+    id: u32,
     name: String,
 }

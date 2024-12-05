@@ -5,7 +5,7 @@ use crash_orm_test::{default_create_table, setup_test_connection};
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemTime {
-    id: Option<u32>,
+    id: u32,
     date: OffsetDateTime,
 }
 
@@ -15,11 +15,11 @@ pub async fn test_time() {
     default_create_table!(TestItemTime, conn);
 
     let date = OffsetDateTime::now_utc();
-    let mut entity = TestItemTime {
-        id: None,
+
+    TestItemTimeCreate {
         date,
-    };
-    entity.insert(&conn).await.unwrap();
+    }.insert(&conn).await.unwrap();
+
     let result = TestItemTime::query()
         .condition(TestItemTimeColumn::DATE.equals(date))
         .fetch_single(&conn).await;

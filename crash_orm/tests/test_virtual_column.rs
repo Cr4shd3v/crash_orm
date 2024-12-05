@@ -1,9 +1,9 @@
-use crash_orm::prelude::{Entity, EntityVec, EqualQueryColumn, RoundVirtualColumn, Schema, SqrtVirtualColumn, StringVirtualColumn};
+use crash_orm::prelude::{Entity, EntityCreateVec, EqualQueryColumn, RoundVirtualColumn, Schema, SqrtVirtualColumn, StringVirtualColumn};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem15 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     pub number: Option<i32>,
@@ -11,10 +11,9 @@ pub struct TestItem15 {
     pub sqrt: f64,
 }
 
-impl TestItem15 {
+impl TestItem15Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("Test1234")),
             active: false,
             number: Some(441),
@@ -25,7 +24,6 @@ impl TestItem15 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             active: true,
             number: Some(440),
@@ -45,8 +43,8 @@ async fn test_virtual_column() {
         assert!(TestItem15::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem15::test(), TestItem15::test2()]
-        .persist_all(&conn)
+    vec![TestItem15Create::test(), TestItem15Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

@@ -1,20 +1,19 @@
-use crash_orm::prelude::{Entity, EntityVec, MaxColumn, MinColumn, Schema};
+use crash_orm::prelude::{Entity, EntityCreateVec, MaxColumn, MinColumn, Schema};
 use crash_orm_test::setup_test_connection;
 use rust_decimal::Decimal;
 use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem9 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub name2: Option<String>,
     pub number: Option<Decimal>,
 }
 
-impl TestItem9 {
+impl TestItem9Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: None,
             number: Some(Decimal::new(3200, 3)),
@@ -23,7 +22,6 @@ impl TestItem9 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: Some(String::from("1234")),
             number: Some(Decimal::new(800, 3)),
@@ -41,8 +39,8 @@ async fn test_decimal() {
         assert!(TestItem9::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem9::test(), TestItem9::test2()]
-        .persist_all(&conn)
+    vec![TestItem9Create::test(), TestItem9Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

@@ -270,12 +270,6 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// This type references the column struct of this entity
     type ColumnType;
 
-    /// Get all values of this entity as vector for database insertion.
-    ///
-    /// This method is used internally and should not be used manually.
-    #[doc(hidden)]
-    fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
-
     /// Retrieves all entities
     async fn get_all(connection: &impl DatabaseConnection) -> Result<Vec<Self>> where Self: Sized;
 
@@ -349,11 +343,17 @@ pub(crate) fn slice_query_value_iter<'a>(
 
 /// Trait implemented for all create structs for an entity
 #[async_trait]
-pub trait CreateEntity<E: Entity> {
+pub trait CreateEntity<E: Entity>: Sync + Send + 'static {
     /// Converts self into an actual entity.
     ///
     /// Also generates the [uuid::Uuid] if needed.
     fn into_entity(self) -> E;
+
+    /// Get all values of this create entity as vector for database insertion.
+    ///
+    /// This method is used internally and should not be used manually.
+    #[doc(hidden)]
+    fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
 
     /// Calls [Self::into_entity] and inserts the new entity.
     async fn insert(self, connection: &impl DatabaseConnection) -> Result<E> where Self: Sized {

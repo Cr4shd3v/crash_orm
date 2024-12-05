@@ -1,20 +1,17 @@
-use crash_orm::prelude::{
-    CompareQueryColumn, Entity, EntityVec, OrderDirection, Schema,
-};
+use crash_orm::prelude::{CompareQueryColumn, Entity, EntityCreateVec, OrderDirection, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem17 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     pub number: Option<i32>,
 }
 
-impl TestItem17 {
+impl TestItem17Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("Test1234")),
             active: false,
             number: Some(441),
@@ -23,7 +20,6 @@ impl TestItem17 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             active: true,
             number: Some(440),
@@ -41,8 +37,8 @@ async fn test_order() {
         assert!(TestItem17::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem17::test(), TestItem17::test2()]
-        .persist_all(&conn)
+    vec![TestItem17Create::test(), TestItem17Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

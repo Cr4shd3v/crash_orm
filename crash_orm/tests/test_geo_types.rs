@@ -5,7 +5,7 @@ use crash_orm_test::{default_create_table, setup_test_connection};
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemGeoTypes {
-    id: Option<u32>,
+    id: u32,
     point: Point,
 }
 
@@ -15,11 +15,11 @@ pub async fn test_geo_types() {
     default_create_table!(TestItemGeoTypes, conn);
 
     let point = Point::new(2.0, 2.0);
-    let mut entity = TestItemGeoTypes {
-        id: None,
+
+    TestItemGeoTypesCreate {
         point,
-    };
-    entity.insert(&conn).await.unwrap();
+    }.insert(&conn).await.unwrap();
+
     let result = TestItemGeoTypes::query()
         .condition(TestItemGeoTypesColumn::POINT.equals(point))
         .fetch_single(&conn).await;

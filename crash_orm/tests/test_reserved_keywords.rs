@@ -3,7 +3,7 @@ use crash_orm_test::{default_create_table, setup_test_connection};
 
 #[derive(Entity, Schema, Debug)]
 pub struct TestItemReservedKeywords {
-    pub id: Option<u32>,
+    pub id: u32,
     pub all: bool,
     pub references: String,
     pub order: i32,
@@ -14,8 +14,7 @@ async fn test_reserved_keywords() {
     let conn = setup_test_connection().await;
     default_create_table!(TestItemReservedKeywords, conn);
 
-    TestItemReservedKeywords {
-        id: None,
+    TestItemReservedKeywordsCreate {
         all: true,
         references: "test".to_string(),
         order: 1,

@@ -1,18 +1,17 @@
-use crash_orm::prelude::{Entity, EntityVec, MaxColumn, MinColumn, NullQueryColumn, Schema, SingleResult};
+use crash_orm::prelude::{Entity, EntityCreateVec, MaxColumn, MinColumn, NullQueryColumn, Schema, SingleResult};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem8 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub name2: Option<String>,
     pub number: Option<i32>,
 }
 
-impl TestItem8 {
+impl TestItem8Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: None,
             number: Some(2),
@@ -21,7 +20,6 @@ impl TestItem8 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: Some(String::from("1234")),
             number: Some(15),
@@ -39,8 +37,8 @@ async fn test_min_max() {
         assert!(TestItem8::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem8::test(), TestItem8::test2()]
-        .persist_all(&conn)
+    vec![TestItem8Create::test(), TestItem8Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

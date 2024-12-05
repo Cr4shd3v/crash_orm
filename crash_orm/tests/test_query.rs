@@ -1,23 +1,21 @@
-use crash_orm::prelude::{Entity, EqualQueryColumn, NullQueryColumn, Schema};
+use crash_orm::prelude::{CreateEntity, Entity, EqualQueryColumn, NullQueryColumn, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem4 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name: Option<String>,
 }
 
-impl TestItem4 {
+impl TestItem4Create {
     fn test() -> Self {
         Self {
-            id: None,
             name: Some(String::from("test123")),
         }
     }
 
     fn test2() -> Self {
         Self {
-            id: None,
             name: Some(String::from("test1234")),
         }
     }
@@ -33,8 +31,8 @@ async fn test_query_simple() {
         assert!(TestItem4::truncate_table(&conn).await.is_ok());
     }
 
-    assert!(TestItem4::test().persist(&conn).await.is_ok());
-    assert!(TestItem4::test2().persist(&conn).await.is_ok());
+    assert!(TestItem4Create::test().insert(&conn).await.is_ok());
+    assert!(TestItem4Create::test2().insert(&conn).await.is_ok());
     let results = TestItem4::query()
         .condition(TestItem4Column::NAME.equals("test123"))
         .fetch(&conn)
@@ -54,16 +52,15 @@ async fn test_query_simple() {
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem5 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub name2: Option<String>,
     pub number: Option<i32>,
 }
 
-impl TestItem5 {
+impl TestItem5Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: None,
             number: Some(1),
@@ -72,7 +69,6 @@ impl TestItem5 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: Some(String::from("1234")),
             number: None,
@@ -90,8 +86,8 @@ async fn test_query_complex() {
         assert!(TestItem5::truncate_table(&conn).await.is_ok());
     }
 
-    assert!(TestItem5::test().persist(&conn).await.is_ok());
-    assert!(TestItem5::test2().persist(&conn).await.is_ok());
+    assert!(TestItem5Create::test().insert(&conn).await.is_ok());
+    assert!(TestItem5Create::test2().insert(&conn).await.is_ok());
 
     let results = TestItem5::query()
         .condition(TestItem5Column::NAME1.equals(String::from("test123")))

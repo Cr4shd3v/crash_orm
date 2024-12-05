@@ -5,7 +5,7 @@ use crash_orm_test::{default_create_table, setup_test_connection};
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemEuI48 {
-    id: Option<u32>,
+    id: u32,
     mac: MacAddress,
 }
 
@@ -15,11 +15,9 @@ async fn test_eui48() {
     default_create_table!(TestItemEuI48, conn);
 
     let mac = MacAddress::broadcast();
-    let mut entity = TestItemEuI48 {
-        id: None,
+    TestItemEuI48Create {
         mac,
-    };
-    entity.insert(&conn).await.unwrap();
+    }.insert(&conn).await.unwrap();
 
     let item = TestItemEuI48::query()
         .condition(TestItemEuI48Column::MAC.equals(mac))

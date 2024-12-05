@@ -5,7 +5,7 @@ use crash_orm_test::{default_create_table, setup_test_connection};
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemBitVec {
-    id: Option<u32>,
+    id: u32,
     bit_vec: BitVec,
 }
 
@@ -15,11 +15,11 @@ async fn test_bit_vec() {
     default_create_table!(TestItemBitVec, conn);
 
     let bit_vec = BitVec::from_bytes(&[1, 2, 3]);
-    let mut entity = TestItemBitVec {
-        id: None,
+
+    TestItemBitVecCreate {
         bit_vec: bit_vec.clone(),
-    };
-    entity.insert(&conn).await.unwrap();
+    }.insert(&conn).await.unwrap();
+
     let result = TestItemBitVec::query()
         .condition(TestItemBitVecColumn::BIT_VEC.equals(bit_vec))
         .fetch_single(&conn).await;

@@ -1,18 +1,17 @@
-use crash_orm::prelude::{Entity, EntityVec, NullQueryColumn, Schema, SingleResult, SumColumn};
+use crash_orm::prelude::{Entity, EntityCreateVec, NullQueryColumn, Schema, SingleResult, SumColumn};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem7 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub name2: Option<String>,
     pub number: Option<i32>,
 }
 
-impl TestItem7 {
+impl TestItem7Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: None,
             number: Some(2),
@@ -21,7 +20,6 @@ impl TestItem7 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: Some(String::from("1234")),
             number: Some(15),
@@ -39,8 +37,8 @@ async fn test_sum() {
         assert!(TestItem7::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem7::test(), TestItem7::test2()]
-        .persist_all(&conn)
+    vec![TestItem7Create::test(), TestItem7Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

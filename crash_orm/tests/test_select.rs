@@ -1,21 +1,18 @@
-use crash_orm::prelude::{
-    BoolQueryColumn, Entity, EntityVec, Schema, StringVirtualColumn,
-};
+use crash_orm::prelude::{BoolQueryColumn, Entity, EntityCreateVec, Schema, StringVirtualColumn};
 use crash_orm_test::setup_test_connection;
 use tokio_postgres::Row;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem16 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     pub number: Option<i32>,
 }
 
-impl TestItem16 {
+impl TestItem16Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("Test1234")),
             active: false,
             number: Some(441),
@@ -24,7 +21,6 @@ impl TestItem16 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             active: true,
             number: Some(440),
@@ -42,8 +38,8 @@ async fn test_select() {
         assert!(TestItem16::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem16::test(), TestItem16::test2()]
-        .persist_all(&conn)
+    vec![TestItem16Create::test(), TestItem16Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

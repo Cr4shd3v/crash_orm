@@ -3,16 +3,15 @@ use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem6 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub name2: Option<String>,
     pub number: Option<i32>,
 }
 
-impl TestItem6 {
+impl TestItem6Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: None,
             number: Some(1),
@@ -21,7 +20,6 @@ impl TestItem6 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             name2: Some(String::from("1234")),
             number: None,
@@ -30,7 +28,6 @@ impl TestItem6 {
 
     fn test3() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test1234")),
             name2: Some(String::from("1234")),
             number: None,
@@ -48,8 +45,8 @@ async fn test_count() {
         assert!(TestItem6::truncate_table(&conn).await.is_ok());
     }
 
-    assert!(vec![TestItem6::test(), TestItem6::test2(), TestItem6::test3()]
-        .persist_all(&conn)
+    assert!(vec![TestItem6Create::test(), TestItem6Create::test2(), TestItem6Create::test3()]
+        .insert_all(&conn)
         .await
         .is_ok());
 

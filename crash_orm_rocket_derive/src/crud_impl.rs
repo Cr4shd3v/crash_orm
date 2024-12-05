@@ -18,7 +18,7 @@ pub fn crud_impl(input: TokenStream) -> TokenStream {
                 use crash_orm::entity::CreateEntity;
                 let element = json.0.insert(&**conn).await.unwrap();
 
-                rocket::serde::json::Json(element.id.unwrap())
+                rocket::serde::json::Json(element.id)
             }
 
             #[rocket::get("/get/<id>")]

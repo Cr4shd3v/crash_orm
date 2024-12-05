@@ -1,20 +1,17 @@
-use crash_orm::prelude::{
-    Entity, EntityVec, EqualQueryColumn, Schema, TextCastVirtualColumn,
-};
+use crash_orm::prelude::{Entity, EntityCreateVec, EqualQueryColumn, Schema, TextCastVirtualColumn};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem18 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     pub number: Option<i32>,
 }
 
-impl TestItem18 {
+impl TestItem18Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("Test1234")),
             active: false,
             number: Some(441),
@@ -23,7 +20,6 @@ impl TestItem18 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             active: true,
             number: Some(440),
@@ -41,8 +37,8 @@ async fn test_cast() {
         assert!(TestItem18::truncate_table(&conn).await.is_ok());
     }
 
-    vec![TestItem18::test(), TestItem18::test2()]
-        .persist_all(&conn)
+    vec![TestItem18Create::test(), TestItem18Create::test2()]
+        .insert_all(&conn)
         .await
         .unwrap();
 

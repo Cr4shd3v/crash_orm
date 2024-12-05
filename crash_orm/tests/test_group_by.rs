@@ -5,23 +5,20 @@ use uuid::Uuid;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemGroupBy {
-    id: Option<Uuid>,
+    id: Uuid,
     number: i32,
 }
 
-impl TestItemGroupBy {
+impl TestItemGroupByCreate {
     fn test_items() -> Vec<Self> {
         vec![
             Self {
-                id: Some(Uuid::now_v7()),
                 number: 1,
             },
             Self {
-                id: Some(Uuid::now_v7()),
                 number: 1,
             },
             Self {
-                id: Some(Uuid::now_v7()),
                 number: 2,
             },
         ]
@@ -38,7 +35,7 @@ async fn test_group_by() {
         assert!(TestItemGroupBy::truncate_table(&conn).await.is_ok());
     }
 
-    TestItemGroupBy::test_items().insert_all(&conn).await.unwrap();
+    TestItemGroupByCreate::test_items().insert_all(&conn).await.unwrap();
 
     let results = TestItemGroupBy::select_query::<Row>(&[&TestItemGroupByColumn::ID.count_column(false)])
         .add_group_by(&TestItemGroupByColumn::NUMBER)

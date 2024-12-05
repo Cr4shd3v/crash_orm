@@ -3,14 +3,13 @@ use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem1 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name: String,
 }
 
-impl TestItem1 {
+impl TestItem1Create {
     fn test() -> Self {
         Self {
-            id: None,
             name: String::from("test123"),
         }
     }
@@ -24,11 +23,8 @@ async fn test_basic() {
         TestItem1::create_table(&conn).await.unwrap();
     }
 
-    let mut item = TestItem1::test();
-
-    item.insert(&conn).await.unwrap();
-    assert!(item.id.is_some());
-    let item = TestItem1::get_by_primary(&conn, item.id.unwrap()).await;
+    let item = TestItem1Create::test().insert(&conn).await.unwrap();
+    let item = TestItem1::get_by_primary(&conn, item.id).await;
     assert!(item.is_ok());
     let mut item = item.unwrap();
     println!("{:?}", item);
@@ -40,14 +36,13 @@ async fn test_basic() {
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem01 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name: String,
 }
 
-impl TestItem01 {
+impl TestItem01Create {
     fn test() -> Self {
         Self {
-            id: None,
             name: String::from("test123"),
         }
     }
@@ -61,12 +56,10 @@ async fn test_persist() {
         TestItem01::create_table(&conn).await.unwrap();
     }
 
-    let mut item = TestItem01::test();
-    item.persist(&conn).await.unwrap();
-    assert!(item.id.is_some());
+    let mut item = TestItem01Create::test().insert(&conn).await.unwrap();
     item.name = String::from("test_updated");
-    assert!(item.persist(&conn).await.is_ok());
-    let item_from_db = TestItem01::get_by_primary(&conn, item.id.unwrap()).await;
+    assert!(item.update(&conn).await.is_ok());
+    let item_from_db = TestItem01::get_by_primary(&conn, item.id).await;
     assert!(item_from_db.is_ok());
     let item_from_db = item_from_db.unwrap();
     assert_eq!(&*item_from_db.name, "test_updated");
@@ -78,14 +71,13 @@ async fn test_persist() {
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem2 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name: String,
 }
 
-impl TestItem2 {
+impl TestItem2Create {
     fn test() -> Self {
         Self {
-            id: None,
             name: String::from("test123"),
         }
     }
@@ -99,7 +91,7 @@ async fn test_get_all() {
         TestItem2::create_table(&conn).await.unwrap();
     }
 
-    vec![TestItem2::test(), TestItem2::test(), TestItem2::test()]
+    vec![TestItem2Create::test(), TestItem2Create::test(), TestItem2Create::test()]
         .insert_all(&conn)
         .await
         .unwrap();
@@ -117,14 +109,13 @@ async fn test_get_all() {
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem3 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name: String,
 }
 
-impl TestItem3 {
+impl TestItem3Create {
     fn test() -> Self {
         Self {
-            id: None,
             name: String::from("test123"),
         }
     }
@@ -136,7 +127,7 @@ async fn test_schema() {
 
     assert_eq!(TestItem3::TABLE_NAME, "test_item_3");
     assert!(TestItem3::create_table(&conn).await.is_ok());
-    assert!(TestItem3::test().persist(&conn).await.is_ok());
+    assert!(TestItem3Create::test().insert(&conn).await.is_ok());
     let all = TestItem3::get_all(&conn).await;
     assert!(all.is_ok());
     assert_eq!(all.unwrap().len(), 1);
@@ -148,7 +139,7 @@ async fn test_schema() {
     assert!(exists.is_ok());
     assert!(exists.unwrap());
     assert!(TestItem3::drop_table(&conn).await.is_ok());
-    assert!(TestItem3::test().persist(&conn).await.is_err());
+    assert!(TestItem3Create::test().insert(&conn).await.is_err());
     let exists = TestItem3::table_exists(&conn).await;
     assert!(exists.is_ok());
     assert!(!exists.unwrap());

@@ -5,13 +5,13 @@ use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemUuid {
-    pub id: Option<Uuid>,
+    pub id: Uuid,
     pub test: u32,
 }
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItemI32 {
-    pub id: Option<i32>,
+    pub id: i32,
     pub t: u32,
     pub test_item_uuid: OneToOne<TestItemUuid, Uuid>,
 }
@@ -27,15 +27,12 @@ async fn test_uuid() {
     }
 
     // Automatically generate a uuid v4 through selected feature flag
-    let mut entity = TestItemUuid {
-        id: None,
+    let entity = TestItemUuidCreate {
         test: 111,
-    };
-
-    entity.insert(&conn).await.unwrap();
+    }.insert(&conn).await.unwrap();
 
     let result = TestItemUuid::query()
-        .condition(TestItemUuidColumn::ID.equals(entity.id.unwrap()))
+        .condition(TestItemUuidColumn::ID.equals(entity.id))
         .fetch(&conn).await.unwrap();
     assert_eq!(result.len(), 1);
     assert_eq!(result[0].test, 111);

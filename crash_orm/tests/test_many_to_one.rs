@@ -1,9 +1,9 @@
-use crash_orm::prelude::{Entity, EntityVec, ManyToOne, OneToMany, Schema};
+use crash_orm::prelude::{CreateEntity, Entity, ManyToOne, OneToMany, Schema};
 use crash_orm_test::setup_test_connection;
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem21 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     pub other: Option<ManyToOne<TestItem22, u32>>,
@@ -11,17 +11,16 @@ pub struct TestItem21 {
 
 #[derive(Entity, Debug, Schema)]
 pub struct TestItem22 {
-    pub id: Option<u32>,
+    pub id: u32,
     pub name1: Option<String>,
     pub active: bool,
     #[mapped_by("other")]
     pub test_items_21: OneToMany<TestItem21, u32>,
 }
 
-impl TestItem21 {
+impl TestItem21Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test123")),
             active: false,
             other: None,
@@ -30,7 +29,6 @@ impl TestItem21 {
 
     fn test2() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("test321")),
             active: true,
             other: Some(ManyToOne::new(1)),
@@ -38,13 +36,11 @@ impl TestItem21 {
     }
 }
 
-impl TestItem22 {
+impl TestItem22Create {
     fn test() -> Self {
         Self {
-            id: None,
             name1: Some(String::from("Test1234")),
             active: false,
-            test_items_21: OneToMany::new(),
         }
     }
 }
@@ -65,14 +61,11 @@ async fn test_many_to_one() {
 
     assert!(TestItem21::create_table(&conn).await.is_ok());
 
-    let mut target_item = TestItem22::test();
-    target_item.persist(&conn).await.unwrap();
-    let mut test_item = TestItem21::test();
+    let target_item = TestItem22Create::test().insert(&conn).await.unwrap();
+    let mut test_item = TestItem21Create::test().insert(&conn).await.unwrap();
     test_item.set_other(Some(&target_item)).unwrap();
-    vec![test_item, TestItem21::test2()]
-        .persist_all(&conn)
-        .await
-        .unwrap();
+    test_item.update(&conn).await.unwrap();
+    TestItem21Create::test2().insert(&conn).await.unwrap();
 
     let results = TestItem21::query().fetch(&conn).await;
     assert!(results.is_ok());
