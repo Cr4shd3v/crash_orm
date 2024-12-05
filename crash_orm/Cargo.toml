@@ -23,6 +23,8 @@ with-bit-vec = ["bit-vec", "tokio-postgres/with-bit-vec-0_6"]
 with-time = ["time", "tokio-postgres/with-time-0_3"]
 with-geo-types = ["geo-types", "tokio-postgres/with-geo-types-0_7"]
 serialize = []
+uuid-gen-v4 = ["with-uuid", "uuid/v4", "crash_orm_derive/uuid-gen-v4"]
+uuid-gen-v7 = ["with-uuid", "uuid/v7", "crash_orm_derive/uuid-gen-v7"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -42,7 +44,7 @@ time = { workspace = true, optional = true }
 geo-types = { workspace = true, optional = true }
 
 [dev-dependencies]
-crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "json", "with-eui48", "with-bit-vec", "with-time", "with-geo-types", "migration", "serialize"] }
+crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "json", "with-eui48", "with-bit-vec", "with-time", "with-geo-types", "migration", "serialize", "uuid-gen-v4"] }
 tokio-test = { workspace = true }
 crash_orm_test = { workspace = true }
 uuid = { workspace = true, features = ["v7"] }

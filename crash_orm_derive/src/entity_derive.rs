@@ -19,6 +19,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut all_field_self_values_format = String::new();
     let mut insert_field_names = vec![];
     let mut insert_field_self_values = quote!();
+    let mut insert_field_values = quote!();
+    let mut update_field_self_values = quote!();
     let mut insert_field_self_values_format = String::new();
     let mut update_fields = vec![];
     let mut column_consts = quote!();
@@ -234,6 +236,14 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 &self.#field_ident,
             });
 
+            insert_field_values.extend(quote! {
+                &self.#field_ident,
+            });
+
+            update_field_self_values.extend(quote! {
+                &self.#field_ident,
+            });
+
             update_index += 1;
             update_fields.push(format!("{} = ${}", escape_reserved_keywords(&field_ident_str), update_index));
 
@@ -245,6 +255,19 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             insert_field_self_values.extend(quote! {
                 &self.#field_ident,
+            });
+
+            #[cfg(not(any(feature = "uuid-gen-v4", feature = "uuid-gen-v7")))]
+            insert_field_values.extend(quote! {
+                &self.#field_ident,
+            });
+            #[cfg(feature = "uuid-gen-v4")]
+            insert_field_values.extend(quote! {
+                &uuid::Uuid::new_v4(),
+            });
+            #[cfg(feature = "uuid-gen-v7")]
+            insert_field_values.extend(quote! {
+                &uuid::Uuid::now_v7(),
             });
 
             insert_index += 1;
@@ -282,7 +305,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             ident_str, update_fields.join(","), primary_field_name, insert_index
         );
         quote! {
-            connection.execute_query(#update_string,&[#insert_field_self_values &self.#primary_key_ident]).await?;
+            connection.execute_query(#update_string,&[#update_field_self_values &self.#primary_key_ident]).await?;
         }
     };
 
@@ -371,7 +394,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             }
 
             async fn insert_get_id(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#primary_type> {
-                let rows = connection.query_many(#insert_string,&[#insert_field_self_values]).await?;
+                let rows = connection.query_many(#insert_string,&[#insert_field_values]).await?;
                 Ok(rows.get(0).unwrap().get(0))
             }
         }

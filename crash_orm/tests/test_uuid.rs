@@ -26,13 +26,13 @@ async fn test_uuid() {
         assert!(TestItemUuid::truncate_table(&conn).await.is_ok());
     }
 
-    let uuid = Uuid::now_v7();
+    // Automatically generate a uuid v4 through selected feature flag
     let entity = TestItemUuid {
-        id: Some(uuid),
+        id: None,
         test: 111,
     };
 
-    assert!(entity.insert_get_id(&conn).await.is_ok());
+    let uuid = entity.insert_get_id(&conn).await.unwrap();
 
     let result = TestItemUuid::query()
         .condition(TestItemUuidColumn::ID.equals(uuid))

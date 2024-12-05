@@ -20,3 +20,8 @@ proc-macro = true
 syn = { workspace = true, features = ["full"] }
 quote = { workspace = true }
 convert_case = { workspace = true }
+
+[features]
+default = []
+uuid-gen-v4 = []
+uuid-gen-v7 = []

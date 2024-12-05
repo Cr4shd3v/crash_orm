@@ -11,6 +11,9 @@ mod util;
 mod result_mapping_derive;
 mod reserved_keywords;
 
+#[cfg(all(feature = "uuid-gen-v4", feature = "uuid-gen-v7"))]
+compile_error!("Conflicting features: You cannot have gen-uuid-v4 and gen-uuid-v7 active at the same time!");
+
 #[proc_macro_derive(Entity, attributes(mapped_by, primary_key))]
 pub fn derive_entity(input: TokenStream) -> TokenStream {
     let mut output = derive_entity_impl(input.clone());
