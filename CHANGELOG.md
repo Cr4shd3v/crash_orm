@@ -1,3 +1,17 @@
+# v0.7.0
+- feat!: primary keys are no longer options
+- feat: added delete query for bulk removal
+- feat!: removed insert_get_id, insert_set_id, now only insert
+- feat: added create structs for each entity for better creation
+- feat: auto set uuid per feature flag
+- feat: change json db type to jsonb
+- feat: Entity::remove no longer needs mutable access
+- feat(migration): added down methods for migration manager
+- feat(rocket): added rocket integration crate
+  - initialize database connection
+  - run migrations
+  - generate rocket routes for crud operations
+
 # v0.6.3
 - fix: fix not escaped update statement
 

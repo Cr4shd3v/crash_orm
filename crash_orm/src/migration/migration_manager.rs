@@ -75,7 +75,7 @@ pub trait CrashOrmMigrationManager: Sync + Send + 'static {
     async fn migrate_down_prev(conn: &CrashOrmDatabaseConnection) -> crate::Result<()> {
         let local_migrations = Self::get_migrations();
 
-        let mut latest = CrashOrmMigrationRecord::query()
+        let latest = CrashOrmMigrationRecord::query()
             .order(&CrashOrmMigrationRecordColumn::ID, OrderDirection::DESC)
             .fetch_single(conn).await?;
 

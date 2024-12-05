@@ -411,7 +411,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 Ok(())
             }
 
-            async fn remove(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
+            async fn remove(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 connection.execute_query(#delete_string, &[&self.#primary_key_ident]).await?;
                 Ok(())
             }

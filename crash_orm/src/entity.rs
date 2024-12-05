@@ -29,11 +29,7 @@
 //! There are a few functions on each entity to save them into the database.
 //!
 //! ### Insert Entity
-//! To save a new entity you can use either insert_get_id or insert_set_id.
-//!
-//! The difference between the two is simple:
-//! - insert_get_id: Only requires an immutable reference to self and simply returns the id from the insertion
-//! - insert_set_id: Requires a mutable reference to self and automatically sets the id on the entity in Rust
+//! To save a new entity you can use insert on the Create entity.
 //!
 //! Example:
 //!
@@ -57,9 +53,11 @@
 //! ```
 //!
 //! #### Exception: Uuid
-//! When inserting an entity with a uuid as primary key, **you** are responsible for generating the uuid.
+//! When inserting an entity with uuid as primary key, **you** are responsible for generating the uuid.
 //!
 //! This is because there are many different versions of uuid, and you can choose which you want to use.
+//!
+//! However, you can choose to automatically generate uuid v4 or v7 for new entity through the feature flags `uuid-gen-v4` and `uuid-gen-v7`.
 //!
 //! ### Update Entity
 //! Updating an entity is way simpler, since there is only one function.
@@ -183,8 +181,6 @@
 //! # });
 //! ```
 //!
-//! NOTE: After this function call, the id of the entity will be empty! (This is why it needs &mut self).
-//!
 //! ## Functions for Vec\<Entity>
 //! There are two utility functions to help with saving or deleting many entities.
 //!
@@ -283,7 +279,7 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     async fn insert(&mut self, connection: &impl DatabaseConnection) -> Result<()>;
 
     /// Removes the entity from the database
-    async fn remove(&mut self, connection: &impl DatabaseConnection) -> Result<()>;
+    async fn remove(&self, connection: &impl DatabaseConnection) -> Result<()>;
 
     /// Updates the entity in the database
     async fn update(&self, connection: &impl DatabaseConnection) -> Result<()>;
