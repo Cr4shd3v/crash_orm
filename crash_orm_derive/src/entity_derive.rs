@@ -394,8 +394,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             }
 
             async fn insert_get_id(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#primary_type> {
-                let rows = connection.query_many(#insert_string,&[#insert_field_values]).await?;
-                Ok(rows.get(0).unwrap().get(0))
+                let row = connection.query_single(#insert_string,&[#insert_field_values]).await?;
+                Ok(row.get(0))
             }
         }
     };
