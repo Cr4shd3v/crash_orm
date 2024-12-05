@@ -17,6 +17,7 @@ jobs:
         image: postgres
         env:
           POSTGRES_DB: crash_orm_test
+          POSTGRES_USER: crash_orm
           POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
@@ -34,7 +35,7 @@ jobs:
       - name: Cargo test
         run: cargo test
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost/crash_orm_test
+          DATABASE_URL: postgres://crash_orm:postgres@localhost/crash_orm_test
   create-release:
     if: github.repository_owner == 'Cr4shd3v'
     needs:
