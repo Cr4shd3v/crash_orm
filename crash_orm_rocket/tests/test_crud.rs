@@ -5,6 +5,7 @@ use crash_orm::prelude::*;
 use crash_orm_rocket::CrashOrmDatabaseFairing;
 use crash_orm_rocket_derive::CRUD;
 use crash_orm_test::TEST_DB_URL;
+use crate::testcrud::TestCrudCreate;
 
 #[tokio::test]
 async fn test_crud_operation() {

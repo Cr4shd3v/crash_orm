@@ -29,51 +29,56 @@ pub fn crud_impl(input: TokenStream) -> TokenStream {
     }
 
     let create_ident = Ident::new(&*format!("{}Create", ident), ident.span());
+    let mod_ident = Ident::new(&*ident.to_string().to_lowercase(), ident.span());
 
     let output = quote! {
-        #[derive(serde::Deserialize, serde::Serialize)]
-        struct #create_ident {
-            #create_fields
-        }
+        mod #mod_ident {
+            use super::#ident;
 
-        #[rocket::post("/create", data = "<json>")]
-        async fn create(json: rocket::serde::json::Json<#create_ident>, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<u32> {
-            let mut element = #ident {
-                id: None,
-                #field_mapping
-            };
+            #[derive(serde::Deserialize, serde::Serialize)]
+            pub struct #create_ident {
+                #create_fields
+            }
 
-            use crash_orm::entity::Entity;
-            element.insert_set_id(&**conn).await.unwrap();
+            #[rocket::post("/create", data = "<json>")]
+            pub async fn create(json: rocket::serde::json::Json<#create_ident>, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<u32> {
+                let mut element = #ident {
+                    id: None,
+                    #field_mapping
+                };
 
-            rocket::serde::json::Json(element.id.unwrap())
-        }
+                use crash_orm::entity::Entity;
+                element.insert_set_id(&**conn).await.unwrap();
 
-        #[rocket::get("/get/<id>")]
-        async fn read(id: u32, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<#ident> {
-            use crash_orm::entity::Entity;
-            rocket::serde::json::Json(#ident::get_by_primary(&**conn, id).await.unwrap())
-        }
+                rocket::serde::json::Json(element.id.unwrap())
+            }
 
-        #[rocket::post("/update", data = "<json>")]
-        async fn update(json: rocket::serde::json::Json<#ident>, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<bool> {
-            use crash_orm::entity::Entity;
-            json.0.update(&**conn).await.unwrap();
+            #[rocket::get("/get/<id>")]
+            pub async fn read(id: u32, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<#ident> {
+                use crash_orm::entity::PrimaryKeyEntity;
+                rocket::serde::json::Json(#ident::get_by_primary(&**conn, id).await.unwrap())
+            }
 
-            rocket::serde::json::Json(true)
-        }
+            #[rocket::post("/update", data = "<json>")]
+            pub async fn update(json: rocket::serde::json::Json<#ident>, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<bool> {
+                use crash_orm::entity::Entity;
+                json.0.update(&**conn).await.unwrap();
 
-        #[rocket::delete("/delete/<id>")]
-        async fn delete(id: u32, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<bool> {
-            use crash_orm::entity::Entity;
-            #ident::get_by_primary(&**conn, id).await.unwrap().remove(&**conn).await.unwrap();
+                rocket::serde::json::Json(true)
+            }
 
-            rocket::serde::json::Json(true)
+            #[rocket::delete("/delete/<id>")]
+            pub async fn delete(id: u32, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<bool> {
+                use crash_orm::entity::{Entity, PrimaryKeyEntity};
+                #ident::get_by_primary(&**conn, id).await.unwrap().remove(&**conn).await.unwrap();
+
+                rocket::serde::json::Json(true)
+            }
         }
 
         impl #ident {
             pub fn get_crud_routes() -> Vec<rocket::Route> {
-                rocket::routes![create, read, update, delete]
+                rocket::routes![#mod_ident::create, #mod_ident::read, #mod_ident::update, #mod_ident::delete]
             }
         }
     };
