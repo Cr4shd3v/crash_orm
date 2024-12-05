@@ -53,3 +53,7 @@ jobs:
         run: cargo publish --no-verify -p crash_orm_derive --token ${{ secrets.CRATES_TOKEN }}
       - name: Publish crash_orm to crates
         run: cargo publish --no-verify -p crash_orm --token ${{ secrets.CRATES_TOKEN }}
+      - name: Publish crash_orm to crates
+        run: cargo publish --no-verify -p crash_orm_rocket_derive --token ${{ secrets.CRATES_TOKEN }}
+      - name: Publish crash_orm to crates
+        run: cargo publish --no-verify -p crash_orm_rocket --token ${{ secrets.CRATES_TOKEN }}
