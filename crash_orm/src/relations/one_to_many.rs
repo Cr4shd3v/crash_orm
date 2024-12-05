@@ -31,13 +31,13 @@ sql_impl_for_relation!(ManyToOne);
 ///
 /// #[derive(Entity, Debug)]
 /// struct TestItem1 {
-///     id: Option<u32>,
+///     id: u32,
 ///     item2: ManyToOne<TestItem2, u32>,
 /// }
 ///
 /// #[derive(Entity, Debug)]
 /// struct TestItem2 {
-///     id: Option<u32>,
+///     id: u32,
 ///     test: String,
 ///     #[mapped_by("item2")]
 ///     item1: OneToMany<TestItem1, u32>,

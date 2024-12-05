@@ -13,7 +13,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //!     pub other: Option<OneToOne<TestItem2, u32>>, // nullable
@@ -21,7 +21,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem2 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //! }
@@ -60,7 +60,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //!     pub other: Option<OneToOne<TestItem2, u32>>,
@@ -68,7 +68,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem2 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //!     #[mapped_by("other")]
@@ -87,7 +87,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //!     pub other: Option<ManyToOne<TestItem2, u32>>,
@@ -95,7 +95,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem2 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //! }
@@ -131,7 +131,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem1 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //!     pub other: Option<ManyToOne<TestItem2, u32>>,
@@ -139,7 +139,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! pub struct TestItem2 {
-//!     pub id: Option<u32>,
+//!     pub id: u32,
 //!     pub name1: Option<String>,
 //!     pub active: bool,
 //!     #[mapped_by("other")]

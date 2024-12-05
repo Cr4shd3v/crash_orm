@@ -373,12 +373,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::prelude::CreateEntity<#ident> for #ident_create {
-            fn get_values(&self) -> Vec<&(dyn crash_orm::postgres::types::ToSql + Sync)> {
-                vec![
-                    #insert_field_self_values
-                ]
-            }
-
             fn into_entity(self) -> #ident {
                 #ident {
                     #create_fields_mapping
@@ -393,6 +387,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             const __INSERT_FIELD_NAMES: &'static str = #insert_field_names;
 
             type ColumnType = #ident_column;
+
+            fn get_values(&self) -> Vec<&(dyn crash_orm::postgres::types::ToSql + Sync)> {
+                vec![
+                    #insert_field_self_values
+                ]
+            }
 
             async fn get_all(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
                 let rows = connection.query_many(#select_all_string, &[]).await?;

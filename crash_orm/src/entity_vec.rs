@@ -47,12 +47,12 @@ pub trait EntityCreateVec<T: PrimaryKeyEntity<P>, P: ColumnType> {
     /// Batch insert all entities in the vector
     ///
     /// This does **not** update the ids of the entity if needed.
-    async fn insert_all(&self, connection: &impl DatabaseConnection) -> crate::Result<()>;
+    async fn insert_all(self, connection: &impl DatabaseConnection) -> crate::Result<()>;
 }
 
 #[async_trait]
 impl<C: CreateEntity<T>, T: PrimaryKeyEntity<P>, P: ColumnType> EntityCreateVec<T, P> for Vec<C> {
-    async fn insert_all(&self, connection: &impl DatabaseConnection) -> crate::Result<()> {
+    async fn insert_all(self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         if self.is_empty() {
             return Ok(());
         }
@@ -64,9 +64,11 @@ impl<C: CreateEntity<T>, T: PrimaryKeyEntity<P>, P: ColumnType> EntityCreateVec<
             }).collect::<Vec<String>>().join(","))
         }).collect::<Vec<String>>().join(",");
 
-        let values = self.iter().map(|entity| entity.get_values()).flatten().collect::<Vec<&(dyn ToSql + Sync)>>();
+        let transformed = self.into_iter().map(CreateEntity::into_entity).collect::<Vec<T>>();
+        let values = transformed.iter().map(|entity| entity.get_values()).flatten().collect::<Vec<&(dyn ToSql + Sync)>>();
 
         let query = format!("INSERT INTO {}({}) VALUES {}", T::TABLE_NAME, T::__INSERT_FIELD_NAMES, insert_values_string);
+        println!("{:?}", query);
         connection.execute_query(&*query, values.as_slice()).await?;
 
         Ok(())

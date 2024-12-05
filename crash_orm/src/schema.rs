@@ -9,7 +9,7 @@
 //!
 //! #[derive(Entity, Debug, Schema)]
 //! struct TestEntity {
-//!     id: Option<u32>,
+//!     id: u32,
 //! }
 //! ```
 //!
@@ -22,7 +22,7 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
@@ -40,7 +40,7 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
@@ -58,7 +58,7 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
@@ -76,7 +76,7 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestEntity {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {

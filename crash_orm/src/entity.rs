@@ -5,8 +5,7 @@
 //! ## Declaration
 //! To declare an entity you must do the following things:
 //! - declare a struct
-//! - add a field named "id" with the type Option\<u32>
-//!   - despite being an option, the column resulting from id will not be nullable!
+//! - add a field named "id"
 //! - derive Entity and Debug
 //!
 //! Below is a minimal example:
@@ -16,7 +15,7 @@
 //!
 //! #[derive(Entity, Debug)]
 //! struct TestItem {
-//!     id: Option<u32>,
+//!     id: u32,
 //! }
 //! ```
 //!
@@ -44,17 +43,16 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItemInsert {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemInsert::create_table_if_not_exists(&conn).await.unwrap();
-//! let mut entity = TestItemInsert { id: None };
-//! entity.insert(&conn).await.unwrap();
+//! let entity = TestItemInsertCreate {  }.insert(&conn).await.unwrap();
 //!
-//! let entity2 = TestItemInsert { id: None };
-//! let id = entity.insert(&conn).await.unwrap();
+//! let entity2 = TestItemInsertCreate {  };
+//! let id = entity2.insert(&conn).await.unwrap();
 //! # });
 //! ```
 //!
@@ -73,15 +71,14 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItemUpdate {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemUpdate::create_table_if_not_exists(&conn).await.unwrap();
-//! # let mut entity2 = TestItemUpdate { id: None };
-//! # entity2.insert(&conn).await.unwrap();
-//! let entity = TestItemUpdate::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
+//! # let entity2 = TestItemUpdateCreate {  }.insert(&conn).await.unwrap();
+//! let entity = TestItemUpdate::get_by_primary(&conn, entity2.id).await.unwrap();
 //! // Modify entity properties
 //! entity.update(&conn).await.unwrap();
 //! # });
@@ -102,17 +99,17 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItemPersist {
-//! #    id: Option<u32>,
+//! #    id: u32,
+//! #    test: i32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemPersist::create_table_if_not_exists(&conn).await.unwrap();
-//! # let mut entity2 = TestItemPersist { id: None };
-//! # entity2.insert(&conn).await.unwrap();
-//! let mut entity = TestItemPersist::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
+//! # let entity2 = TestItemPersistCreate { test: 1 }.insert(&conn).await.unwrap();
+//! let entity = TestItemPersist::get_by_primary(&conn, entity2.id).await.unwrap();
 //! // Modify entity properties
-//! entity.persist(&conn).await.unwrap();
+//! entity.update(&conn).await.unwrap();
 //! # });
 //! ```
 //!
@@ -132,15 +129,14 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItemGetById {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemGetById::create_table_if_not_exists(&conn).await.unwrap();
-//! # let mut entity2 = TestItemGetById { id: None };
-//! # entity2.insert(&conn).await.unwrap();
-//! let entity = TestItemGetById::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
+//! # let entity2 = TestItemGetByIdCreate {  }.insert(&conn).await.unwrap();
+//! let entity = TestItemGetById::get_by_primary(&conn, entity2.id).await.unwrap();
 //! # });
 //! ```
 //!
@@ -156,7 +152,7 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItemGetAll {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
@@ -175,15 +171,14 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItemRemove {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemRemove::create_table_if_not_exists(&conn).await.unwrap();
-//! # let mut entity2 = TestItemRemove { id: None };
-//! # entity2.insert(&conn).await.unwrap();
-//! let mut entity = TestItemRemove::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
+//! # let entity2 = TestItemRemoveCreate {  }.insert(&conn).await.unwrap();
+//! let mut entity = TestItemRemove::get_by_primary(&conn, entity2.id).await.unwrap();
 //! entity.remove(&conn).await.unwrap();
 //! # });
 //! ```
@@ -193,7 +188,7 @@
 //! ## Functions for Vec\<Entity>
 //! There are two utility functions to help with saving or deleting many entities.
 //!
-//! ### Persist Vec\<Entity>
+//! ### Insert Vec\<Entity>
 //! You can save an entire vector of entities with just one function call:
 //!
 //! ```rust
@@ -202,16 +197,17 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItemPersist {
-//! #    id: Option<u32>,
+//! #    id: u32,
+//! #    test: i32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemPersist::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity_1 = TestItemPersist { id: None };
-//! # let entity_n = TestItemPersist { id: None };
-//! let mut entities = vec![entity_1, /*...,*/ entity_n];
-//! entities.persist_all(&conn).await.unwrap();
+//! # let entity_1 = TestItemPersistCreate { test: 1 };
+//! # let entity_n = TestItemPersistCreate { test: 2 };
+//! let entities = vec![entity_1, /*...,*/ entity_n];
+//! entities.insert_all(&conn).await.unwrap();
 //! # });
 //! ```
 //!
@@ -224,16 +220,15 @@
 //!
 //! # #[derive(Entity, Debug, Schema)]
 //! # struct TestItem {
-//! #    id: Option<u32>,
+//! #    id: u32,
 //! # }
 //!
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItem::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity_1 = TestItem { id: None };
-//! # let entity_n = TestItem { id: None };
-//! let mut entities = vec![entity_1, /*...,*/ entity_n];
-//! # entities = TestItem::get_all(&conn).await.unwrap();
+//! # let entity_1 = TestItemCreate {  };
+//! # let entity_n = TestItemCreate {  };
+//! let entities = TestItem::get_all(&conn).await.unwrap();
 //! entities.remove_all(&conn).await.unwrap();
 //! # });
 //! ```
@@ -254,7 +249,7 @@ use crate::result_mapping::ResultMapping;
 ///
 /// #[derive(Entity, Debug)]
 /// struct TestEntity {
-///     id: Option<u32>,
+///     id: u32,
 ///     name: String,
 /// }
 /// ```
@@ -269,6 +264,12 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
 
     /// This type references the column struct of this entity
     type ColumnType;
+
+    /// Get all values of this create entity as vector for database insertion.
+    ///
+    /// This method is used internally and should not be used manually.
+    #[doc(hidden)]
+    fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
 
     /// Retrieves all entities
     async fn get_all(connection: &impl DatabaseConnection) -> Result<Vec<Self>> where Self: Sized;
@@ -348,12 +349,6 @@ pub trait CreateEntity<E: Entity>: Sync + Send + 'static {
     ///
     /// Also generates the [uuid::Uuid] if needed.
     fn into_entity(self) -> E;
-
-    /// Get all values of this create entity as vector for database insertion.
-    ///
-    /// This method is used internally and should not be used manually.
-    #[doc(hidden)]
-    fn get_values(&self) -> Vec<&(dyn ToSql + Sync)>;
 
     /// Calls [Self::into_entity] and inserts the new entity.
     async fn insert(self, connection: &impl DatabaseConnection) -> Result<E> where Self: Sized {

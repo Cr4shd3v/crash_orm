@@ -51,7 +51,7 @@
 //!
 //! #[derive(Debug, Entity, Schema)]
 //! struct Person {
-//!     id: Option<u32>,
+//!     id: u32,
 //!     name: String,
 //! }
 //! ```

@@ -11,7 +11,7 @@ use crate::connection::DatabaseConnection;
 ///
 /// #[derive(Entity, Debug, Schema)]
 /// struct TestItem {
-///     id: Option<u32>,
+///     id: u32,
 ///     name: String,
 /// }
 /// ```
