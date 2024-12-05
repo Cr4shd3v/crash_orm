@@ -3,7 +3,7 @@ use chrono::Utc;
 
 use crate::migration::entity::{CrashOrmMigrationRecord, CrashOrmMigrationRecordColumn};
 use crate::migration::migration::Migration;
-use crate::prelude::{CrashOrmDatabaseConnection, Entity, EqualQueryColumn, OrderDirection, Schema};
+use crate::prelude::{CrashOrmDatabaseConnection, CrashOrmMigrationRecordCreate, CreateEntity, Entity, EqualQueryColumn, OrderDirection, Schema};
 
 /// Trait to be implemented for a migration manager as documented [here](crate::migration).
 #[async_trait]
@@ -28,8 +28,7 @@ pub trait CrashOrmMigrationManager: Sync + Send + 'static {
             if migration_in_db.is_empty() {
                 local_migration.up(conn).await?;
 
-                let mut migration_entry = CrashOrmMigrationRecord {
-                    id: None,
+                let migration_entry = CrashOrmMigrationRecordCreate {
                     name: name.to_string(),
                     executed_at: Utc::now(),
                 };

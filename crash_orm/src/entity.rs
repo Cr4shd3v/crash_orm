@@ -293,12 +293,6 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// Updates the entity in the database
     async fn update(&self, connection: &impl DatabaseConnection) -> Result<()>;
 
-    /// Persist this entity.
-    ///
-    /// If the entity is not yet inserted, [`Self::insert_set_id`] is called.
-    /// If the entity is already inserted, [`Self::update`] is called.
-    async fn persist(&mut self, connection: &impl DatabaseConnection) -> Result<()>;
-
     /// Creates a [Query] for this Entity.
     ///
     /// See [Query] for more details on how to build a query.
@@ -338,10 +332,10 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
 /// Contains all primary key related functions of an entity.
 #[async_trait]
 pub trait PrimaryKeyEntity<P: ColumnType>: Entity {
-    /// Returns the id of the entity.
+    /// Returns the primary key of the entity.
     ///
     /// Used internally by the ORM
-    fn get_primary(&self) -> Option<P>;
+    fn get_primary(&self) -> P;
 
     /// Retrieves an entity by its primary key
     async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> Result<Self> where Self: Sized;

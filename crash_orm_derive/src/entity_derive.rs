@@ -59,11 +59,11 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     };
     let primary_key_ident = Ident::new(&*primary_field_name, Span::call_site());
 
-    let Some(primary_type) = extract_generic_type(&primary_type, 1) else {
-        panic!("The identifier for entity {} must be an option", ident_str);
-    };
-
     let primary_type_str = get_type_string(&primary_type);
+
+    if primary_type_str == "Option" {
+        panic!("The primary key must not be an Option!");
+    }
 
     for field in struct_data.fields {
         let field_ident = field.ident.as_ref().unwrap();
@@ -216,17 +216,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         all_index += 1;
 
-        if field_ident_str != primary_field_name {
-            column_consts.extend(quote! {
-                #[allow(missing_docs)]
-                pub const #field_ident_upper: crash_orm::prelude::EntityColumn::<#field_type, #ident> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
-            });
-        } else {
-            column_consts.extend(quote! {
-                #[allow(missing_docs)]
-                pub const #field_ident_upper: crash_orm::prelude::EntityColumn::<#primary_type, #ident> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
-            });
-        }
+        column_consts.extend(quote! {
+            #[allow(missing_docs)]
+            pub const #field_ident_upper: crash_orm::prelude::EntityColumn::<#field_type, #ident> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
+        });
 
         if field_ident_str != primary_field_name {
             if is_relation_value_holder(&field_type) {
@@ -287,12 +280,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             #[cfg(feature = "uuid-gen-v4")]
             create_fields_mapping.extend(quote! {
-                #field_ident: Some(uuid::Uuid::new_v4()),
+                #field_ident: uuid::Uuid::new_v4(),
             });
 
             #[cfg(feature = "uuid-gen-v7")]
             create_fields_mapping.extend(quote! {
-                #field_ident: Some(uuid::Uuid::now_v7()),
+                #field_ident: uuid::Uuid::now_v7(),
             });
 
             #[cfg(not(any(feature = "uuid-gen-v4", feature = "uuid-gen-v7")))]
@@ -313,7 +306,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
         } else {
             create_fields_mapping.extend(quote! {
-                #field_ident: None,
+                #field_ident: Default::default(),
             });
         }
 
@@ -328,7 +321,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let select_by_id_string = format!("SELECT * FROM {} WHERE {} = $1", ident_str, primary_field_name);
     let select_all_string = format!("SELECT * FROM {}", ident_str);
-    let count_string = format!("SELECT COUNT({}) FROM {}", primary_key_ident.to_string(),ident_str);
+    let count_string = format!("SELECT COUNT({}) FROM {}", primary_field_name, ident_str);
     let insert_string = if insert_field_names.is_empty() {
         format!("INSERT INTO {} DEFAULT VALUES RETURNING {}", ident_str, primary_field_name)
     } else {
@@ -414,42 +407,25 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             async fn insert(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 let row = connection.query_single(#insert_string,&[#insert_field_values]).await?;
-                self.#primary_key_ident = Some(row.get(0));
+                self.#primary_key_ident = row.get(0);
                 Ok(())
             }
 
             async fn remove(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
-                if self.#primary_key_ident.is_none() {
-                    return Ok(());
-                }
-
                 connection.execute_query(#delete_string, &[&self.#primary_key_ident]).await?;
-                self.#primary_key_ident = None;
                 Ok(())
             }
 
             async fn update(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
-                if self.#primary_key_ident.is_none() {
-                    return Err(crash_orm::Error::from_str("You can't update an entity without an id."));
-                }
-
                 #update_statement
 
                 Ok(())
-            }
-
-            async fn persist(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
-                if self.#primary_key_ident.is_none() {
-                    self.insert(connection).await
-                } else {
-                    self.update(connection).await
-                }
             }
         }
 
         #[crash_orm::async_trait::async_trait]
         impl crash_orm::prelude::PrimaryKeyEntity<#primary_type> for #ident {
-            fn get_primary(&self) -> Option<#primary_type> {
+            fn get_primary(&self) -> #primary_type {
                 self.#primary_key_ident
             }
 

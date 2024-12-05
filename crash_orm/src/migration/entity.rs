@@ -8,7 +8,7 @@ use crate as crash_orm;
 #[derive(Entity, Schema, Debug)]
 pub struct CrashOrmMigrationRecord {
     /// ID of the migration
-    pub id: Option<u32>,
+    pub id: u32,
     /// Name of the migration, derived from the [get_name](super::Migration::get_name) method of a migration
     pub name: String,
     /// Execution time of the migration

@@ -11,9 +11,6 @@ use crate::prelude::{ColumnType, DatabaseConnection};
 /// Requires [Sync] on the entity.
 #[async_trait]
 pub trait EntityVec<P: ColumnType> {
-    /// Shortcut function to call [Entity::persist] on every entity in this vector.
-    async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()>;
-
     /// Batch insert all entities in the vector
     ///
     /// This does **not** update the ids of the entity if needed.
@@ -27,14 +24,6 @@ pub trait EntityVec<P: ColumnType> {
 
 #[async_trait]
 impl<T: PrimaryKeyEntity<P>, P: ColumnType> EntityVec<P> for Vec<T> {
-    async fn persist_all(&mut self, connection: &impl DatabaseConnection) -> crate::Result<()> {
-        for entity in self {
-            entity.persist(connection).await?;
-        }
-
-        Ok(())
-    }
-
     async fn insert_all(&self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         if self.is_empty() {
             return Ok(());
@@ -62,8 +51,6 @@ impl<T: PrimaryKeyEntity<P>, P: ColumnType> EntityVec<P> for Vec<T> {
 
         let ids = self.into_iter()
             .map(|v| v.get_primary())
-            .filter(|v| v.is_some())
-            .map(|v| v.unwrap())
             .collect::<Vec<P>>();
 
         let query = format!(
