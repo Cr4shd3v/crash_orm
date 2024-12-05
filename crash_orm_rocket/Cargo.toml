@@ -2,6 +2,14 @@
 name = "crash_orm_rocket"
 version = "0.7.0"
 edition = "2021"
+license = "MIT"
+description = "Integration for Crash ORM into rocket"
+homepage = "https://github.com/Cr4shd3v/crash_orm"
+documentation = "https://docs.rs/crash_orm_rocket/latest/crash_orm_rocket/"
+repository = "https://github.com/Cr4shd3v/crash_orm"
+readme = "Readme.md"
+categories = ["database"]
+keywords = ["async", "database", "framework", "orm"]
 
 [dependencies]
 crash_orm = { workspace = true }
