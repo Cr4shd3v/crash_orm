@@ -15,11 +15,11 @@ pub async fn test_time() {
     default_create_table!(TestItemTime, conn);
 
     let date = OffsetDateTime::now_utc();
-    let entity = TestItemTime {
+    let mut entity = TestItemTime {
         id: None,
         date,
     };
-    entity.insert_get_id(&conn).await.unwrap();
+    entity.insert(&conn).await.unwrap();
     let result = TestItemTime::query()
         .condition(TestItemTimeColumn::DATE.equals(date))
         .fetch_single(&conn).await;

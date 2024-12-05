@@ -15,11 +15,11 @@ async fn test_eui48() {
     default_create_table!(TestItemEuI48, conn);
 
     let mac = MacAddress::broadcast();
-    let entity = TestItemEuI48 {
+    let mut entity = TestItemEuI48 {
         id: None,
         mac,
     };
-    entity.insert_get_id(&conn).await.unwrap();
+    entity.insert(&conn).await.unwrap();
 
     let item = TestItemEuI48::query()
         .condition(TestItemEuI48Column::MAC.equals(mac))

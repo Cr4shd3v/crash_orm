@@ -48,7 +48,7 @@ pub fn crud_impl(input: TokenStream) -> TokenStream {
                 };
 
                 use crash_orm::entity::Entity;
-                element.insert_set_id(&**conn).await.unwrap();
+                element.insert(&**conn).await.unwrap();
 
                 rocket::serde::json::Json(element.id.unwrap())
             }

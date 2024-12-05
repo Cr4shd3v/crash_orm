@@ -51,10 +51,10 @@
 //! # let conn = setup_test_connection().await;
 //! # TestItemInsert::create_table_if_not_exists(&conn).await.unwrap();
 //! let mut entity = TestItemInsert { id: None };
-//! entity.insert_set_id(&conn).await.unwrap();
+//! entity.insert(&conn).await.unwrap();
 //!
 //! let entity2 = TestItemInsert { id: None };
-//! let id = entity.insert_get_id(&conn).await.unwrap();
+//! let id = entity.insert(&conn).await.unwrap();
 //! # });
 //! ```
 //!
@@ -79,9 +79,9 @@
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemUpdate::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItemUpdate { id: None };
-//! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let entity = TestItemUpdate::get_by_primary(&conn, id).await.unwrap();
+//! # let mut entity2 = TestItemUpdate { id: None };
+//! # entity2.insert(&conn).await.unwrap();
+//! let entity = TestItemUpdate::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
 //! // Modify entity properties
 //! entity.update(&conn).await.unwrap();
 //! # });
@@ -108,9 +108,9 @@
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemPersist::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItemPersist { id: None };
-//! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let mut entity = TestItemPersist::get_by_primary(&conn, id).await.unwrap();
+//! # let mut entity2 = TestItemPersist { id: None };
+//! # entity2.insert(&conn).await.unwrap();
+//! let mut entity = TestItemPersist::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
 //! // Modify entity properties
 //! entity.persist(&conn).await.unwrap();
 //! # });
@@ -138,9 +138,9 @@
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemGetById::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItemGetById { id: None };
-//! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let entity = TestItemGetById::get_by_primary(&conn, id).await.unwrap();
+//! # let mut entity2 = TestItemGetById { id: None };
+//! # entity2.insert(&conn).await.unwrap();
+//! let entity = TestItemGetById::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
 //! # });
 //! ```
 //!
@@ -181,9 +181,9 @@
 //! # tokio_test::block_on(async {
 //! # let conn = setup_test_connection().await;
 //! # TestItemRemove::create_table_if_not_exists(&conn).await.unwrap();
-//! # let entity2 = TestItemRemove { id: None };
-//! # let id = entity2.insert_get_id(&conn).await.unwrap();
-//! let mut entity = TestItemRemove::get_by_primary(&conn, id).await.unwrap();
+//! # let mut entity2 = TestItemRemove { id: None };
+//! # entity2.insert(&conn).await.unwrap();
+//! let mut entity = TestItemRemove::get_by_primary(&conn, entity2.id.unwrap()).await.unwrap();
 //! entity.remove(&conn).await.unwrap();
 //! # });
 //! ```

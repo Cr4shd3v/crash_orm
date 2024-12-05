@@ -19,7 +19,7 @@ async fn test_reserved_keywords() {
         all: true,
         references: "test".to_string(),
         order: 1,
-    }.insert_get_id(&conn).await.unwrap();
+    }.insert(&conn).await.unwrap();
 
     TestItemReservedKeywords::drop_table(&conn).await.unwrap();
 }

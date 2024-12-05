@@ -15,11 +15,11 @@ async fn test_bit_vec() {
     default_create_table!(TestItemBitVec, conn);
 
     let bit_vec = BitVec::from_bytes(&[1, 2, 3]);
-    let entity = TestItemBitVec {
+    let mut entity = TestItemBitVec {
         id: None,
         bit_vec: bit_vec.clone(),
     };
-    entity.insert_get_id(&conn).await.unwrap();
+    entity.insert(&conn).await.unwrap();
     let result = TestItemBitVec::query()
         .condition(TestItemBitVecColumn::BIT_VEC.equals(bit_vec))
         .fetch_single(&conn).await;

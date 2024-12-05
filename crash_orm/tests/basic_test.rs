@@ -26,7 +26,7 @@ async fn test_basic() {
 
     let mut item = TestItem1::test();
 
-    item.insert_set_id(&conn).await.unwrap();
+    item.insert(&conn).await.unwrap();
     assert!(item.id.is_some());
     let item = TestItem1::get_by_primary(&conn, item.id.unwrap()).await;
     assert!(item.is_ok());

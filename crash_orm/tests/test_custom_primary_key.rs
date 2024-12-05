@@ -13,12 +13,12 @@ async fn test_custom_primary_key() {
     let conn = setup_test_connection().await;
     default_create_table!(CustomPrimaryKey, conn);
 
-    let entity = CustomPrimaryKey {
+    let mut entity = CustomPrimaryKey {
         custom_id: None,
         test_field: String::from("test123"),
     };
-    let id = entity.insert_get_id(&conn).await.unwrap();
-    let result = CustomPrimaryKey::get_by_primary(&conn, id).await.unwrap();
+    entity.insert(&conn).await.unwrap();
+    let result = CustomPrimaryKey::get_by_primary(&conn, entity.custom_id.unwrap()).await.unwrap();
     assert_eq!(result.test_field, "test123");
 
     CustomPrimaryKey::drop_table(&conn).await.unwrap()

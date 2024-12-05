@@ -27,15 +27,15 @@ async fn test_uuid() {
     }
 
     // Automatically generate a uuid v4 through selected feature flag
-    let entity = TestItemUuid {
+    let mut entity = TestItemUuid {
         id: None,
         test: 111,
     };
 
-    let uuid = entity.insert_get_id(&conn).await.unwrap();
+    entity.insert(&conn).await.unwrap();
 
     let result = TestItemUuid::query()
-        .condition(TestItemUuidColumn::ID.equals(uuid))
+        .condition(TestItemUuidColumn::ID.equals(entity.id.unwrap()))
         .fetch(&conn).await.unwrap();
     assert_eq!(result.len(), 1);
     assert_eq!(result[0].test, 111);
