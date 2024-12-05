@@ -345,10 +345,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 Ok(row.get(0))
             }
 
-            async fn insert_set_id(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
-                use crash_orm::prelude::PrimaryKeyEntity;
-                let id = self.insert_get_id(connection).await?;
-                self.#primary_key_ident = Some(id);
+            async fn insert(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
+                let row = connection.query_single(#insert_string,&[#insert_field_values]).await?;
+                self.#primary_key_ident = Some(row.get(0));
                 Ok(())
             }
 
@@ -374,7 +373,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             async fn persist(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
                 if self.#primary_key_ident.is_none() {
-                    self.insert_set_id(connection).await
+                    self.insert(connection).await
                 } else {
                     self.update(connection).await
                 }
@@ -391,11 +390,6 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 let row = connection.query_single(#select_by_id_string, &[&#primary_key_ident]).await?;
                 use crash_orm::prelude::{Entity, ResultMapping};
                 Ok(Self::from_row(row))
-            }
-
-            async fn insert_get_id(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#primary_type> {
-                let row = connection.query_single(#insert_string,&[#insert_field_values]).await?;
-                Ok(row.get(0))
             }
         }
     };

@@ -34,7 +34,7 @@ pub trait CrashOrmMigrationManager: Sync + Send + 'static {
                     executed_at: Utc::now(),
                 };
 
-                migration_entry.insert_set_id(conn).await?;
+                migration_entry.insert(conn).await?;
             }
         }
 

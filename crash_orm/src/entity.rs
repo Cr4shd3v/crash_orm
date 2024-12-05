@@ -284,8 +284,8 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
 
     /// Insert and set id
     ///
-    /// This DOES set the id in the entity
-    async fn insert_set_id(&mut self, connection: &impl DatabaseConnection) -> Result<()>;
+    /// This sets the id in the entity
+    async fn insert(&mut self, connection: &impl DatabaseConnection) -> Result<()>;
 
     /// Removes the entity from the database
     async fn remove(&mut self, connection: &impl DatabaseConnection) -> Result<()>;
@@ -345,11 +345,6 @@ pub trait PrimaryKeyEntity<P: ColumnType>: Entity {
 
     /// Retrieves an entity by its primary key
     async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> Result<Self> where Self: Sized;
-
-    /// Insert and returns the id
-    ///
-    /// This DOES NOT set the id in the entity
-    async fn insert_get_id(&self, connection: &impl DatabaseConnection) -> Result<P>;
 }
 
 pub(crate) fn slice_query_value_iter<'a>(
