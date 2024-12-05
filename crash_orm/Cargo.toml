@@ -22,7 +22,7 @@ with-eui48 = ["eui48", "tokio-postgres/with-eui48-1"]
 with-bit-vec = ["bit-vec", "tokio-postgres/with-bit-vec-0_6"]
 with-time = ["time", "tokio-postgres/with-time-0_3"]
 with-geo-types = ["geo-types", "tokio-postgres/with-geo-types-0_7"]
-serialize = []
+serialize = ["crash_orm_derive/serialize", "chrono/serde", "eui48/serde", "time/serde", "geo-types/serde", "bit-vec/serde", "uuid/serde"]
 uuid-gen-v4 = ["with-uuid", "uuid/v4", "crash_orm_derive/uuid-gen-v4"]
 uuid-gen-v7 = ["with-uuid", "uuid/v7", "crash_orm_derive/uuid-gen-v7"]
 

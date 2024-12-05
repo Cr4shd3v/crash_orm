@@ -25,3 +25,4 @@ convert_case = { workspace = true }
 default = []
 uuid-gen-v4 = []
 uuid-gen-v7 = []
+serialize = []

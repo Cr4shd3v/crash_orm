@@ -352,3 +352,19 @@ pub(crate) fn slice_query_value_iter<'a>(
 ) -> impl ExactSizeIterator<Item = &'a (dyn ToSql + Sync)> + 'a {
     s.iter().map(|s| &***s as _)
 }
+
+/// Trait implemented for all create structs for an entity
+#[async_trait]
+pub trait CreateEntity<E: Entity> {
+    /// Converts self into an actual entity.
+    ///
+    /// Also generates the [uuid::Uuid] if needed.
+    fn into_entity(self) -> E;
+
+    /// Calls [Self::into_entity] and inserts the new entity.
+    async fn insert(self, connection: &impl DatabaseConnection) -> Result<E> where Self: Sized {
+        let mut entity = self.into_entity();
+        entity.insert(connection).await?;
+        Ok(entity)
+    }
+}

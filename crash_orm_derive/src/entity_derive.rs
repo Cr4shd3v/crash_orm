@@ -25,6 +25,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let mut update_fields = vec![];
     let mut column_consts = quote!();
     let mut functions = quote!();
+    let mut create_fields = quote!();
+    let mut create_fields_mapping = quote!();
 
     let mut all_index = 0usize;
     let mut insert_index = 0usize;
@@ -104,6 +106,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         use crash_orm::prelude::{Entity, ResultMapping};
                         Ok(rows.into_iter().map(|v| #entity_type::from_row(v)).collect::<Vec<#entity_type>>())
                     }
+                });
+
+                create_fields_mapping.extend(quote! {
+                    #field_ident: crash_orm::prelude::OneToMany::new(),
                 });
 
                 continue;
@@ -200,6 +206,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     }
                 });
 
+                create_fields_mapping.extend(quote! {
+                    #field_ident: crash_orm::prelude::OneToOneRef::new(),
+                });
+
                 continue;
             }
         }
@@ -250,11 +260,39 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             insert_index += 1;
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
             insert_field_names.push(escape_reserved_keywords(&field_ident_str));
+
+            create_fields.extend(quote! {
+                pub #field_ident: #field_type,
+            });
+
+            create_fields_mapping.extend(quote! {
+                #field_ident: self.#field_ident,
+            });
         } else if primary_type_str == "Uuid" {
             insert_field_names.push(escape_reserved_keywords(&field_ident_str));
 
             insert_field_self_values.extend(quote! {
                 &self.#field_ident,
+            });
+
+            // If no uuid generation is configured, the user must provide it in the Create struct
+            #[cfg(not(any(feature = "uuid-gen-v4", feature = "uuid-gen-v7")))]
+            create_fields.extend(quote! {
+                pub #field_ident: #field_type,
+            });
+            #[cfg(not(any(feature = "uuid-gen-v4", feature = "uuid-gen-v7")))]
+            create_fields_mapping.extend(quote! {
+                #field_ident: self.#field_ident,
+            });
+
+            #[cfg(feature = "uuid-gen-v4")]
+            create_fields_mapping.extend(quote! {
+                #field_ident: Some(uuid::Uuid::new_v4()),
+            });
+
+            #[cfg(feature = "uuid-gen-v7")]
+            create_fields_mapping.extend(quote! {
+                #field_ident: Some(uuid::Uuid::now_v7()),
             });
 
             #[cfg(not(any(feature = "uuid-gen-v4", feature = "uuid-gen-v7")))]
@@ -273,6 +311,10 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             insert_index += 1;
 
             insert_field_self_values_format.push_str(&*format!("${},", insert_index));
+        } else {
+            create_fields_mapping.extend(quote! {
+                #field_ident: None,
+            });
         }
 
         all_field_self_values_format.push_str(&*format!("${},", all_index));
@@ -311,6 +353,15 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
     let ident_column = Ident::new(&*format!("{}Column", ident.to_string()), ident.span());
     let ident_column_doc = format!("Column struct for [{}]", ident_str);
+    let ident_create = Ident::new(&*format!("{}Create", ident), ident.span());
+    let create_doc_text = format!("Creation struct for {}", ident_str);
+
+    #[cfg(not(feature = "serialize"))]
+    let create_macro = quote!();
+    #[cfg(feature = "serialize")]
+    let create_macro = quote! {
+        #[derive(serde::Serialize, serde::Deserialize)]
+    };
 
     let mut output = quote! {
         #[doc=#ident_column_doc]
@@ -318,6 +369,22 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         impl #ident_column {
             #column_consts
+        }
+
+        #create_macro
+        #[doc=#create_doc_text]
+        #[allow(missing_docs)]
+        #vis struct #ident_create {
+            #create_fields
+        }
+
+        #[crash_orm::async_trait::async_trait]
+        impl crash_orm::prelude::CreateEntity<#ident> for #ident_create {
+            fn into_entity(self) -> #ident {
+                #ident {
+                    #create_fields_mapping
+                }
+            }
         }
 
         #[crash_orm::async_trait::async_trait]
