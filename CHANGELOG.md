@@ -1,3 +1,6 @@
+# v0.7.1
+- fix: removed println! from EntityCreateVec
+
 # v0.7.0
 - feat!: primary keys are no longer options
 - feat: added delete query for bulk removal

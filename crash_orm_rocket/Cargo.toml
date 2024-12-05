@@ -1,6 +1,6 @@
 [package]
 name = "crash_orm_rocket"
-version = "0.7.0"
+version = "0.7.1"
 edition = "2021"
 license = "MIT"
 description = "Integration for Crash ORM into rocket"
