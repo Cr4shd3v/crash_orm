@@ -3,7 +3,7 @@ use chrono::Utc;
 
 use crate::migration::entity::{CrashOrmMigrationRecord, CrashOrmMigrationRecordColumn};
 use crate::migration::migration::Migration;
-use crate::prelude::{CrashOrmDatabaseConnection, Entity, EqualQueryColumn, Schema};
+use crate::prelude::{CrashOrmDatabaseConnection, Entity, EqualQueryColumn, OrderDirection, Schema};
 
 /// Trait to be implemented for a migration manager as documented [here](crate::migration).
 #[async_trait]
@@ -37,6 +37,56 @@ pub trait CrashOrmMigrationManager: Sync + Send + 'static {
                 migration_entry.insert_set_id(conn).await?;
             }
         }
+
+        Ok(())
+    }
+
+    /// This function migrates your database down to the desired version
+    async fn migrate_down_to(conn: &CrashOrmDatabaseConnection, name: &str) -> crate::Result<()> {
+        let mut local_migrations = Self::get_migrations();
+        local_migrations.reverse();
+
+        let latest = CrashOrmMigrationRecord::query()
+            .order(&CrashOrmMigrationRecordColumn::ID, OrderDirection::DESC)
+            .fetch_single(conn).await?;
+
+        let mut started = false;
+        for migration in local_migrations {
+            if !started && migration.get_name() == latest.name {
+                started = true;
+            }
+
+            if started {
+                migration.down(conn).await?;
+
+                CrashOrmMigrationRecord::query()
+                    .condition(CrashOrmMigrationRecordColumn::NAME.equals(migration.get_name()))
+                    .fetch_single(conn).await?.remove(conn).await?;
+            }
+
+            if migration.get_name() == name {
+                break;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Migrate down to the previous migration
+    async fn migrate_down_prev(conn: &CrashOrmDatabaseConnection) -> crate::Result<()> {
+        let local_migrations = Self::get_migrations();
+
+        let mut latest = CrashOrmMigrationRecord::query()
+            .order(&CrashOrmMigrationRecordColumn::ID, OrderDirection::DESC)
+            .fetch_single(conn).await?;
+
+        let Some(local_migration) = local_migrations.iter().find(|m| m.get_name() == latest.name) else {
+            return Err(crate::Error::from_str(&*format!("The previous migration {} was not found in local migrations", latest.name)));
+        };
+
+        local_migration.down(conn).await?;
+
+        latest.remove(conn).await?;
 
         Ok(())
     }
