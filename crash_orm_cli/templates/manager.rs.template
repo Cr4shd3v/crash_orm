@@ -1,0 +1,13 @@
+use crash_orm::prelude::*;
+
+pub struct MigrationManager;
+
+#[async_trait]
+impl CrashOrmMigrationManager for MigrationManager
+{
+    fn get_migrations() -> Vec<Box<dyn Migration>> {
+        vec![
+
+        ]
+    }
+}

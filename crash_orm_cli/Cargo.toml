@@ -1,8 +1,17 @@
 [package]
 name = "crash_orm_cli"
-version = "0.1.0"
+version = "0.7.1"
 edition = "2021"
 
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
 dotenvy = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+toml = { workspace = true }
+cargo_toml = { workspace = true }
+
+crash_orm = { workspace = true }
+
+[[bin]]
+name = "crash-orm"
+path = "src/main.rs"

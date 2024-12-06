@@ -33,6 +33,8 @@ rocket = "^0.5"
 # Cli
 clap = "^4.5"
 dotenvy = "^0.15"
+toml = "^0.8"
+cargo_toml = "^0.21"
 
 # Own crates
 crash_orm = { path = "crash_orm", version = "0.7.1" }
