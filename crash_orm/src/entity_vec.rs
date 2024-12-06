@@ -1,21 +1,18 @@
 //! Contains utility functions for vectors of entities.
 
-use async_trait::async_trait;
 use postgres::types::ToSql;
 
 use crate::entity::PrimaryKeyEntity;
 use crate::prelude::{ColumnType, CreateEntity, DatabaseConnection};
 
 /// Trait implementing useful functions for vectors of entities.
-#[async_trait]
 pub trait EntityVec<P: ColumnType> {
     /// Shortcut function to call [Entity::remove] on every entity in this vector.
     ///
     /// This will be a batch operation in the future.
-    async fn remove_all(&self, connection: &impl DatabaseConnection) -> crate::Result<()>;
+    fn remove_all(&self, connection: &impl DatabaseConnection) -> impl std::future::Future<Output = crate::Result<()>> + Send;
 }
 
-#[async_trait]
 impl<T: PrimaryKeyEntity<P>, P: ColumnType> EntityVec<P> for Vec<T> {
     async fn remove_all(&self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         if self.is_empty() {
@@ -42,15 +39,13 @@ impl<T: PrimaryKeyEntity<P>, P: ColumnType> EntityVec<P> for Vec<T> {
 }
 
 /// Trait implementing useful functions for vectors of create entities.
-#[async_trait]
 pub trait EntityCreateVec<T: PrimaryKeyEntity<P>, P: ColumnType> {
     /// Batch insert all entities in the vector
     ///
     /// This does **not** update the ids of the entity if needed.
-    async fn insert_all(self, connection: &impl DatabaseConnection) -> crate::Result<()>;
+    fn insert_all(self, connection: &impl DatabaseConnection) -> impl std::future::Future<Output = crate::Result<()>> + Send;
 }
 
-#[async_trait]
 impl<C: CreateEntity<T>, T: PrimaryKeyEntity<P>, P: ColumnType> EntityCreateVec<T, P> for Vec<C> {
     async fn insert_all(self, connection: &impl DatabaseConnection) -> crate::Result<()> {
         if self.is_empty() {
