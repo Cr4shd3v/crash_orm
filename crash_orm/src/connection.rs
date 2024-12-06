@@ -16,30 +16,29 @@ use tokio_postgres::types::ToSql;
 /// The default implementation that should be used is [CrashOrmDatabaseConnection].
 ///
 /// You can also just use the default tokio-postgres [Client], this trait is implemented for that as well.
-#[async_trait::async_trait]
 pub trait DatabaseConnection: Sync {
     /// Method used to only retrieve a single row of a query result.
-    async fn query_single(
+    fn query_single(
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> crate::Result<Row>;
+    ) -> impl std::future::Future<Output = crate::Result<Row>> + Send;
 
     /// Method used to retrieve all rows of a query result.
-    async fn query_many(
+    fn query_many(
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> crate::Result<Vec<Row>>;
+    ) -> impl std::future::Future<Output = crate::Result<Vec<Row>>> + Send;
 
     /// Method used to execute a query without returning a row.
     ///
     /// However, this function returns the count of modified rows in the database.
-    async fn execute_query(
+    fn execute_query(
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> crate::Result<u64>;
+    ) -> impl std::future::Future<Output = crate::Result<u64>> + Send;
 }
 
 /// The default, simple implementation of the [DatabaseConnection] trait.
@@ -86,7 +85,6 @@ impl Deref for CrashOrmDatabaseConnection {
 
 macro_rules! impl_database_connection {
     ($class:ty) => {
-        #[async_trait::async_trait]
         impl DatabaseConnection for $class {
             async fn query_single(
                 &self,
@@ -120,7 +118,6 @@ macro_rules! impl_database_connection {
 impl_database_connection!(CrashOrmDatabaseConnection);
 impl_database_connection!(Client);
 
-#[async_trait::async_trait]
 impl<T: DatabaseConnection + Send> DatabaseConnection for Arc<T> {
     async fn query_single(
         &self,
