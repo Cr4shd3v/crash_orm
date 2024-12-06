@@ -225,6 +225,9 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// Name of the table
     const TABLE_NAME: &'static str;
 
+    /// Name of the primary key of this entity
+    const PRIMARY_KEY_NAME: &'static str;
+
     /// Internal field for batch insert
     #[doc(hidden)]
     const __INSERT_FIELD_NAMES: &'static str;

@@ -20,5 +20,7 @@ async fn test_custom_primary_key() {
     let result = CustomPrimaryKey::get_by_primary(&conn, entity.custom_id).await.unwrap();
     assert_eq!(result.test_field, "test123");
 
+    assert_eq!(CustomPrimaryKey::PRIMARY_KEY_NAME, "custom_id");
+
     CustomPrimaryKey::drop_table(&conn).await.unwrap()
 }

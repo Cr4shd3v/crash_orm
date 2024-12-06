@@ -384,6 +384,8 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
         impl crash_orm::prelude::Entity for #ident {
             const TABLE_NAME: &'static str = #ident_str;
 
+            const PRIMARY_KEY_NAME: &'static str = #primary_field_name;
+
             const __INSERT_FIELD_NAMES: &'static str = #insert_field_names;
 
             type ColumnType = #ident_column;
