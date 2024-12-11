@@ -1,3 +1,6 @@
+# v0.7.2
+- fix: fixed escaped column names in column struct
+
 # v0.7.1
 - fix: removed println! from EntityCreateVec
 

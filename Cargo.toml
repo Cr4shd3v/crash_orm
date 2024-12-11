@@ -31,9 +31,9 @@ geo-types = "^0.7"
 rocket = "^0.5"
 
 # Own crates
-crash_orm = { path = "crash_orm", version = "0.7.1" }
-crash_orm_derive = { path = "crash_orm_derive", version = "0.7.1" }
-crash_orm_rocket = { path = "crash_orm_rocket", version = "0.7.1" }
-crash_orm_rocket_derive = { path = "crash_orm_rocket_derive", version = "0.7.1" }
+crash_orm = { path = "crash_orm", version = "0.7.2" }
+crash_orm_derive = { path = "crash_orm_derive", version = "0.7.2" }
+crash_orm_rocket = { path = "crash_orm_rocket", version = "0.7.2" }
+crash_orm_rocket_derive = { path = "crash_orm_rocket_derive", version = "0.7.2" }
 
 crash_orm_test = { path = "crash_orm_test" }

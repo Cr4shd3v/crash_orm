@@ -68,6 +68,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     for field in struct_data.fields {
         let field_ident = field.ident.as_ref().unwrap();
         let field_ident_str = field_ident.to_string();
+        let field_ident_str_escaped = escape_reserved_keywords(&field_ident_str);
         let field_ident_upper = Ident::new(&*field_ident_str.to_uppercase(), field_ident.span());
         let field_type = &field.ty;
 
@@ -218,7 +219,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
         column_consts.extend(quote! {
             #[allow(missing_docs)]
-            pub const #field_ident_upper: crash_orm::prelude::EntityColumn::<#field_type, #ident> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
+            pub const #field_ident_upper: crash_orm::prelude::EntityColumn::<#field_type, #ident> = crash_orm::prelude::EntityColumn::new(#field_ident_str_escaped);
         });
 
         if field_ident_str != primary_field_name {
@@ -231,7 +232,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     panic!("Missing generic parameter at {}", field_ident_str);
                 };
                 column_consts.extend(quote! {
-                    pub const #field_ident_upper_id: crash_orm::prelude::EntityColumn::<#target_entity_id_type, #ident> = crash_orm::prelude::EntityColumn::new(#field_ident_str);
+                    pub const #field_ident_upper_id: crash_orm::prelude::EntityColumn::<#target_entity_id_type, #ident> = crash_orm::prelude::EntityColumn::new(#field_ident_str_escaped);
                 });
             }
 
