@@ -59,7 +59,7 @@ async fn test_one_to_one() {
 
     let result = test_item_20.get_other(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().name1, Some(String::from("test123")));
+    assert_eq!(result.unwrap().unwrap().name1, Some(String::from("test123")));
 
     let results = TestItem19::query().fetch(&conn).await;
     assert!(results.is_ok());

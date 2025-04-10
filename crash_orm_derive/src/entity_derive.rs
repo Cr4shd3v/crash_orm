@@ -105,7 +105,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Vec<#entity_type>> {
                         let rows = connection.query_many(#query, &[&self.#primary_key_ident]).await?;
                         use crash_orm::prelude::{Entity, ResultMapping};
-                        Ok(rows.into_iter().map(|v| #entity_type::from_row(v)).collect::<Vec<#entity_type>>())
+                        Ok(rows.into_iter().map(|v| #entity_type::from_row(v)).filter(|r| r.is_some()).map(|r| r.unwrap()).collect::<Vec<#entity_type>>())
                     }
                 });
 
@@ -130,7 +130,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
                                 use crash_orm::entity::PrimaryKeyEntity;
-                                Ok(Some(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
+                                Ok(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?)
                             } else {
                                 Ok(None)
                             }
@@ -144,7 +144,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             use crash_orm::entity::PrimaryKeyEntity;
                             #entity_type::get_by_primary(connection, self.#field_ident.target_id).await
                         }
@@ -166,7 +166,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                         async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             if self.#field_ident.is_some() {
                                 use crash_orm::prelude::PrimaryKeyEntity;
-                                Ok(Some(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?))
+                                Ok(#entity_type::get_by_primary(connection, self.#field_ident.as_ref().unwrap().target_id).await?)
                             } else {
                                 Ok(None)
                             }
@@ -180,7 +180,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                             Ok(())
                         }
 
-                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                        async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                             use crash_orm::entity::PrimaryKeyEntity;
                             #entity_type::get_by_primary(connection, self.#field_ident.target_id).await
                         }
@@ -200,7 +200,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 );
 
                 functions.extend(quote! {
-                    async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<#entity_type> {
+                    async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                         use crash_orm::prelude::{Entity, ResultMapping};
                         let row = connection.query_single(#query, &[&self.#primary_key_ident]).await?;
                         Ok(#entity_type::from_row(row))
@@ -398,7 +398,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             async fn get_all(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Vec<#ident>> {
                 let rows = connection.query_many(#select_all_string, &[]).await?;
                 use crash_orm::prelude::ResultMapping;
-                Ok(rows.into_iter().map(|v| Self::from_row(v)).collect::<Vec<Self>>())
+                Ok(rows.into_iter().map(|v| Self::from_row(v)).filter(|r| r.is_some()).map(|r| r.unwrap()).collect::<Vec<Self>>())
             }
 
             async fn count(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<i64> {
@@ -430,7 +430,7 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                 self.#primary_key_ident
             }
 
-            async fn get_by_primary(connection: &impl crash_orm::prelude::DatabaseConnection, #primary_key_ident: #primary_type) -> crash_orm::Result<#ident> {
+            async fn get_by_primary(connection: &impl crash_orm::prelude::DatabaseConnection, #primary_key_ident: #primary_type) -> crash_orm::Result<Option<#ident>> {
                 let row = connection.query_single(#select_by_id_string, &[&#primary_key_ident]).await?;
                 use crash_orm::prelude::{Entity, ResultMapping};
                 Ok(Self::from_row(row))

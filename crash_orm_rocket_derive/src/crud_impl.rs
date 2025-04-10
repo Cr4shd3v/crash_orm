@@ -22,7 +22,7 @@ pub fn crud_impl(input: TokenStream) -> TokenStream {
             }
 
             #[rocket::get("/get/<id>")]
-            pub async fn read(id: u32, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<#ident> {
+            pub async fn read(id: u32, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<Option<#ident>> {
                 use crash_orm::entity::PrimaryKeyEntity;
                 rocket::serde::json::Json(#ident::get_by_primary(&**conn, id).await.unwrap())
             }
@@ -38,7 +38,9 @@ pub fn crud_impl(input: TokenStream) -> TokenStream {
             #[rocket::delete("/delete/<id>")]
             pub async fn delete(id: u32, conn: &rocket::State<crash_orm::connection::CrashOrmDatabaseConnection>) -> rocket::serde::json::Json<bool> {
                 use crash_orm::entity::{Entity, PrimaryKeyEntity};
-                #ident::get_by_primary(&**conn, id).await.unwrap().remove(&**conn).await.unwrap();
+                if let Some(entity) = #ident::get_by_primary(&**conn, id).await.unwrap() {
+                    entity.remove(&**conn).await.unwrap();
+                }
 
                 rocket::serde::json::Json(true)
             }

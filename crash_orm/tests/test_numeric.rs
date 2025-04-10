@@ -47,12 +47,12 @@ async fn test_decimal() {
     let result = TestItem9::select_query::<Row>(&[&TestItem9Column::NUMBER.max()])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, Decimal>(0), Decimal::new(3200, 3));
+    assert_eq!(result.unwrap().unwrap().get::<_, Decimal>(0), Decimal::new(3200, 3));
 
     let result = TestItem9::select_query::<Row>(&[&TestItem9Column::NUMBER.min()])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().get::<_, Decimal>(0), Decimal::new(800, 3));
+    assert_eq!(result.unwrap().unwrap().get::<_, Decimal>(0), Decimal::new(800, 3));
 
     assert!(TestItem9::drop_table(&conn).await.is_ok());
 }

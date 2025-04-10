@@ -45,13 +45,13 @@ async fn test_sum() {
     let result = TestItem7::select_query::<SingleResult<i64>>(&[&TestItem7Column::NUMBER.sum(true)])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 17);
+    assert_eq!(*result.unwrap().unwrap(), 17);
 
     let result = TestItem7::select_query::<SingleResult<i64>>(&[&TestItem7Column::NUMBER.sum(true)])
         .condition(TestItem7Column::NAME2.is_not_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 15);
+    assert_eq!(*result.unwrap().unwrap(), 15);
 
     assert!(TestItem7::drop_table(&conn).await.is_ok());
 }

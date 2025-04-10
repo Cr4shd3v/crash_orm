@@ -17,7 +17,7 @@ async fn test_custom_primary_key() {
         test_field: String::from("test123"),
     }.insert(&conn).await.unwrap();
 
-    let result = CustomPrimaryKey::get_by_primary(&conn, entity.custom_id).await.unwrap();
+    let result = CustomPrimaryKey::get_by_primary(&conn, entity.custom_id).await.unwrap().unwrap();
     assert_eq!(result.test_field, "test123");
 
     CustomPrimaryKey::drop_table(&conn).await.unwrap()

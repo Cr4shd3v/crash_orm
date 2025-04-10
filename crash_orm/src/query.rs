@@ -249,11 +249,11 @@ impl<T: Entity, R: ResultMapping> Query<T, R, SelectQueryType> {
             )
             .await?;
 
-        Ok(rows.into_iter().map(|r| R::from_row(r)).collect::<Vec<R>>())
+        Ok(rows.into_iter().map(|r| R::from_row(r)).filter(|r| r.is_some()).map(|r| r.unwrap()).collect::<Vec<R>>())
     }
 
     /// Execute this query and returns a single result as an entity
-    pub async fn fetch_single(self, connection: &impl DatabaseConnection) -> crate::Result<R> {
+    pub async fn fetch_single(self, connection: &impl DatabaseConnection) -> crate::Result<Option<R>> {
         let (query, values) = self.get_raw_query();
 
         let row = connection

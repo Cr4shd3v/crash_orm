@@ -45,24 +45,24 @@ async fn test_min_max() {
     let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.min()])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 2);
+    assert_eq!(*result.unwrap().unwrap(), 2);
 
     let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.min()])
         .condition(TestItem8Column::NAME2.is_not_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 15);
+    assert_eq!(*result.unwrap().unwrap(), 15);
 
     let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.max()])
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 15);
+    assert_eq!(*result.unwrap().unwrap(), 15);
 
     let result = TestItem8::select_query::<SingleResult<i32>>(&[&TestItem8Column::NUMBER.max()])
         .condition(TestItem8Column::NAME2.is_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 2);
+    assert_eq!(*result.unwrap().unwrap(), 2);
 
     assert!(TestItem8::drop_table(&conn).await.is_ok());
 }

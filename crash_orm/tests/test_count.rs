@@ -54,13 +54,13 @@ async fn test_count() {
         .condition(TestItem6Column::NUMBER.is_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 2);
+    assert_eq!(*result.unwrap().unwrap(), 2);
 
     let result = TestItem6::select_query::<SingleResult<i64>>(&[&TestItem6Column::NAME2.count_column(true)])
         .condition(TestItem6Column::NUMBER.is_null())
         .fetch_single(&conn).await;
     assert!(result.is_ok());
-    assert_eq!(*result.unwrap(), 1);
+    assert_eq!(*result.unwrap().unwrap(), 1);
 
     let result = TestItem6::count(&conn).await;
     assert!(result.is_ok());

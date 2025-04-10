@@ -47,7 +47,7 @@ pub trait CrashOrmMigrationManager: Sync + Send + 'static {
 
         let latest = CrashOrmMigrationRecord::query()
             .order(&CrashOrmMigrationRecordColumn::ID, OrderDirection::DESC)
-            .fetch_single(conn).await?;
+            .fetch_single(conn).await?.unwrap();
 
         let mut started = false;
         for migration in local_migrations {
@@ -77,7 +77,8 @@ pub trait CrashOrmMigrationManager: Sync + Send + 'static {
 
         let latest = CrashOrmMigrationRecord::query()
             .order(&CrashOrmMigrationRecordColumn::ID, OrderDirection::DESC)
-            .fetch_single(conn).await?;
+            .fetch_single(conn).await?
+            .unwrap();
 
         let Some(local_migration) = local_migrations.iter().find(|m| m.get_name() == latest.name) else {
             return Err(crate::Error::from_str(&*format!("The previous migration {} was not found in local migrations", latest.name)));

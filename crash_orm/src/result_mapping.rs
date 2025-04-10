@@ -11,15 +11,15 @@ use std::ops::{Deref, DerefMut};
 /// Required for [Entity::select_query] generic type.
 pub trait ResultMapping {
     /// Parses Self from a [Row].
-    fn from_row(row: Row) -> Self where Self: Sized;
+    fn from_row(row: Row) -> Option<Self> where Self: Sized;
 }
 
 impl ResultMapping for Row {
-    fn from_row(row: Row) -> Self
+    fn from_row(row: Row) -> Option<Self>
     where
         Self: Sized
     {
-        row
+        Some(row)
     }
 }
 
@@ -45,21 +45,21 @@ impl<T: ColumnType> DerefMut for SingleResult<T> {
 }
 
 impl<T: ColumnType> ResultMapping for SingleResult<T> {
-    fn from_row(row: Row) -> Self
+    fn from_row(row: Row) -> Option<Self>
     where
         Self: Sized
     {
-        SingleResult {
-            inner: row.get::<_, T>(0),
-        }
+        Some(SingleResult {
+            inner: row.try_get::<_, T>(0).ok()?,
+        })
     }
 }
 
 impl ResultMapping for () {
-    fn from_row(_row: Row) -> Self
+    fn from_row(_row: Row) -> Option<Self>
     where
         Self: Sized
     {
-        ()
+        Some(())
     }
 }

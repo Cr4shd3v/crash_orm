@@ -13,7 +13,7 @@ async fn test_empty() {
     default_create_table!(TestItemEmpty, conn);
 
     let item = TestItemEmptyCreate {  }.insert(&conn).await.unwrap();
-    let entity = TestItemEmpty::get_by_primary(&conn, item.id).await.unwrap();
+    let entity = TestItemEmpty::get_by_primary(&conn, item.id).await.unwrap().unwrap();
     entity.update(&conn).await.unwrap();
 
     TestItemEmpty::drop_table(&conn).await.unwrap();

@@ -48,7 +48,7 @@ async fn test_result_mapping() {
     let result = TestResultMapping::select_query::<TestMapping>(&[
         &TestResultMappingColumn::TEST.count_column(true),
         &TestResultMappingColumn::NUMBER.sum(true),
-    ]).fetch_single(&conn).await.unwrap();
+    ]).fetch_single(&conn).await.unwrap().unwrap();
     assert_eq!(result.count, 3);
     assert_eq!(result.sum, 6);
     

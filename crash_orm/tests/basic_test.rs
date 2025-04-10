@@ -26,7 +26,7 @@ async fn test_basic() {
     let item = TestItem1Create::test().insert(&conn).await.unwrap();
     let item = TestItem1::get_by_primary(&conn, item.id).await;
     assert!(item.is_ok());
-    let item = item.unwrap();
+    let item = item.unwrap().unwrap();
     println!("{:?}", item);
     assert_eq!(&*item.name, "test123");
 
@@ -61,7 +61,7 @@ async fn test_persist() {
     assert!(item.update(&conn).await.is_ok());
     let item_from_db = TestItem01::get_by_primary(&conn, item.id).await;
     assert!(item_from_db.is_ok());
-    let item_from_db = item_from_db.unwrap();
+    let item_from_db = item_from_db.unwrap().unwrap();
     assert_eq!(&*item_from_db.name, "test_updated");
     assert_eq!(item_from_db.id, item.id);
 

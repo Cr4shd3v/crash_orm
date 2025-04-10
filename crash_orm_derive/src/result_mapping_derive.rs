@@ -40,7 +40,7 @@ pub(crate) fn derive_result_mapping_impl(input: TokenStream) -> TokenStream {
         }
 
         select_fields.extend(quote! {
-            #field_ident: row.get(#all_index),
+            #field_ident: row.try_get(#all_index).ok()?,
         });
 
         all_index += 1;
@@ -48,10 +48,10 @@ pub(crate) fn derive_result_mapping_impl(input: TokenStream) -> TokenStream {
     
     let output = quote! {
         impl crash_orm::result_mapping::ResultMapping for #ident {
-            fn from_row(row: crash_orm::postgres::Row) -> #ident {
-                #ident {
+            fn from_row(row: crash_orm::postgres::Row) -> Option<#ident> {
+                Some(#ident {
                     #select_fields
-                }
+                })
             }
         }
     };

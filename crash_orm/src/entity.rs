@@ -76,9 +76,10 @@
 //! # let conn = setup_test_connection().await;
 //! # TestItemUpdate::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItemUpdateCreate {  }.insert(&conn).await.unwrap();
-//! let entity = TestItemUpdate::get_by_primary(&conn, entity2.id).await.unwrap();
-//! // Modify entity properties
-//! entity.update(&conn).await.unwrap();
+//! if let Some(entity) = TestItemUpdate::get_by_primary(&conn, entity2.id).await.unwrap() {
+//!     // Modify entity properties
+//!     entity.update(&conn).await.unwrap();
+//! }
 //! # });
 //! ```
 //!
@@ -147,8 +148,9 @@
 //! # let conn = setup_test_connection().await;
 //! # TestItemRemove::create_table_if_not_exists(&conn).await.unwrap();
 //! # let entity2 = TestItemRemoveCreate {  }.insert(&conn).await.unwrap();
-//! let mut entity = TestItemRemove::get_by_primary(&conn, entity2.id).await.unwrap();
-//! entity.remove(&conn).await.unwrap();
+//! if let Some(entity) = TestItemRemove::get_by_primary(&conn, entity2.id).await.unwrap() {
+//!     entity.remove(&conn).await.unwrap();
+//! }
 //! # });
 //! ```
 //!
@@ -310,7 +312,7 @@ pub trait PrimaryKeyEntity<P: ColumnType>: Entity {
     fn get_primary(&self) -> P;
 
     /// Retrieves an entity by its primary key
-    async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> Result<Self> where Self: Sized;
+    async fn get_by_primary(connection: &impl DatabaseConnection, id: P) -> Result<Option<Self>> where Self: Sized;
 }
 
 pub(crate) fn slice_query_value_iter<'a>(
