@@ -88,8 +88,6 @@ simple_column_value!(chrono::NaiveTime);
 simple_column_value!(String);
 #[cfg(feature = "with-eui48")]
 simple_column_value!(eui48::MacAddress);
-#[cfg(feature = "with-bit-vec")]
-simple_column_value!(bit_vec::BitVec);
 #[cfg(feature = "with-time")]
 simple_column_value!(time::PrimitiveDateTime);
 #[cfg(feature = "with-time")]

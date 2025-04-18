@@ -19,10 +19,9 @@ with-chrono = ["chrono", "tokio-postgres/with-chrono-0_4"]
 with-uuid = ["uuid", "tokio-postgres/with-uuid-1"]
 json = ["serde", "serde_json", "tokio-postgres/with-serde_json-1", "serialize"]
 with-eui48 = ["eui48", "tokio-postgres/with-eui48-1"]
-with-bit-vec = ["bit-vec", "tokio-postgres/with-bit-vec-0_6"]
 with-time = ["time", "tokio-postgres/with-time-0_3"]
 with-geo-types = ["geo-types", "tokio-postgres/with-geo-types-0_7"]
-serialize = ["crash_orm_derive/serialize", "chrono/serde", "eui48/serde", "time/serde", "geo-types/serde", "bit-vec/serde", "uuid/serde"]
+serialize = ["crash_orm_derive/serialize", "chrono/serde", "eui48/serde", "time/serde", "geo-types/serde", "uuid/serde"]
 uuid-gen-v4 = ["with-uuid", "uuid/v4", "crash_orm_derive/uuid-gen-v4"]
 uuid-gen-v7 = ["with-uuid", "uuid/v7", "crash_orm_derive/uuid-gen-v7"]
 
@@ -39,12 +38,11 @@ uuid = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 eui48 = { workspace = true, optional = true }
-bit-vec = { workspace = true, optional = true }
 time = { workspace = true, optional = true }
 geo-types = { workspace = true, optional = true }
 
 [dev-dependencies]
-crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "json", "with-eui48", "with-bit-vec", "with-time", "with-geo-types", "migration", "serialize", "uuid-gen-v4"] }
+crash_orm = { path = ".", features = ["with-rust-decimal", "with-chrono", "with-uuid", "json", "with-eui48", "with-time", "with-geo-types", "migration", "serialize", "uuid-gen-v4"] }
 tokio-test = { workspace = true }
 crash_orm_test = { workspace = true }
 uuid = { workspace = true, features = ["v7"] }
