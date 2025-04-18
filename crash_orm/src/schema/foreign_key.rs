@@ -1,6 +1,6 @@
 use postgres::Row;
 
-#[derive(Eq, PartialEq, Clone)]
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub struct ForeignKey {
     pub(crate) name: Option<String>,
     pub(crate) src_field: String,

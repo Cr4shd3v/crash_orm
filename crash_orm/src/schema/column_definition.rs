@@ -3,6 +3,7 @@ use postgres::types::Type;
 use crate::schema::foreign_key::ForeignKey;
 
 /// Struct describing a column in a table
+#[derive(Clone, Debug)]
 pub struct ColumnDefinition {
     pub(crate) old_name: Option<String>,
     pub(crate) name: String,

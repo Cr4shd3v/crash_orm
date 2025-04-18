@@ -6,6 +6,7 @@ use crate::prelude::{ColumnDefinition, DatabaseConnection};
 use crate::schema::foreign_key::ForeignKey;
 
 /// Struct describing a table in the database
+#[derive(Clone, Debug)]
 pub struct TableDefinition {
     old_name: Option<String>,
     name: String,
