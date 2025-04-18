@@ -27,6 +27,7 @@
 //!
 //! To make a column nullable, just put the type in an Option.
 
+use std::fmt::Debug;
 use std::sync::Arc;
 
 use crate::prelude::*;
@@ -102,6 +103,12 @@ simple_column_value!(geo_types::Point);
 simple_column_value!(geo_types::Rect);
 #[cfg(feature = "with-geo-types")]
 simple_column_value!(geo_types::LineString);
+
+impl<JSON: serde::Serialize + serde::de::DeserializeOwned + Debug + Clone + Send + Sync + 'static> UntypedColumnValue for TypedJson<JSON> {
+    fn get_sql(&self) -> BoxedSql {
+        BoxedSql::new("_$i".to_string(), vec![Arc::new(Box::new(self.clone()))])
+    }
+}
 
 impl<T: ColumnType, U: Entity> UntypedColumnValue for VirtualColumn<T, U> {
     fn get_sql(&self) -> BoxedSql {

@@ -88,6 +88,8 @@ pub mod column_type;
 pub mod migration;
 pub mod boxed_sql;
 pub mod result_mapping;
+#[cfg(feature = "json")]
+pub mod json;
 
 pub mod prelude {
     //! Reexports all required modules and crates
@@ -112,6 +114,8 @@ pub mod prelude {
     pub use crate::result_mapping::*;
     pub use crate::schema::*;
     pub use crate::virtual_column::*;
+    #[cfg(feature = "json")]
+    pub use crate::json::*;
 
     pub extern crate tokio_postgres as postgres;
 }

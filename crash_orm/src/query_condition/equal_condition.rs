@@ -1,4 +1,5 @@
-use crate::prelude::{Column, ColumnType, Entity, IntoSql, QueryCondition};
+use std::fmt::Debug;
+use crate::prelude::{Column, ColumnType, Entity, IntoSql, QueryCondition, TypedJson};
 
 /// Trait implementing equals operator [QueryCondition]
 pub trait EqualQueryColumn<T: ColumnType, U: Entity> {
@@ -58,6 +59,31 @@ macro_rules! impl_equal_entity_column_geo {
         }
     };
 }
+
+#[cfg(feature = "json")]
+impl<JSON: serde::Serialize + serde::de::DeserializeOwned + Debug + Clone + Send + Sync + 'static, T: Entity, U: Column<TypedJson<JSON>, T>> EqualQueryColumn<TypedJson<JSON>, T> for U {
+    fn equals(&self, other: impl IntoSql<TypedJson<JSON>>) -> QueryCondition<T> {
+        let mut boxed = self.get_sql();
+        let other_boxed = other.into_boxed_sql();
+        boxed.modify(|v| format!("{v} = {}", other_boxed.sql));
+        boxed.values.extend(other_boxed.values);
+
+        QueryCondition::new(boxed)
+    }
+
+    fn not_equals(
+        &self,
+        other: impl IntoSql<TypedJson<JSON>>,
+    ) -> QueryCondition<T> {
+        let mut boxed = self.get_sql();
+        let other_boxed = other.into_boxed_sql();
+        boxed.modify(|v| format!("{v} <> {}", other_boxed.sql));
+        boxed.values.extend(other_boxed.values);
+
+        QueryCondition::new(boxed)
+    }
+}
+
 
 impl_equal_entity_column!(bool);
 impl_equal_entity_column!(i8);
