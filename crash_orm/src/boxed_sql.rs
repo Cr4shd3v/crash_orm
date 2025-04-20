@@ -31,16 +31,15 @@ impl BoxedSql {
 
     /// Resolves this value into it's parts with inserted IDs
     pub fn resolve(
-        &self,
+        mut self,
         mut index: usize,
     ) -> (String, Vec<Arc<Box<dyn ToSql + Sync + Send>>>, usize) {
-        let mut sql = self.sql.clone();
-        while sql.contains("_$i") {
-            sql = sql.replacen("_$i", &*format!("${index}"), 1);
+        while self.sql.contains("_$i") {
+            self.sql = self.sql.replacen("_$i", &*format!("${index}"), 1);
             index += 1;
         }
 
-        (sql, self.values.clone(), index)
+        (self.sql, self.values, index)
     }
 
     /// Modify the raw sql string.
