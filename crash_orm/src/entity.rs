@@ -262,7 +262,7 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// See [Query] for more details on how to build a query.
     fn query() -> Query<Self, Self, SelectQueryType> where Self: Sized {
         Query::new(BoxedSql::new(
-            format!("SELECT * FROM {}", Self::TABLE_NAME),
+            format!("SELECT * FROM public.{}", Self::TABLE_NAME),
             vec![],
         ))
     }
@@ -272,7 +272,7 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// See [Query] for more details on how to build a query.
     fn delete() -> Query<Self, (), DeleteQueryType> where Self: Sized {
         Query::new(BoxedSql::new(
-            format!("DELETE FROM {}", Self::TABLE_NAME),
+            format!("DELETE FROM public.{}", Self::TABLE_NAME),
             vec![],
         ))
     }
@@ -297,7 +297,7 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
         }
 
         Query::new(BoxedSql::new(
-            format!("SELECT {} FROM {}", query.join(","), Self::TABLE_NAME),
+            format!("SELECT {} FROM public.{}", query.join(","), Self::TABLE_NAME),
             values,
         ))
     }
