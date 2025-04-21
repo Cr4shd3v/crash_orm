@@ -264,8 +264,12 @@ impl<T: Entity, R: ResultMapping> Query<T, R, SelectQueryType> {
                     .as_slice(),
             )
             .await?;
-
-        Ok(R::from_row(row))
+        
+        if let Some(row) = row {
+            Ok(R::from_row(row))
+        } else {    
+            Ok(None)
+        }
     }
 }
 

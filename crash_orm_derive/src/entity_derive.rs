@@ -203,7 +203,11 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
                     async fn #get_function_ident(&self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<Option<#entity_type>> {
                         use crash_orm::prelude::{Entity, ResultMapping};
                         let row = connection.query_single(#query, &[&self.#primary_key_ident]).await?;
-                        Ok(#entity_type::from_row(row))
+                        if let Some(row) = row {
+                            Ok(#entity_type::from_row(row))
+                        } else {
+                            Ok(None)
+                        }
                     }
                 });
 
@@ -402,12 +406,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
             }
 
             async fn count(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<i64> {
-                let row = connection.query_single(#count_string, &[]).await?;
+                let row = connection.query_single(#count_string, &[]).await?.unwrap();
                 Ok(row.get(0))
             }
 
             async fn insert(&mut self, connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<()> {
-                let row = connection.query_single(#insert_string,&[#insert_field_values]).await?;
+                let row = connection.query_single(#insert_string,&[#insert_field_values]).await?.unwrap();
                 self.#primary_key_ident = row.get(0);
                 Ok(())
             }
@@ -432,8 +436,12 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
 
             async fn get_by_primary(connection: &impl crash_orm::prelude::DatabaseConnection, #primary_key_ident: #primary_type) -> crash_orm::Result<Option<#ident>> {
                 let row = connection.query_single(#select_by_id_string, &[&#primary_key_ident]).await?;
-                use crash_orm::prelude::{Entity, ResultMapping};
-                Ok(Self::from_row(row))
+                if let Some(row) = row {
+                    use crash_orm::prelude::{Entity, ResultMapping};
+                    Ok(Self::from_row(row))
+                } else {
+                    Ok(None)
+                }
             }
         }
     };

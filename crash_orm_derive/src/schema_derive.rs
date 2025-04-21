@@ -126,7 +126,7 @@ pub fn derive_schema_impl(input: TokenStream) -> TokenStream {
             }
 
             async fn table_exists(connection: &impl crash_orm::prelude::DatabaseConnection) -> crash_orm::Result<bool> {
-                let row = connection.query_single(#table_exists_string, &[]).await?;
+                let row = connection.query_single(#table_exists_string, &[]).await?.unwrap();
                 let exists: bool = row.get(0);
                 Ok(exists)
             }

@@ -22,7 +22,7 @@ pub trait DatabaseConnection: Sync {
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> impl std::future::Future<Output = crate::Result<Row>> + Send;
+    ) -> impl std::future::Future<Output = crate::Result<Option<Row>>> + Send;
 
     /// Method used to retrieve all rows of a query result.
     fn query_many(
@@ -90,8 +90,8 @@ macro_rules! impl_database_connection {
                 &self,
                 statement: &str,
                 params: &[&(dyn ToSql + Sync)],
-            ) -> crate::Result<Row> {
-                self.query_one(statement, params)
+            ) -> crate::Result<Option<Row>> {
+                self.query_opt(statement, params)
                     .await
                     .map_err(|e| e.into())
             }
@@ -123,7 +123,7 @@ impl<T: DatabaseConnection + Send> DatabaseConnection for Arc<T> {
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> crate::Result<Row> {
+    ) -> crate::Result<Option<Row>> {
         self.deref().query_single(statement, params).await
     }
 
