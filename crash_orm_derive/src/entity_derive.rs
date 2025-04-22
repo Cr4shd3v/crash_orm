@@ -324,24 +324,24 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     let insert_field_self_values_format =
         insert_field_self_values_format.strip_suffix(",").unwrap_or("");
 
-    let select_by_id_string = format!("SELECT * FROM {} WHERE {} = $1", ident_str, primary_field_name);
-    let select_all_string = format!("SELECT * FROM {}", ident_str);
-    let count_string = format!("SELECT COUNT({}) FROM {}", primary_field_name, ident_str);
+    let select_by_id_string = format!("SELECT * FROM public.{} WHERE {} = $1", ident_str, primary_field_name);
+    let select_all_string = format!("SELECT * FROM public.{}", ident_str);
+    let count_string = format!("SELECT COUNT({}) FROM public.{}", primary_field_name, ident_str);
     let insert_string = if insert_field_names.is_empty() {
-        format!("INSERT INTO {} DEFAULT VALUES RETURNING {}", ident_str, primary_field_name)
+        format!("INSERT INTO public.{} DEFAULT VALUES RETURNING {}", ident_str, primary_field_name)
     } else {
         format!(
-            "INSERT INTO {}({}) VALUES ({}) RETURNING {}",
+            "INSERT INTO public.{}({}) VALUES ({}) RETURNING {}",
             ident_str, insert_field_names, insert_field_self_values_format, primary_field_name
         )
     };
-    let delete_string = format!("DELETE FROM {} WHERE {} = $1", ident_str, primary_field_name);
+    let delete_string = format!("DELETE FROM public.{} WHERE {} = $1", ident_str, primary_field_name);
 
     let update_statement = if update_fields.is_empty() {
         quote!()
     } else {
         let update_string = format!(
-            "UPDATE {} SET {} WHERE {} = ${}",
+            "UPDATE public.{} SET {} WHERE {} = ${}",
             ident_str, update_fields.join(","), primary_field_name, insert_index
         );
         quote! {
@@ -350,9 +350,9 @@ pub fn derive_entity_impl(input: TokenStream) -> TokenStream {
     };
 
     let ident_column = Ident::new(&*format!("{}Column", ident.to_string()), ident.span());
-    let ident_column_doc = format!("Column struct for [{}]", ident_str);
+    let ident_column_doc = format!("Column struct for public.{}", ident_str);
     let ident_create = Ident::new(&*format!("{}Create", ident), ident.span());
-    let create_doc_text = format!("Creation struct for {}", ident_str);
+    let create_doc_text = format!("Creation struct for public.{}", ident_str);
 
     #[cfg(not(feature = "serialize"))]
     let create_macro = quote!();
