@@ -10,7 +10,7 @@ use crate::column_value::UntypedColumnValue;
 use crate::prelude::ColumnType;
 
 /// Struct containing a part of a query with raw sql and values prepared for tokio-postgres.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BoxedSql {
     /// Raw SQL string representing this part of a query.
     ///
