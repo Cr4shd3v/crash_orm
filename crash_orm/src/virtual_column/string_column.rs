@@ -18,7 +18,7 @@ pub trait StringVirtualColumn<U: Entity> {
     fn repeat(&self, repetition: impl IntoSql<i32>) -> VirtualColumn<String, U>;
 
     /// Concat self and other
-    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U>;
+    fn concat(&self, other: Vec<&dyn UntypedColumnValue>) -> VirtualColumn<String, U>;
 
     /// Creates the md5 hash of this string
     fn md5(&self) -> VirtualColumn<String, U>;
@@ -68,7 +68,7 @@ impl<U: Entity, R: Column<String, U>> StringVirtualColumn<U> for R {
         ))
     }
 
-    fn concat(&self, other: Vec<&(dyn UntypedColumnValue)>) -> VirtualColumn<String, U> {
+    fn concat(&self, other: Vec<&dyn UntypedColumnValue>) -> VirtualColumn<String, U> {
         let mut sql = self.get_sql();
         for value in other {
             let value_sql = value.get_sql();

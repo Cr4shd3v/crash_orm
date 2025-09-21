@@ -197,7 +197,7 @@ impl<T: Entity, R: ResultMapping> Query<T, R, SelectQueryType> {
     /// Add an order to this query.
     pub fn add_order(
         mut self,
-        order: &(dyn UntypedColumn<T>),
+        order: &dyn UntypedColumn<T>,
         order_direction: OrderDirection,
     ) -> Query<T, R, SelectQueryType> {
         self.order.push((order.get_sql(), order_direction));
@@ -209,7 +209,7 @@ impl<T: Entity, R: ResultMapping> Query<T, R, SelectQueryType> {
     /// This will OVERRIDE all previous orders.
     pub fn order(
         mut self,
-        order: &(dyn UntypedColumn<T>),
+        order: &dyn UntypedColumn<T>,
         order_direction: OrderDirection,
     ) -> Query<T, R, SelectQueryType> {
         self.order = vec![(order.get_sql(), order_direction)];

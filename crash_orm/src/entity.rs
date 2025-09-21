@@ -280,7 +280,7 @@ pub trait Entity: ResultMapping + Send + Sync + Debug + 'static {
     /// Select specific columns ([EntityColumn] or [VirtualColumn]) from this entity.
     ///
     /// This returns a [SelectQuery]. See [SelectQuery] for more details.
-    fn select_query<R: ResultMapping>(columns: &[&(dyn UntypedColumn<Self>)]) -> Query<Self, R, SelectQueryType> where Self: Sized {
+    fn select_query<R: ResultMapping>(columns: &[&dyn UntypedColumn<Self>]) -> Query<Self, R, SelectQueryType> where Self: Sized {
         let columns = columns
             .iter()
             .map(|v| v.get_sql())
