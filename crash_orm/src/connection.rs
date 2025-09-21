@@ -22,14 +22,14 @@ pub trait DatabaseConnection: Sync {
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> impl std::future::Future<Output = crate::Result<Option<Row>>> + Send;
+    ) -> impl Future<Output = crate::Result<Option<Row>>> + Send;
 
     /// Method used to retrieve all rows of a query result.
     fn query_many(
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> impl std::future::Future<Output = crate::Result<Vec<Row>>> + Send;
+    ) -> impl Future<Output = crate::Result<Vec<Row>>> + Send;
 
     /// Method used to execute a query without returning a row.
     ///
@@ -38,7 +38,7 @@ pub trait DatabaseConnection: Sync {
         &self,
         statement: &str,
         params: &[&(dyn ToSql + Sync)],
-    ) -> impl std::future::Future<Output = crate::Result<u64>> + Send;
+    ) -> impl Future<Output = crate::Result<u64>> + Send;
 }
 
 /// The default, simple implementation of the [DatabaseConnection] trait.
@@ -72,6 +72,14 @@ impl CrashOrmDatabaseConnection {
             tokio_postgres::NoTls,
         )
         .await
+    }
+
+    /// Returns the name of the current database.
+    ///
+    /// Calls Postgres function `current_database()`
+    pub async fn database_name(&self) -> String {
+        let row = self.query_one("SELECT current_database()", &[]).await.unwrap();
+        row.get(0)
     }
 }
 

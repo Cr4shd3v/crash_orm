@@ -13,7 +13,7 @@ async fn test_rocket() {
 
 #[tokio::test]
 async fn test_rocket_env() {
-    std::env::set_var("DATABASE_URL", TEST_DB_URL);
+    unsafe { std::env::set_var("DATABASE_URL", TEST_DB_URL); }
 
     let rocket = rocket::build()
         .attach(CrashOrmDatabaseFairing::default()).ignite().await.unwrap();
